@@ -1,0 +1,432 @@
+# The table of contents of the CodeLead documentation (docfx / Microsoft Learn shape).
+# The lead keeps this file; writers do not edit it. A page that is not listed here fails the checker.
+- name: CodeLead documentation
+  href: index.md
+- name: Get started
+  items:
+    - name: "Overview"
+      href: get-started/index.md
+    - name: "Choose your path"
+      href: get-started/choose-your-path.md
+    - name: "Install CodeLead"
+      href: get-started/install.md
+    - name: "Quickstart: build a new app"
+      href: get-started/quickstart-new-app.md
+    - name: "Quickstart: change existing code"
+      href: get-started/quickstart-existing-code.md
+    - name: "Quickstart: CodeLead in VS Code"
+      href: get-started/quickstart-vscode.md
+- name: Tutorials
+  items:
+    - name: "Overview"
+      href: tutorials/index.md
+    - name: "Build a new app, step by step"
+      href: tutorials/build-a-new-app.md
+    - name: "Change existing code with evidence"
+      href: tutorials/change-existing-code.md
+    - name: "Start a new app from a template"
+      href: tutorials/start-from-a-template.md
+    - name: "Modernize a .NET Framework application"
+      href: tutorials/modernize-a-dotnet-framework-app.md
+    - name: "Record journeys with the Analyst"
+      href: tutorials/record-journeys-with-the-analyst.md
+    - name: "Work with agents on the board"
+      href: tutorials/work-with-agents-on-the-board.md
+- name: Concepts
+  items:
+    - name: "Overview"
+      href: concepts/index.md
+    - name: "How CodeLead works"
+      href: concepts/how-codelead-works.md
+    - name: "Requests, plans and patches"
+      href: concepts/requests-plans-and-patches.md
+    - name: "The patch check"
+      href: concepts/the-patch-check.md
+    - name: "Validation and the gate"
+      href: concepts/validation-and-the-gate.md
+    - name: "Repair"
+      href: concepts/repair.md
+    - name: "Evidence records"
+      href: concepts/evidence-records.md
+    - name: "Results and stops"
+      href: concepts/results-and-stops.md
+    - name: "Prompts and recommended answers"
+      href: concepts/prompts-and-recommended-answers.md
+    - name: "Models and roles"
+      href: concepts/models-and-roles.md
+    - name: "Strategies"
+      href: concepts/strategies.md
+    - name: "New apps: steps, increments and the run report"
+      href: concepts/new-apps.md
+    - name: "The knowledge base"
+      href: concepts/knowledge-base.md
+    - name: "The repository map"
+      href: concepts/repository-map.md
+    - name: "Conventions"
+      href: concepts/conventions.md
+    - name: "Sessions"
+      href: concepts/sessions.md
+    - name: "The project library"
+      href: concepts/project-library.md
+    - name: "The behaviour register and seed data"
+      href: concepts/register-and-seed.md
+    - name: "Unattended runs and the run lock"
+      href: concepts/unattended-runs.md
+    - name: "Privacy and remote models"
+      href: concepts/privacy-and-remote-models.md
+    - name: "Licence and plans"
+      href: concepts/licence-and-plans.md
+    - name: "Glossary"
+      href: concepts/glossary.md
+- name: How-to guides
+  items:
+    - name: "Overview"
+      href: how-to/index.md
+    - name: "Set up local models"
+      href: how-to/set-up-local-models.md
+    - name: "Set up remote models"
+      href: how-to/set-up-remote-models.md
+    - name: "Use a stronger model for repairs"
+      href: how-to/use-a-stronger-model-for-repairs.md
+    - name: "Write your conventions"
+      href: how-to/write-conventions.md
+    - name: "Declare validation commands"
+      href: how-to/declare-validation-commands.md
+    - name: "Fix a stop"
+      href: how-to/fix-a-stop.md
+    - name: "Stop and resume work"
+      href: how-to/stop-and-resume.md
+    - name: "Export a session"
+      href: how-to/export-a-session.md
+    - name: "Read a session in the Session Log Viewer"
+      href: how-to/read-a-session.md
+    - name: "Build .NET Framework projects on Windows"
+      href: how-to/build-on-windows.md
+    - name: "Narrate the code before you pin it"
+      href: how-to/narrate-before-pins.md
+    - name: "Explain a finding of the extraction gate"
+      href: how-to/explain-a-gate-finding.md
+    - name: "Waive a security finding"
+      href: how-to/waive-a-security-finding.md
+    - name: "Update CodeLead"
+      href: how-to/update-codelead.md
+- name: Modernization
+  items:
+    - name: "Overview"
+      href: modernization/index.md
+    - name: "The eight stages"
+      href: modernization/the-eight-stages.md
+    - name: "The dossier"
+      href: modernization/dossier.md
+    - name: "Pins"
+      href: modernization/pins.md
+    - name: "Transforms"
+      href: modernization/transforms.md
+    - name: "The System Model"
+      href: modernization/system-model.md
+    - name: "The rebuild"
+      href: modernization/rebuild.md
+    - name: "The walk and parity"
+      href: modernization/walk-and-parity.md
+    - name: "The audit pack"
+      href: modernization/audit-pack.md
+    - name: "The modernization program"
+      href: modernization/the-program.md
+    - name: "Start the old application for CodeLead"
+      href: modernization/source-run-profile.md
+- name: CodeLead for VS Code
+  items:
+    - name: "Overview"
+      href: extension/index.md
+    - name: "Install the extension"
+      href: extension/install.md
+    - name: "A tour of the extension"
+      href: extension/tour.md
+    - name: "The Projects view"
+      href: extension/projects-view.md
+    - name: "The chat"
+      href: extension/chat.md
+    - name: "The Sessions view"
+      href: extension/sessions-view.md
+    - name: "The Knowledge base view"
+      href: extension/knowledge-base-view.md
+    - name: "The Modernization view"
+      href: extension/modernization-view.md
+    - name: "The Modernize wizard"
+      href: extension/modernize-wizard.md
+    - name: "The Board view"
+      href: extension/board-view.md
+    - name: "The Analyst view"
+      href: extension/analyst-view.md
+    - name: "The Explorer view"
+      href: extension/explorer-view.md
+    - name: "Settings"
+      href: extension/settings.md
+    - name: "Commands"
+      href: extension/commands.md
+    - name: "Troubleshooting"
+      href: extension/troubleshooting.md
+- name: Pinboard
+  items:
+    - name: "Overview"
+      href: pinboard/index.md
+    - name: "Cards, columns and participants"
+      href: pinboard/concepts.md
+    - name: "Use the board"
+      href: pinboard/use-the-board.md
+    - name: "Projects, themes and bulk operations"
+      href: pinboard/projects-themes-and-bulk.md
+    - name: "Work with agents"
+      href: pinboard/work-with-agents.md
+    - name: "Rules for agents"
+      href: pinboard/rules-for-agents.md
+    - name: "Files and events"
+      href: pinboard/files-and-events.md
+    - name: "Board commands"
+      href: pinboard/cli/index.md
+    - name: "codelead board init"
+      href: pinboard/cli/board-init.md
+    - name: "codelead board check"
+      href: pinboard/cli/board-check.md
+    - name: "codelead board list"
+      href: pinboard/cli/board-list.md
+    - name: "codelead board show"
+      href: pinboard/cli/board-show.md
+    - name: "codelead board new"
+      href: pinboard/cli/board-new.md
+    - name: "codelead board reply"
+      href: pinboard/cli/board-reply.md
+    - name: "codelead board move"
+      href: pinboard/cli/board-move.md
+    - name: "codelead board set"
+      href: pinboard/cli/board-set.md
+    - name: "codelead board archive"
+      href: pinboard/cli/board-archive.md
+    - name: "codelead board unarchive"
+      href: pinboard/cli/board-unarchive.md
+    - name: "codelead board validate"
+      href: pinboard/cli/board-validate.md
+    - name: "codelead board import"
+      href: pinboard/cli/board-import.md
+    - name: "codelead board tidy"
+      href: pinboard/cli/board-tidy.md
+    - name: "codelead board serve"
+      href: pinboard/cli/board-serve.md
+- name: Analyst and Explorer
+  items:
+    - name: "Overview"
+      href: analyst/index.md
+    - name: "Roles, journeys and steps"
+      href: analyst/concepts.md
+    - name: "Explore an application"
+      href: analyst/explore-an-application.md
+    - name: "Record a journey"
+      href: analyst/record-a-journey.md
+    - name: "From a recording to a specification"
+      href: analyst/from-recording-to-spec.md
+    - name: "Passwords"
+      href: analyst/passwords.md
+    - name: "Files the Analyst writes"
+      href: analyst/files.md
+    - name: "Limits"
+      href: analyst/limits.md
+    - name: "codelead analyst record"
+      href: analyst/reference/analyst-record.md
+    - name: "codelead analyst explore"
+      href: analyst/reference/analyst-explore.md
+    - name: "codelead analyst draft"
+      href: analyst/reference/analyst-draft.md
+    - name: "codelead analyst check"
+      href: analyst/reference/analyst-check.md
+    - name: "codelead analyst replay"
+      href: analyst/reference/analyst-replay.md
+    - name: "codelead analyst rules"
+      href: analyst/reference/analyst-rules.md
+    - name: "codelead analyst facts"
+      href: analyst/reference/analyst-facts.md
+- name: Command-line reference
+  items:
+    - name: "Overview"
+      href: cli/index.md
+    - name: "codelead init"
+      href: cli/codelead-init.md
+    - name: "codelead chat"
+      href: cli/codelead-chat.md
+    - name: "codelead interactive"
+      href: cli/codelead-interactive.md
+    - name: "codelead library"
+      href: cli/codelead-library.md
+    - name: "codelead models"
+      href: cli/codelead-models.md
+    - name: "codelead config"
+      href: cli/codelead-config.md
+    - name: "codelead preflight"
+      href: cli/codelead-preflight.md
+    - name: "codelead scan"
+      href: cli/codelead-scan.md
+    - name: "codelead parity"
+      href: cli/codelead-parity.md
+    - name: "codelead rebuild-report"
+      href: cli/codelead-rebuild-report.md
+    - name: "codelead rebuild"
+      href: cli/codelead-rebuild.md
+    - name: "codelead rebuild run"
+      href: cli/codelead-rebuild-run.md
+    - name: "codelead rebuild init"
+      href: cli/codelead-rebuild-init.md
+    - name: "codelead implement"
+      href: cli/codelead-implement.md
+    - name: "codelead walk"
+      href: cli/codelead-walk.md
+    - name: "codelead spec"
+      href: cli/codelead-spec.md
+    - name: "codelead conventions"
+      href: cli/codelead-conventions.md
+    - name: "codelead pr"
+      href: cli/codelead-pr.md
+    - name: "codelead sessions"
+      href: cli/codelead-sessions.md
+    - name: "codelead doctor"
+      href: cli/codelead-doctor.md
+    - name: "codelead licence"
+      href: cli/codelead-licence.md
+    - name: "codelead setup"
+      href: cli/codelead-setup.md
+    - name: "codelead model"
+      href: cli/codelead-model.md
+    - name: "codelead board"
+      href: cli/codelead-board.md
+    - name: "codelead seed"
+      href: cli/codelead-seed.md
+    - name: "codelead register"
+      href: cli/codelead-register.md
+    - name: "codelead lint"
+      href: cli/codelead-lint.md
+    - name: "codelead map"
+      href: cli/codelead-map.md
+    - name: "codelead analyst"
+      href: cli/codelead-analyst.md
+    - name: "codelead modernize"
+      href: cli/codelead-modernize.md
+    - name: "codelead modernize start"
+      href: cli/codelead-modernize-start.md
+    - name: "codelead modernize next"
+      href: cli/codelead-modernize-next.md
+    - name: "codelead modernize run"
+      href: cli/codelead-modernize-run.md
+    - name: "codelead modernize continue"
+      href: cli/codelead-modernize-continue.md
+    - name: "codelead modernize answer"
+      href: cli/codelead-modernize-answer.md
+    - name: "codelead modernize status"
+      href: cli/codelead-modernize-status.md
+    - name: "codelead modernize stop"
+      href: cli/codelead-modernize-stop.md
+    - name: "codelead modernize skip"
+      href: cli/codelead-modernize-skip.md
+    - name: "codelead modernize source"
+      href: cli/codelead-modernize-source.md
+- name: Chat command reference
+  items:
+    - name: "Overview"
+      href: chat-commands/index.md
+    - name: "/patch"
+      href: chat-commands/patch.md
+    - name: "/preflight"
+      href: chat-commands/preflight.md
+    - name: "/implement"
+      href: chat-commands/implement.md
+    - name: "/lint"
+      href: chat-commands/lint.md
+    - name: "/scan"
+      href: chat-commands/scan.md
+    - name: "/edit"
+      href: chat-commands/edit.md
+    - name: "/repair"
+      href: chat-commands/repair.md
+    - name: "/spec"
+      href: chat-commands/spec.md
+    - name: "/validate"
+      href: chat-commands/validate.md
+    - name: "/copy"
+      href: chat-commands/copy.md
+    - name: "/paste"
+      href: chat-commands/paste.md
+    - name: "/strategy"
+      href: chat-commands/strategy.md
+    - name: "/help"
+      href: chat-commands/help.md
+    - name: "/status"
+      href: chat-commands/status.md
+    - name: "/exit"
+      href: chat-commands/exit.md
+    - name: "/quit"
+      href: chat-commands/quit.md
+    - name: "/create-app"
+      href: chat-commands/create-app.md
+    - name: "/plan"
+      href: chat-commands/plan.md
+    - name: "/build-step"
+      href: chat-commands/build-step.md
+    - name: "/build-incremental"
+      href: chat-commands/build-incremental.md
+    - name: "/greenfield"
+      href: chat-commands/greenfield.md
+    - name: "/pin"
+      href: chat-commands/pin.md
+    - name: "/log"
+      href: chat-commands/log.md
+    - name: "/map"
+      href: chat-commands/map.md
+    - name: "/pr"
+      href: chat-commands/pr.md
+    - name: "/chat"
+      href: chat-commands/chat.md
+    - name: "/ask"
+      href: chat-commands/ask.md
+    - name: "/modernize"
+      href: chat-commands/modernize.md
+    - name: "/session"
+      href: chat-commands/session.md
+- name: Reference
+  items:
+    - name: "Overview"
+      href: reference/index.md
+    - name: "Configuration file"
+      href: reference/configuration.md
+    - name: "Environment variables"
+      href: reference/environment-variables.md
+    - name: "Files and folders"
+      href: reference/files-and-folders.md
+    - name: "Evidence record format"
+      href: reference/evidence-record-format.md
+    - name: "Validation file"
+      href: reference/validation-file.md
+    - name: "Run profile"
+      href: reference/run-profile.md
+    - name: "Run file for specification runs"
+      href: reference/run-file.md
+    - name: "Rebuild manifest"
+      href: reference/rebuild-manifest.md
+    - name: "Modernization state file"
+      href: reference/modernization-state-file.md
+    - name: "Journeys format"
+      href: reference/journeys-format.md
+    - name: "Specification files"
+      href: reference/spec-files.md
+    - name: "Parity waivers"
+      href: reference/parity-waivers.md
+    - name: "Rebuild run summary"
+      href: reference/rebuild-run-summary.md
+    - name: "Pin levels file"
+      href: reference/pin-levels-file.md
+    - name: "Extraction dispositions and security waivers"
+      href: reference/dispositions-and-waivers.md
+    - name: "Session protocol"
+      href: reference/session-io-protocol.md
+    - name: "Template manifest"
+      href: reference/template-manifest.md
+    - name: "Messages and what to do"
+      href: reference/messages.md
+    - name: "Exit codes"
+      href: reference/exit-codes.md
