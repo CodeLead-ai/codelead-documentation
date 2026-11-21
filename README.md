@@ -73,6 +73,10 @@ Open an issue in this repository. Three things help us fix it fast:
 
 Please do not put a key, a password or private code in an issue.
 
+## Licence
+
+MIT (see [LICENSE](LICENSE)). You can use these pages, change them and share them. Keep the copyright notice.
+
 ## Build a website from these pages
 
 The pages are plain Markdown files with a small header (title, description, kind, area, date). `toc.yml` gives the order and the names of the pages, in the format that documentation site builders such as docfx read. No website is built from this repository yet.
