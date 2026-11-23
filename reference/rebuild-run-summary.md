@@ -85,7 +85,8 @@ The sections appear in this order. A section of lanes that wait on other lanes a
 | Key | Type | What it holds |
 |---|---|---|
 | `schema` | string | `codelead.rebuild-run/1`. |
-| `target` | string | The rebuild's folder. |
+| `target` | string | The name of the rebuild's folder. Never a path of the machine. |
+| `targetFromSource` | string | The rebuild's folder as seen from the old application's folder, for example `../webapp-rebuild`. Present when the rebuild records where the old application is. |
 | `status` | `running` or `ended` | Whether the run still goes. |
 | `startedAt`, `endedAt` | string | ISO times in UTC. |
 | `minutes` | number | The run's wall clock so far. |
