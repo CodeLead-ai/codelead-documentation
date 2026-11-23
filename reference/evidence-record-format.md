@@ -198,6 +198,7 @@ Read a chain from its last record back along `follows`. The last record says how
 | `validation` | object | `status` (`passed` or `failed`) and `commands`. Each command has `command` (the command line), `status`, `exitCode`, and for a declared command its `label`. A command found in two scopes and run once lists them in `sources`. |
 | `composed` | object | For a pin or a transform: `kind`, `subject` (the project or the scope), `level` (`memory` or `database`), `units`, and `command`, the line that composes it again. |
 | `pins_database` | string | The database that a database pin's tests ran against, in words. Never a password. |
+| `set_aside` | list | On a landed pin increment: the tests that CodeLead set aside so that the rest could land. Each has `test`, `file`, `wholeFile` (when the whole file was removed), `failure`, `reason`, `fact` (when the test's name anchors one) and `text`, the test as it was. See [Pins](../modernization/pins.md#a-pin-that-cannot-run-in-the-test-process). |
 | `model_unreachable` | object | A model call that never got an answer: `call`, `role`, `provider` and `address`. |
 | `conventions` | object | `conformance_warnings`, and `formatting`: the formatter that ran on apply, its `status` and its `files`. |
 | `checkpoint_commit` | string | The commit that holds the landing, when checkpoint commits are on. |

@@ -247,7 +247,9 @@ The Pin stage writes `coverage` once it has measured the pins:
 | `project` | The web project that the pins cover. |
 | `counted` | `true` when the project has a narration, so that its facts are counted. |
 | `memory`, `database` | For each pin level: `units` (`withTests` of `withFacts`), `facts` (`pinned` of `provable`) and `rules` (`pinned` of `provable`). |
-| `walk` | The facts that no pin level proves, such as authorization attributes. The walk proves them. |
+| `walk` | The attribute facts, such as authorization attributes. No pin level proves them. The walk proves them. |
+| `runtime` | The facts whose code needs the web runtime, such as a call of `FormsAuthentication.SignOut()`. The walk proves them too. Present when there is one. |
+| `setAside` | The pins that CodeLead set aside, because the test process could not run them. `pin-levels.json` says which and why. Present when one was set aside. |
 | `tests` | The tests of both characterization projects. |
 | `units` | Without a narration: `withTests` of `all` units. |
 | `pinsDatabase` | The database that the pins ran against, in words, or `null`. Never a password. |

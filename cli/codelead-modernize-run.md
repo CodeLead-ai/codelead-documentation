@@ -30,7 +30,7 @@ Each stage's problem ends with the line to run after the fix, for example `Then:
 `run` runs the stage that you name, whatever its status: pending, waiting, failed or done. It does not run the stages after it. Run [`codelead modernize next`](codelead-modernize-next.md) for those.
 
 > [!NOTE]
-> **New to this?** A stage that ran before is run again from its start. The files that it wrote before are written again.
+> **New to this?** A stage that ran before is run again from its start. The files that it wrote before are written again. The Pin stage is different: the pins that landed stay, and it pins the facts that remain. Over an applied increment that its gate refused, it runs that gate first and composes nothing again.
 
 > [!TIP]
 > **For experienced users:** the chat runs the same stage with `/modernize --run <stage>`. See [`/modernize`](../chat-commands/modernize.md).

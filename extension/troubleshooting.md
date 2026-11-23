@@ -61,7 +61,7 @@ A command that stops short shows a red card with the reason, the ways out and **
 
 | Card or result | What it means | The way out |
 |---|---|---|
-| **The model call failed**, "Could not connect to lmstudio at http://localhost:1234/v1." | The model server does not run, or its address is wrong. | Start the model server. Check the address in **Settings** > **Model**. Then select **Retry**. |
+| **The model call failed**, `Could not connect to lmstudio at http://localhost:1234/v1.` | The model server does not run, or its address is wrong. | Start the model server. Check the address in **Settings** > **Model**. Then select **Retry**. |
 | **The model call failed**, with a model's name that the provider does not know | The model name is not one of the provider's ids. | Select **Open Settings**, choose a model from the list, and select **Save**. Then **Retry**. |
 | A result **Failed**, "Validation failed: npm test exited 1" | The change was applied, and your build or tests failed. | Select the **/repair** button, or fix the code by hand and send `/validate`. See [Repair](../concepts/repair.md). |
 | A result **Stopped**, "The change was not applied: the answer was no; nothing is changed" | You answered no. | Send `/edit` to apply the checked patch later, or change the request. |

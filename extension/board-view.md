@@ -34,7 +34,7 @@ A click on the project or on a column opens the board page. A click on a card op
 
 ## The board page
 
-The board page opens in a tab named `Board — <project>`. A bar above it gives the page's address, as **Open in the browser — http://127.0.0.1:…**. It also says "If the board stays blank, reload the window".
+The board page opens in a tab named `Board — <project>`. A bar above it gives the page's address, as **Open in the browser —** `http://127.0.0.1:…`. It also says "If the board stays blank, reload the window".
 
 The page is the board itself. On it, you read a card and its thread, answer, move cards between columns, and set tags. A card has **Send to CodeLead**, which tags it `for:codelead`. See [Use the board](../pinboard/use-the-board.md).
 

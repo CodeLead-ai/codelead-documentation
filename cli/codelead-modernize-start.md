@@ -42,6 +42,13 @@ The program is in CodeLead's Pro plan. In a folder without the Pro plan, `start`
 
 With `--base <url>`, the `read` stage also runs the [Explorer](../analyst/explore-an-application.md) on the running application. The Explorer clicks every link and menu item that sends no form, and records each screen.
 
+When the Explorer explores nothing, the `read` stage waits. This happens when the application refuses every sign-in, or when no role reaches a screen. The dossier is written and kept. The problem names each role with what the Explorer saw. Its ways out:
+
+- Open the address in a browser, and try the sign-in with the same account and password. Check each account and its password variable. Then run the stage again.
+- Or go on without the crawl: `codelead modernize skip read --reason "<WHY>"`, then `codelead modernize next`.
+
+When one role is refused and another one explores, the stage is done. Its summary ends with a note that names the refused role.
+
 ### Sign-in accounts for the crawl
 
 With `--as <role>=<account>`, the Explorer signs in as that account, and explores what the role can reach. Repeat `--as` for each role. The program keeps the roles and the accounts in the state file, as `application.accounts`, for every later run of the `read` stage. It never keeps a password.
@@ -57,7 +64,7 @@ When a run profile is recorded with [`codelead modernize source`](codelead-moder
 `start` records two answers for later stages: the rebuild folder (`../<folder>-rebuild`) and the template (`dotnet-next-shadcn`). Change them with [`codelead modernize answer`](codelead-modernize-answer.md).
 
 > [!TIP]
-> **For experienced users:** the survey runs `scripts/dossier/assembleDossier.ts` with tsx, and takes the intake's defaults when there is no terminal. The stage is done when the survey completes and derives the options.
+> **For experienced users:** the survey runs `scripts/dossier/assembleDossier.ts` with tsx, and takes the intake's defaults when there is no terminal. The stage is done when the survey completes and derives the options. With an address, the Explorer must also explore a screen as one of its roles.
 
 ## Options
 
@@ -67,7 +74,7 @@ When a run profile is recorded with [`codelead modernize source`](codelead-moder
 
 - **`--unattended`**
 
-  Unattended mode: the transforms' approvals get CodeLead's recommended answer, which is yes when the patch check passed with no blocking finding. A step that is hard to undo stops the stage. A remote model's consent is asked at the start. The default is approve mode: you approve each landing, as the transforms ask. See [Approve mode and unattended mode](../modernization/the-program.md#approve-mode-and-unattended-mode).
+  Unattended mode: CodeLead gives each question its recommended answer. For example, a patch that passed the patch check with no blocking finding gets yes. The run stops, with the reason, at a step that is hard to undo or at a question with no recommended answer. A remote model's consent is asked at the start. The default is approve mode: you approve each landing, as the transforms ask. See [Approve mode and unattended mode](../modernization/the-program.md#approve-mode-and-unattended-mode).
 
 - **`--project <NAME>`**
 
@@ -136,7 +143,7 @@ When a run profile is recorded with [`codelead modernize source`](codelead-moder
   The Explorer: crawling http://localhost:5080/ as clerk (clerk@example.test) (no forms sent) into …
   ```
 
-  Without the password, the stage waits with the problem `The Explorer needs the password of an account`, and names `CODELEAD_WALK_PASSWORD_CLERK`.
+  Without the password, the stage waits with the problem `The Explorer needs the password of an account`, and names `CODELEAD_WALK_PASSWORD_CLERK`. When the application refuses the account or its password, the stage waits with the problem `The Explorer's sign-in as clerk was not accepted`.
 
 - Start the program in a folder without the Pro plan. The start is refused before any work:
 
@@ -165,7 +172,7 @@ When a run profile is recorded with [`codelead modernize source`](codelead-moder
 
 | Code | Meaning |
 |---|---|
-| `0` | The `read` stage is done, and the program waits at the recordings. |
+| `0` | The `read` stage is done, and the program waits at the recordings. Or the `read` stage waits for you: a password, the old application, or an Explorer that explored nothing. |
 | `1` | The `read` stage failed. Its problem says why, and what to do. |
 | `2` | The command was refused before any work: a folder without the Pro plan, a folder where CodeLead is not initialized, another process that runs a program here, a state file that cannot be read, or an `--as` that is not valid. |
 

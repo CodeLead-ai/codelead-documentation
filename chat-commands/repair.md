@@ -42,7 +42,7 @@ CodeLead compares each file that a repair would change with the states that earl
 `/repair` never runs for a failure of the environment, such as the pins' database that does not answer. A patch cannot fix the environment.
 
 > [!TIP]
-> **For experienced users:** the repair uses the `repair` model role when the configuration sets one. Otherwise it uses the role of the patch strategy. See [Use a stronger model for repairs](../how-to/use-a-stronger-model-for-repairs.md). A pin or an in-place transform repairs itself, up to `modernization.repair.rounds` rounds (the default is 2).
+> **For experienced users:** the repair uses the `repair` model role when the configuration sets one. Otherwise it uses the role of the patch strategy. See [Use a stronger model for repairs](../how-to/use-a-stronger-model-for-repairs.md). A pin or an in-place transform repairs itself. Its limit, `modernization.repair.rounds` (the default is 2), counts the rounds that did not move the failure. A round that ends with a new failure earns one more, up to twice the limit. For example, round 1 fixes a compiler error and round 2 moves the failure again, so a third round runs.
 
 ## Options
 

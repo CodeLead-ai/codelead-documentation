@@ -37,7 +37,7 @@ To modernize an application is to move it to a current platform without losing w
 
 | # | Stage id | Title | What it does | Model calls |
 |---|---|---|---|---|
-| 1 | `read` | Read the application | Writes the [dossier](../modernization/dossier.md). With an address, the Explorer crawls the running application. | None |
+| 1 | `read` | Read the application | Writes the [dossier](../modernization/dossier.md). With an address, the Explorer crawls the running application. The stage waits when the Explorer explores nothing. | None |
 | 2 | `recordings` | Record the journeys | Waits for a person, who records the journeys with the [Analyst](../analyst/record-a-journey.md). | None |
 | 3 | `pins` | Pin the contracts | Writes the [pins](../modernization/pins.md): tests that record what the code does today. | Yes |
 | 4 | `in-place` | Transform in place | Runs the [transforms](../modernization/transforms.md) that fit, in the old code. | Yes |
@@ -73,7 +73,7 @@ To modernize an application is to move it to a current platform without losing w
 
 ### Approve mode and unattended mode
 
-In **approve** mode (the default), you approve each landing of a transform, as the transforms ask. The Pin stage also asks `Narrate webapp now? [Y/n]` when the web project has no narration. With `start --unattended`, each approval gets CodeLead's recommended answer: yes when the patch check passed with no blocking finding. The Pin stage narrates without asking. A step that is hard to undo stops the stage, because nobody is there to answer.
+In **approve** mode (the default), you approve each landing of a transform, as the transforms ask. The Pin stage also asks `Narrate webapp now? [Y/n]` when the web project has no narration. With `start --unattended`, CodeLead gives each question its recommended answer. For example, a patch that passed the patch check with no blocking finding gets yes. The Pin stage narrates without asking. The run stops, with the reason, at a step that is hard to undo or at a question with no recommended answer. Nobody is there to answer them.
 
 ### One program at a time
 

@@ -362,7 +362,7 @@ Optional. Read in the old application's folder by the [modernization program](..
 | `pins.patchRole` | role | see below | The role whose model writes the pins' patch and its retries. |
 | `pins.maxIncrementsPerRun` | whole number, 1 to 50 | 6 | How many increments one `/modernize --pin` runs before it stops and says the next. |
 | `pins.maxIncrementsPerStage` | whole number, 1 to 500 | 24 | How many increments the program's Pin stage runs by itself, unattended, before it waits. |
-| `repair.rounds` | whole number, 0 to 10 | 2 | The repair rounds that a pin or an in-place transform runs by itself after its gate refused the code. `0` runs none: [`/repair`](../chat-commands/repair.md) stays yours. |
+| `repair.rounds` | whole number, 0 to 10 | 2 | The repair rounds that a pin or an in-place transform runs by itself after its gate refused the code. It counts the rounds that did not move the failure. A round whose failure differs from every earlier one earns one more, up to twice this number. `0` runs none: [`/repair`](../chat-commands/repair.md) stays yours. |
 
 Without `pins.patchRole`, the pins' patch goes to the repair role when it is on a remote provider and remote models are allowed. Otherwise it goes to the patch strategy's role, as for any patch.
 

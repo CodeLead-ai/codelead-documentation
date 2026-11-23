@@ -129,7 +129,7 @@ A pin or an in-place transform is a **composed request**: CodeLead writes the re
 | `applied_not_validated` | the same, with `The validation did not run: <why>` | stopped | `/validate`. |
 | `reply_cut` | `The change did not land: <the reply was cut>` | failed | A smaller request, or a higher cap by its configuration key. |
 | `check_refused` | `The change did not land: <the check's problem>` | failed | Run it again. |
-| `gate_refused` | `<title>: <command> exited <n>` | failed | CodeLead offers `The gate refused <subject>: <failure>. Repair it?` |
+| `gate_refused` | `<title>: <n> of <m> tests failed: <test>: <message>` when tests failed, else `<title>: <command> exited <n>` | failed | CodeLead offers `The gate refused <subject>: <failure>. Repair it?` |
 | `repair_stopped` | the repair loop's words | failed | As for the repair loop. |
 | `precondition` | the words of what is missing, such as the pins' database | failed | Do what the words say. No model was called. |
 | `objection` | the preflight's words: the request cannot be done | failed | Read the objection, and change the request. |
@@ -143,6 +143,20 @@ An increment is applied and not validated: validate it first? [Y/n]
 ```
 
 Answer no, and nothing is composed: `An increment is applied and not validated; nothing was composed`. The ways on: `/validate`, or the same command with `--again`.
+
+When you run a pin again over an applied increment that its gate refused, CodeLead first asks `An increment is applied and its gate refused it: run its gate again first? [Y/n]`. Answer no, and nothing is composed: `An increment is applied and its gate refused it; nothing was composed`.
+
+The repair rounds of a composed request, and the pins that cannot run in the test process:
+
+| Words | Meaning | Way out |
+|---|---|---|
+| `Repair round 3 of at most 4 (2 of the 2 before it moved the failure): <failure>` | The round past the limit, earned because the rounds before it moved the failure. | Nothing. The rounds go on by themselves. |
+| `Repair rounds: <k> rounds ran and the failure did not change: the limit of <n> (modernization.repair.rounds) counts the rounds that did not move it.` | The rounds that did not move the failure reached the limit. When some rounds moved it, the line says `did not change in <s> of them`. | Read what each round tried. Fix it by hand, then `/validate`. |
+| `Repair rounds: <k> rounds ran: the cap, twice the limit of <n> (modernization.repair.rounds); each moved the failure.` | The rounds reached the cap, twice the limit. | Read the last failure. Fix it by hand, then `/validate`. |
+| `Set the <n> failing pins aside and land the <m> that pass? [Y/n]` (`1 failing pin` for one) | A few pins cannot run in the test process, and their repair left no patch. | Enter gives yes: the rest land. See [Pins](../modernization/pins.md#a-pin-that-cannot-run-in-the-test-process). |
+| `<m> pins landed; <n> set aside: <test>: <reason>; the walk or the database level may prove it` | The increment landed without the tests set aside. | Read `setAside` in `pin-levels.json`. |
+| `Not set aside: <n> of the increment's <m> tests failed, more than half: the request was wrong, not a few facts; nothing is set aside.` | Too many tests failed to set them aside. | Repair the increment, or pin fewer units. |
+| `The gate did not pass without them either: the pins set aside are put back as they were; nothing landed.` | The set-aside did not help. | Repair the increment. |
 
 ## New apps
 
@@ -189,6 +203,8 @@ The [program](../modernization/the-program.md) refuses with `Refused: … Nothin
 | `Refused: There is no CodeLead configuration in this folder (.codelead/config.json): initialize the folder first (codelead init, or Initialize in the extension), then start the program. Nothing was written or run.` | `codelead modernize start` in a folder where CodeLead is not initialized. Exit code 2. | Run [`codelead init`](../cli/codelead-init.md), or select **Initialize** in the extension. Then start the program again. |
 | `The modernization program did not start: <provider> was not allowed (the answer was no), and <role> uses it.` | You answered no to the consent for a remote model, at the start of the program in unattended mode. Exit code 2 at the terminal; the outcome `stopped` in the chat. | Pick a local model for that role. Or allow remote models without the question. Or send the command again and answer `y`. |
 | `The Explorer needs the password of an account` (problem) | The read stage explores as an account of `--as`, and no password is set for its role. The problem names the variable, such as `CODELEAD_WALK_PASSWORD_CLERK`. Nothing was started. | Set the variable in the environment that the program runs in, or name a credentials file outside the folder with `CODELEAD_WALK_CREDENTIALS`. Then run the read stage again. |
+| `The Explorer's sign-in as <role> was not accepted` (problem), or `The Explorer's sign-ins were not accepted` | The read stage's Explorer explored nothing: the application refused the sign-in. The dossier is written and kept. | Try the sign-in in a browser. Check the account and its `CODELEAD_WALK_PASSWORD_<ROLE>`, then run the read stage again. Or skip it: `codelead modernize skip read --reason "<WHY>"`. |
+| `The Explorer explored no screen of the application` (problem) | No role reached a screen. The dossier is written and kept. | Open the address in a browser. A sign-in page needs an account: `codelead modernize start --base <URL> --as <ROLE>=<ACCOUNT>`. Or skip the read stage with a reason. |
 | `The pins of <project> cannot run on this machine` (problem) | The pins of a .NET Framework project need the .NET Framework runtime or Mono, and this machine has neither. Nothing was asked of the model. | Install Mono, then run the pins again. Or pin the project on Windows. Or declare the pins' commands in `.codelead/validation.json`. |
 | `Refused: there is no modernization program here (.codelead/modernization.json): …` | No program in this folder. | `codelead modernize start [--base <url>] [--unattended]`. |
 | `Refused: .codelead/modernization.json: the stage <id> has the status "<x>", not one of pending, running, waiting, done, failed, skipped.` | The state file is not valid. | Fix the file, or remove it to start the program again. |

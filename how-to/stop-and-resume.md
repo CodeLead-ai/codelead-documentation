@@ -100,6 +100,7 @@ Continue it with /create-app --auto, one step with /build-step, change it with /
 Run the same line again, for example [`/modernize --pin`](../chat-commands/modernize.md#--pin) `webapp`. CodeLead first looks at what the last run left:
 
 - **An increment applied and not validated**: it asks `An increment is applied and not validated: validate it first? [Y/n]`. Press **Enter**. A pass lands the increment.
+- **A pin increment applied, that its gate refused**: it asks `An increment is applied and its gate refused it: run its gate again first? [Y/n]`. Press **Enter**. The gate runs, and the repair rounds follow when it refuses again. Nothing is composed over the pins, so no test is written twice.
 - **A patch that you declined**: it offers three choices. `1` applies it, `2` shows it, `3` composes it again. **Enter** gives `2`, which changes nothing.
 - **To compose anew on purpose**: add `--again`, for example `/modernize --pin webapp --again`.
 

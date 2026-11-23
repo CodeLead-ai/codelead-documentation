@@ -171,13 +171,17 @@ A pin (a test that records what the code does today) and an in-place transform a
 | `applied_not_validated` | `stopped` | `Transform T1 was applied and not validated: the gate did not run` | `/validate`. |
 | `reply_cut` | `failed` | `… did not land`, with the counts of the cut reply | Pin fewer units: `--units <unit>`. |
 | `check_refused` | `failed` | `… did not land: the patch check refused …` | `/patch --retry`, or run it again. |
-| `gate_refused` | `failed` | `The pins of webapp did not land: dotnet test exited 1` | `/repair` in this session. |
+| `gate_refused` | `failed` | `The pins of webapp did not land: 1 of 8 tests failed: <test>: <message>`. A build failure reads `…: dotnet test exited 1`. | `/repair` in this session. |
 | `repair_stopped` | `failed` | The gate still refuses after the repair rounds. | Read what each round tried. Fix it by hand, then `/validate`. |
 | `precondition` | `failed` | `The pins of webapp need Visual Studio's MSBuild, and it is not on this machine` | Do what the words say, before any model call. |
 | `objection` | `failed` | The preflight's own words: the request cannot be done. | Change the request. |
 | `other` | `failed` | Any other cause. | Read the words. Only this class offers a stronger model. |
 
-When you run the same pin again over an applied increment that the gate did not judge, CodeLead asks `An increment is applied and not validated: validate it first? [Y/n]`. After a declined patch, it offers to apply it, show it, or compose it again. `--again` composes anew on purpose. See [Stop and resume work](stop-and-resume.md).
+When you run the same pin again over an applied increment that the gate did not judge, CodeLead asks `An increment is applied and not validated: validate it first? [Y/n]`. Over an increment whose gate refused it, it asks `An increment is applied and its gate refused it: run its gate again first? [Y/n]`. After a declined patch, it offers to apply it, show it, or compose it again. `--again` composes anew on purpose. See [Stop and resume work](stop-and-resume.md).
+
+A few pins can fail only because the test process cannot run them. Then CodeLead offers `Set the 1 failing pin aside and land the 7 that pass? [Y/n]`. See [Pins](../modernization/pins.md#a-pin-that-cannot-run-in-the-test-process).
+
+In the program, a Pin stage can fail on its gate. Its ways out work from a terminal: `codelead modernize run pins`, the chat opened with `codelead interactive`, or `codelead modernize answer pins=enough`.
 
 ## Name the cause for the preflight
 

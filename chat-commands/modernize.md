@@ -67,7 +67,7 @@ The actions follow an order. The program (`--run`) runs the stages in this order
 Two rules hold for the actions that change code:
 
 - **Pin first.** A transform runs under the gate of the pins. A transform with no pins in the gate is refused, unless you say `--without-pins`.
-- **The composed actions are `/implement` runs.** `--pin` and `--transform` compose a request from the survey and run it through [`/implement`](implement.md): preflight, patch, patch check, apply, validation. They ask no preflight question: they assume the answers, and show what they assumed once, in a card titled `CodeLead assumed`. They repair themselves when the gate refuses them, up to `modernization.repair.rounds` rounds (the default is 2).
+- **The composed actions are `/implement` runs.** `--pin` and `--transform` compose a request from the survey and run it through [`/implement`](implement.md): preflight, patch, patch check, apply, validation. They ask no preflight question: they assume the answers, and show what they assumed once, in a card titled `CodeLead assumed`. They repair themselves when the gate refuses them. The limit, `modernization.repair.rounds` (the default is 2), counts the rounds that did not move the failure. A round that ends with a new failure earns one more round, up to twice the limit. See [Pins](../modernization/pins.md#the-repair-rounds).
 
 > [!NOTE]
 > **New to this?** Start with `/modernize --plan` on the Basic Store sample. It reads the repository and changes nothing. Then read `docs/codelead/dossier/DOSSIER.md`. The [tutorial](../tutorials/modernize-a-dotnet-framework-app.md) walks the rest, and the [Modernize wizard](../extension/modernize-wizard.md) runs it with buttons.
@@ -263,7 +263,7 @@ Pins a project's behaviour. A pin is a test that records what the code does toda
 
 - `memory`: the in-memory level, with fakes and no database. This is the default.
 - `database`: the facts that reach a data context or a repository. These pins write rows and delete them, on a database of their own.
-- The walk: facts such as `[Authorize]` that only the running application can prove. No pin level spends its budget on them.
+- The walk: facts such as `[Authorize]` that only the running application can prove. The facts whose code needs the web runtime, such as a call of `FormsAuthentication.SignOut()`, are the walk's too. No pin level spends its budget on them.
 
 **The pins' own database.** Before any model call, `--level database` settles the database. CodeLead copies a file-attached database into the pins' folder, under a catalog name of its own, and asks nothing. For a server database, CodeLead writes a git-ignored connections file with a placeholder, and asks one question. The question shows the application's own connections: never give those. The recommended answer is `done`: you put the copy's connection string in that file. The other answers are `env:<NAME>`, a connection string without a password, the path of a copy, or `stop`. A password typed into the chat is refused. A guard refuses any pin that reads the application's configuration or connects to the application's database.
 
@@ -308,10 +308,13 @@ The results of `--pin`:
 | `passed` | `The pins of webapp are complete at the in-memory level (5 tests this run)` | `/modernize --pin webapp --level database — …` |
 | `nothing` | `The pins of webapp are complete at the in-memory level` | `/modernize --pin webapp --level database` |
 | `failed` | `The pins of webapp did not land: MSBuild exited 1` | `Repair it in this session: /repair …`, or run it again |
+| `failed` | `The pins of webapp did not land: 11 of 11 tests failed: StoreContextTests.OrderLines_…: System.InvalidOperationException: No Entity Framework provider found …` | `Repair it in this session: /repair …`, or run it again |
 | `failed` | `The pins of webapp need Visual Studio's MSBuild, and it is not on this machine` | The three ways above. |
 | `failed` | `The database pins need a database that is not the application's` | Put the copy's connection string in the file, answer `done`, then run it again. |
 
 The facts of a landed increment are the coverage: `This increment: 3 tests on OrdersController; 2 of the 3 facts it named pinned`, `So far: …`, `Rules pinned: …`, and what waits. A database pin names the database it ran against first, never its credentials. The other stops are in [The stops of a pin or a transform](#the-stops-of-a-pin-or-a-transform).
+
+When a test cannot run in the test process and its repair left no patch, CodeLead offers to set it aside: `Set the 1 failing pin aside and land the 7 that pass? [Y/n]`. A yes removes the failing test method, and the rest land: `7 pins landed; 1 set aside: <test>: <reason>; the walk or the database level may prove it`. See [Pins](../modernization/pins.md#a-pin-that-cannot-run-in-the-test-process).
 
 ### `--transform`
 
@@ -509,7 +512,7 @@ The modernization program in the chat. It is the same program as [`codelead mode
 
 - `--run`: runs the next stages in order, until one waits on you, one fails, or all are done. The same as [`codelead modernize next`](../cli/codelead-modernize-next.md).
 - `--run <STAGE>`: runs one stage again: `read`, `recordings`, `pins`, `in-place`, `model`, `rebuild-init`, `rebuild` or `audit`.
-- `--as <ROLE>=<ACCOUNT>`, after `--run`: a role that the read stage's Explorer signs in as, and its account, as [`codelead modernize start --as`](../cli/codelead-modernize-start.md#sign-in-accounts-for-the-crawl) does. Repeat it for each role. The state file keeps the roles and the accounts, never a password, for every run of the stage. Each password is read when the stage runs, from `CODELEAD_WALK_PASSWORD_<ROLE>`, else from the file that `CODELEAD_WALK_CREDENTIALS` names. A missing password makes the stage wait, and its problem names the variable.
+- `--as <ROLE>=<ACCOUNT>`, after `--run`: a role that the read stage's Explorer signs in as, and its account, as [`codelead modernize start --as`](../cli/codelead-modernize-start.md#sign-in-accounts-for-the-crawl) does. Repeat it for each role. The state file keeps the roles and the accounts, never a password, for every run of the stage. Each password is read when the stage runs, from `CODELEAD_WALK_PASSWORD_<ROLE>`, else from the file that `CODELEAD_WALK_CREDENTIALS` names. A missing password makes the stage wait, and its problem names the variable. A sign-in that the application refuses for every role, or no screen at all, makes the stage wait too.
 - `--continue`: the recordings are made; CodeLead marks them done and runs the next stages. It takes nothing after it.
 - `--answer <KEY>=<VALUE>`: records answers, and runs nothing. The same as [`codelead modernize answer`](../cli/codelead-modernize-answer.md), with the same eight keys: `rebuildFolder`, `template`, `framework`, `identity`, `database`, `pinsDatabase`, `security` and `pins`. `pinsDatabase=done` (or `env:<NAME>`) answers the pins' database question. `security=decided`, `fix-all` or `fix-none` answers the security findings that wait for a person. `pins=enough` ends the pins stage with the coverage as it stands, only while the stage waits or failed.
 - `--skip <STAGE> --reason <WHY>`: goes past a stage that failed or waits for you, as [`codelead modernize skip`](../cli/codelead-modernize-skip.md) does. The reason is required. The recordings are never skipped.
@@ -614,7 +617,9 @@ Refused: IIS Express runs on Windows, and this machine is macOS: run the preset 
 | `The gate refused the pins: <failure>. Repair it? [Y/n]` | `--pin`, `--transform` | Yes. | Yes. |
 | `Pin the next: <units> (<n> facts)? [Y/n]` | `--pin` | Yes. | Yes. |
 | `Narrate <project> now? [Y/n]` | `--run`, at the pins stage, when the web project has no narration | Yes: "the pins take their facts from it". | Yes. |
+| `Set the 1 failing pin aside and land the 7 that pass? [Y/n]` | `--pin`, after a repair round that left no patch | Yes: "the pins that pass are pinned; the text of each one set aside is kept on the evidence record". | Yes. |
 | `An increment is applied and not validated: validate it first? [Y/n]` | `--pin`, `--transform` | Yes. | Yes. |
+| `An increment is applied and its gate refused it: run its gate again first? [Y/n]` | `--pin`, over an increment whose gate refused it and whose repair rounds ended | Yes: "composing again over it would write the same tests a second time". | Yes. |
 | `… apply it, look at it, or compose again?` then `Choose [1-3], or press Enter for 2:` | `--pin`, `--transform`, after a declined patch | 2: look at it; nothing changes. | 2. |
 | The pins' database: `Your answer:` | `--pin --level database` | `done`: the password stays in the file. | A text answer is required. |
 | `Remove the database pins' gate entries now, so that no later increment runs them on the application's database? [Y/n]` | `--pin --level database` | Yes: "they would run on the application's database". | Yes. |
@@ -622,7 +627,7 @@ Refused: IIS Express runs on Windows, and this machine is macOS: run the preset 
 
 ## What you see
 
-Every action ends with a result. For `--plan` and `--audit-pack`, the result names the folder that was written. For `--pin` and the in-place `--transform`, the result has a verdict, and the terminal prints a closing line. The other actions end with their own last statement as the headline. `--source` takes its first line instead: what it did, such as `There was no run profile to take out: nothing changed`, or its refusal.
+Every action ends with a result. For `--plan` and `--audit-pack`, the result names the folder that was written. For `--pin` and the in-place `--transform`, the result has a verdict, and the terminal prints a closing line. Inside a stage of the program, that closing line gives the outcome and the reason, with no `; next: …`. The stage's own lines then give the way out. The other actions end with their own last statement as the headline. `--source` takes its first line instead: what it did, such as `There was no run profile to take out: nothing changed`, or its refusal.
 
 ### The stops of a pin or a transform
 
@@ -636,11 +641,18 @@ When a pin or a transform does not land, its result says why, by the class of it
 | Applied, not validated for another reason | `stopped` | `Transform T1 was applied and not validated: the gate did not run` | `Validate it: /validate (a pass lands the transform)` |
 | The model's reply was cut at its cap | `failed` | `… did not land`, with the counts | `Pin fewer units in this increment: /modernize --pin webapp --units <unit>` |
 | The patch check refused the patch | `failed` | `… did not land: the patch check refused …` | `/patch --retry`, or run it again |
-| The gate refused it, and the repair rounds stopped | `failed` | `The pins of webapp did not land: dotnet test exited 1` | `Repair it in this session: /repair …` |
+| The gate refused it, and the repair rounds stopped | `failed` | `The pins of webapp did not land: 1 of 8 tests failed: <test>: <message>`, or `…: dotnet test exited 1` when the build failed | `Repair it in this session: /repair …` |
 | A precondition | `failed` | For example, `The pins of webapp need Visual Studio's MSBuild, and it is not on this machine` | The precondition's own ways. |
 | The preflight objected | `failed` | The objection's words. | Change the request. |
 
-A run that comes back over an applied increment asks to validate it first. A run after a declined patch offers to apply it, show it, or compose it again. `--again` composes anew on purpose.
+When tests failed, the reason is the count and the first failed test, with its message. It is never a line of a stack. For example:
+
+<!-- described, not captured -->
+```output
+1 of 8 tests failed: AccountControllerTests.SignOut_RedirectsToSignIn_Lines51_51: System.NullReferenceException: Object reference not set to an instance of an object
+```
+
+A run that comes back over an applied increment asks to validate it first. A pin that comes back over an increment whose gate refused it asks to run that gate again first. A run after a declined patch offers to apply it, show it, or compose it again. `--again` composes anew on purpose.
 
 ## Examples
 

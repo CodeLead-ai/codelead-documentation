@@ -123,7 +123,7 @@ To turn them on in the file:
 - **When a stronger model does not help.** A failure of the environment, such as a missing tool, is not a model problem. CodeLead says so, and runs no repair round for it. See [Fix a stop](fix-a-stop.md).
 - **A loop that goes in circles.** A repair can bring a file back to a state that an earlier round tried. CodeLead then stops the repair loop. See [Repair](../concepts/repair.md).
 - **The pins of a modernization.** The pins write their patch on the repair role when it is remote and remote models are allowed. See [Pins](../modernization/pins.md).
-- **The rounds.** A pin or an in-place transform runs up to `modernization.repair.rounds` repair rounds by itself. The default is 2.
+- **The rounds.** A pin or an in-place transform runs its repair rounds by itself. `modernization.repair.rounds` (the default is 2) counts the rounds that did not move the failure. A round whose failure differs from every earlier one earns one more, up to twice the number. For example, round 1 fixes a compiler error and round 2 moves the failure again, so a third round runs. A rebuild part's session counts every round, up to its own cap, `repairsPerSession` in the [run profile](../reference/run-profile.md).
 
 ## See also
 

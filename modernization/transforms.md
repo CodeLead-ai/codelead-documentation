@@ -40,8 +40,8 @@ Each transform is an [`/implement`](../chat-commands/implement.md) run that Code
 1. **The composer** reads the dossier and the project files, and writes the request. The request names the files that change and the files that stay. It ends with the sentence `Change exactly what this request names and nothing else.`
 2. **The preflight** checks the request. CodeLead answers its questions itself, and shows its answers once, in a card titled `CodeLead assumed`. When the preflight objects that the request cannot be done, the transform stops with those words.
 3. **The patch**: the model writes it, and [the patch check](../concepts/the-patch-check.md) reads it.
-4. **Your approval**: in approve mode, CodeLead asks `Apply this patch? [Y/n]` for each landing. Unattended, the answer is yes.
-5. **The gate** builds the projects and runs the pins. When it refuses, CodeLead runs up to two [repair](../concepts/repair.md) rounds.
+4. **Your approval**: in approve mode, CodeLead asks `Apply this patch? [Y/n]` for each landing. Unattended, CodeLead gives the recommended answer: yes when the patch check passed with no blocking finding.
+5. **The gate** builds the projects and runs the pins. When it refuses, CodeLead runs [repair](../concepts/repair.md) rounds by itself. The limit counts the rounds that did not move the failure. See [Pins](pins.md#the-repair-rounds).
 6. **The landing**: the change passed the gate, and an [evidence record](../concepts/evidence-records.md) records it.
 
 A transform that does not land changes nothing past its last green step.
@@ -72,6 +72,8 @@ Request: Extract the data layer of webapp into a new class library webapp.Data, 
 ```
 
 The rest of the request describes the new project file, the reference from the web project, and the solution entry. The new project keeps the old format and framework. It also says what stays: the Identity context, the web project's packages, its `Web.config` and its connection strings.
+
+The request names the destinations by a rule: "each to the same folder below it". CodeLead gives the [patch check](../concepts/the-patch-check.md) each destination's full path, so the check reads them as planned files. Its line for a moved file then reads `Patch creates webapp.Data/DAL/StoreContext.cs (a file the request asks for).`
 
 T5D refuses, with the way out, when:
 
@@ -179,8 +181,9 @@ On the Basic Store sample, nine write actions accept a write without `[Authorize
 - **Validation**: a transform validates what it changed plus the declared gate, and asks no scope question.
 - **The named surface**: the request names its folders and files. A change outside them gets a note: `outside the folder the request names: <file>`.
 - **A second run**: over an increment that is applied and not validated, CodeLead asks to validate it first. After a declined patch, it offers to apply it, show it or compose again. `--again` composes anew on purpose.
-- **Repair rounds**: `modernization.repair.rounds` in `.codelead/config.json`, 2 by default. 0 runs none.
-- **Results**: `Transform T5D landed with the parity gate green` when it lands. `Transform T1 did not land: MSBuild exited 1` when the gate refused it. See [Results and stops](../concepts/results-and-stops.md).
+- **The gate in the request**: the request names each entry of the declared gate with its project first, for example `pins in-memory (webapp.Characterization, dotnet test, net48)`. The patch check reads this as a citation, not as a project to change.
+- **Repair rounds**: `modernization.repair.rounds` in `.codelead/config.json`, 2 by default. It counts the rounds that did not move the failure, and a round that moves it earns one more, up to twice the number. 0 runs none.
+- **Results**: `Transform T5D landed with the parity gate green` when it lands. `Transform T1 did not land: MSBuild exited 1` when the gate refused it on the build. When tests failed, the headline gives the gate's reason instead: `<n> of <m> tests failed: <test>: <message>`. See [Results and stops](../concepts/results-and-stops.md).
 
 ## What a transform is not
 

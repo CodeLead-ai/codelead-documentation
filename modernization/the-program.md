@@ -98,6 +98,7 @@ This status comes from a Mac, which has no Visual Studio's MSBuild. The Model st
 | Stage | It waits for | You do | Then |
 |---|---|---|---|
 | Read | The old application, when the program must start it and cannot (`Start the old application`). | Start the application by hand, or record how to start it. | `codelead modernize run read` |
+| Read | An Explorer that explored nothing: every sign-in was refused, or no role reached a screen (`The Explorer's sign-in as clerk was not accepted`). The dossier is written. | Try the address and the sign-in in a browser. Check each account and its `CODELEAD_WALK_PASSWORD_<ROLE>`. Or go on without the crawl. | `codelead modernize run read`, or `codelead modernize skip read --reason "<WHY>"`, then `next` |
 | Observe | The recordings, always. | Record the journeys with the Analyst. | `codelead modernize continue` |
 | Pin | Provable facts that remain (`6 facts still wait at the in-memory level`). | Run the stage again, or accept the coverage. | `codelead modernize run pins`, or `codelead modernize answer pins=enough` |
 | Pin | A database of the pins' own, for a database on a server. | Put a copy's connection string in the file that CodeLead prepared. | `codelead modernize answer pinsDatabase=done`, then `codelead modernize run pins` |
@@ -109,6 +110,14 @@ This status comes from a Mac, which has no Visual Studio's MSBuild. The Model st
 [Waive a security finding](../how-to/waive-a-security-finding.md) says how to decide each security finding.
 
 A **failed** stage is different: something went wrong that is not a question for you. Its problem says the cause and the way out. The program does not run a failed stage again by itself. Fix the cause and run the stage again. When the cause cannot be fixed now, go past the stage with [`codelead modernize skip`](../cli/codelead-modernize-skip.md) and your reason. The stage then ends `skipped`, and the state file keeps who skipped it, why and when. See [Fix a stop](../how-to/fix-a-stop.md#unblock-a-modernization-stage).
+
+The Pin stage fails, for example, when the gate refuses an increment and its repair rounds end. Its ways out work from a terminal as well as in the chat:
+
+- Run the stage again: `codelead modernize run pins`. It runs the gate of the pins that were applied first, and composes nothing over them.
+- Or open the chat in this folder with `codelead interactive`, then run `/repair` and `/validate` there.
+- Or go on with what is pinned: `codelead modernize answer pins=enough`.
+
+See [Pins](pins.md#the-pin-stage-of-the-program).
 
 ## The answers
 
@@ -136,7 +145,7 @@ A key that the program does not take is refused, with the list of all eight. A c
 The program runs in one of two modes. You choose it when you start: **Approve each landing** or **Run unattended** in the wizard, or `codelead modernize start --unattended` in a terminal.
 
 - **Approve mode** is the default. Before each landing of a pin or a transform, CodeLead asks `Apply this patch? [Y/n]`, and you answer in the terminal **CodeLead: modernize** or the chat. The recommended answer is in capitals, and Enter gives it.
-- **Unattended mode** gives those questions their recommended answer. A patch that passed the patch check with no blocking finding gets yes and lands. A patch with a blocking finding gets no.
+- **Unattended mode** gives each question its recommended answer. A patch that passed the patch check with no blocking finding gets yes and lands. A patch with a blocking finding gets no. A pin that cannot run in the test process is set aside, so that the pins that pass land.
 
 In unattended mode, a step that is hard to undo is never answered. The stage stops there at once, with the reason and the way out. A question with no recommended answer stops it too: CodeLead does not guess.
 

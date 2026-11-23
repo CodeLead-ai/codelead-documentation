@@ -35,6 +35,7 @@ Nobody types in an unattended run. CodeLead answers each question itself, with t
 - **No** to "Mark validation as manually passed?". No person checked it, so CodeLead never says that a person did.
 - **One retry** of a failed scaffold command, by itself. After a second failure, "Retry scaffold command?" gets the recommended no.
 - **The default** of each clarifying question of the preflight.
+- **Yes** to "Set the 1 failing pin aside and land the 7 that pass?". A [pin](../modernization/pins.md) that cannot run in the test process is set aside, and its text stays on the evidence record. The run says so: `The unattended run: the failing pins are set aside, as CodeLead recommends (…)`.
 
 Two kinds of question stop the run, because nobody is there to choose:
 
@@ -51,7 +52,7 @@ The unattended run stopped: this deletes 4 entries of the target folder, and nob
 
 Three questions are asked of a person only, and never in a run. They are the trust of a template package, the recovery menu of a build that stays red, and the chat's offer to run a command. A run declines them.
 
-A composed request (a pin or a transform of a modernization) asks no questions at all. It takes each default and shows the list once as "CodeLead assumed". The evidence record keeps every assumption. See [Prompts and recommended answers](prompts-and-recommended-answers.md).
+A composed request (a pin or a transform of a modernization) asks no preflight question. It takes each default and shows the list once as "CodeLead assumed". The evidence record keeps every assumption. See [Prompts and recommended answers](prompts-and-recommended-answers.md).
 
 ### The runners
 
@@ -59,7 +60,7 @@ A composed request (a pin or a transform of a modernization) asks no questions a
 |---|---|---|
 | `codelead implement --card <id>` or `--queue` | The board's cards tagged `for:codelead`, one session for each card, with up to 2 repair rounds each | `--max-cards`, `--max-minutes`, `--until`, `--repair-rounds` |
 | `codelead rebuild run` | The parts of a rebuild's plan: each composed, validated, walked and judged | `--max-parts`, `--max-cost-usd`, `--max-minutes`, `--until`, or `run.unattended` in the rebuild's manifest |
-| `codelead modernize start --unattended`, then `next` | The stages of a modernization program, with the recommended answer to each transform's approval | The caps of each stage, such as the pins' increments |
+| `codelead modernize start --unattended`, then `next` | The stages of a modernization program, with the recommended answer to each question | The caps of each stage, such as the pins' increments |
 
 ### How a run stops
 
