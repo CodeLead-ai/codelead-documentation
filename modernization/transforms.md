@@ -84,7 +84,7 @@ T5D refuses, with the way out, when:
 - a moved file uses a type that stays in the web project.
 
 > [!TIP]
-> **For experienced users:** T5D wants a gate entry that builds the solution. Without one, it adds the note `No declared gate entry builds: declare one that builds sampleapp.slnx (msbuild or dotnet build) in .codelead/validation.json, or the extraction is not shown to compile.` See [Declare validation commands](../how-to/declare-validation-commands.md).
+> **For experienced users:** T5D wants a gate entry that builds the web project and the new library. A `dotnet test` of a project that references the web project counts. It builds that project and every project that it references. Without such an entry, T5D adds the note `No declared gate entry builds: declare one that builds sampleapp.slnx (msbuild or dotnet build) in .codelead/validation.json, or the extraction is not shown to compile.` See [Declare validation commands](../how-to/declare-validation-commands.md).
 
 ### T1: the platform upgrade in place
 
@@ -94,7 +94,7 @@ Use T1 on class libraries. A web project on System.Web, such as an MVC 5 project
 
 ### T5: a seam around a static gateway
 
-T5 finds a class named like `*Data`, `*DB`, `*Gateway`, `*Repository` or `*Store` that the code calls statically. It adds an interface and a class that delegates to the gateway, and routes the callers through the interface. On the Basic Store sample, the controllers create their data context directly, so T5 has nothing to wrap:
+T5 finds a class named like `*Data`, `*DB`, `*Gateway`, `*Repository` or `*Store` that the code calls statically. It adds an interface and a class that delegates to the gateway, and routes the callers through the interface. The request names each new file by its full path, beside the gateway's own file. When CodeLead cannot decide the path, the request names the types only. On the Basic Store sample, the controllers create their data context directly, so T5 has nothing to wrap:
 
 ```output
 No static gateway call found in webapp (a class named *Data, *DB, *Gateway, *Repository or *Store called statically); the seam has nothing to wrap. Name the modules with --scope or write the request by hand.
@@ -104,7 +104,7 @@ That is why the options report proposes T5D for this sample.
 
 ### T10: a dependency behind an adapter
 
-T10 takes one package that the options report names as unmaintained, for example `EntityFramework (EF6: maintenance only)` on the Basic Store sample. It adds an interface with the members that the code calls, and an adapter that delegates to the package. It does not remove the package in this step. With no unmaintained package in scope, it refuses and asks for `--dependency <package>`.
+T10 takes one package that the options report names as unmaintained, for example `EntityFramework (EF6: maintenance only)` on the Basic Store sample. It adds an interface with the members that the code calls, and an adapter that delegates to the package. When one project takes the adapter, the request names both new files by their full path, at the top of that project's folder. A new file at any other path is refused by the patch check. It does not remove the package in this step. With no unmaintained package in scope, it refuses and asks for `--dependency <package>`.
 
 T10 never takes the platform: a package of the framework that a project is built on. An MVC project takes its controllers' base class, its routes and its views' helpers from `Microsoft.AspNet.Mvc`, so an adapter cannot stand in for it. That package is the work of T1 or the rebuild. On the Basic Store sample, the T10 section of `options.md` says so:
 

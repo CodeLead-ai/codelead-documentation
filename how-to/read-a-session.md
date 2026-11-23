@@ -84,7 +84,7 @@ An empty `input` means that you pressed Enter, so the answer was `emptyAnswer`. 
 | `command.started`, `command.completed` | The start and the end of a command. `command.completed` holds the `status` and the `result`. |
 | `codelead.output` | A block that CodeLead wrote, word for word. |
 | `model.request`, `model.response`, `model.error` | Each model call: who called, on which role, provider and model, and the files of the prompt and the response. |
-| `model.call.completed` | The call's time, its thinking tokens and its `usage`: the tokens, and `costUsd` when the cost is known. |
+| `model.call.completed` | The call's time, its thinking tokens and its `usage`: the tokens, and `costUsd` when the cost is known. It also names the role, the provider and the model of the call. |
 | `model.prompt_budget` | The size of a patch, retry or repair prompt, its budget, and each part that was cut to fit. |
 | `model.reply_cut` | A reply that stopped at its cap. |
 | `validation.result` | Each command of the gate, with its status, its exit code and the start of its output. |
