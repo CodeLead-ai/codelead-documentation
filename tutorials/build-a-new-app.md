@@ -324,7 +324,7 @@ Sometimes an increment still fails after its 3 attempts. The result says what ha
 
 | What you see | What it means | What to do |
 |---|---|---|
-| `Increment inc-3 (Mark a task done) FAILED (not built): did not leave the app buildable.`, then `Continuing to the next increment.` | The increment is not built. Every earlier increment is committed. The run goes on. | At the end, build the missing feature with [`/implement`](../chat-commands/implement.md). Use the increment's objective as the request. |
+| `Increment inc-3 (Mark a task done) FAILED (not built): did not leave the app buildable.`, then `Continuing to the next increment.` | The increment is not built, and its changes are put back to the last checkpoint. Every earlier increment is committed. The run goes on. | At the end, build the missing feature with [`/implement`](../chat-commands/implement.md). Use the increment's objective as the request. |
 | `Incremental build stopped: increment inc-1 (Runnable app shell) did not leave the app buildable.` | The skeleton failed. There is no app for the next increment to build on. | `Next: fix the failure with /implement, then rerun /build-incremental.` |
 | `Incremental build paused after 2/4 increments.` | You answered no to `Continue to the next increment?`. The app builds, and every completed increment is committed. | `Next: rerun /build-incremental to continue, or use /implement for the rest.` |
 

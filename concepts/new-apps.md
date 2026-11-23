@@ -83,7 +83,7 @@ After your yes, CodeLead builds each increment in turn:
 3. When the gates pass, the increment is verified. CodeLead commits the folder: `increment inc-2: <title>`. It runs `git init` first when the folder has no repository.
 4. CodeLead asks "Continue to the next increment?". Enter continues.
 
-An increment has at most 3 attempts. Each attempt that fails gives the next one the reason. An increment that still fails is recorded as failed, and the run goes on with the next increment. The run ends with a count:
+An increment has at most 3 attempts. Each attempt that fails gives the next one the reason. An increment that still fails is recorded as failed, and its changes are put back to the last checkpoint. The run goes on with the next increment. The run ends with a count:
 
 ```output
 Incremental build complete: 3/3 increments built, verified, and checkpointed.
