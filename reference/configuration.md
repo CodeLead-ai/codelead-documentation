@@ -327,6 +327,7 @@ Optional. The settings of new apps. See [New apps](../concepts/new-apps.md).
 |---|---|---|---|
 | `polishOnRepairRole` | boolean | `false` | The final polish step of a new app runs on the repair role's model. It works only when the `repair` role is set. `CODELEAD_POLISH_ON_REPAIR` wins over it. |
 | `reviewPassAfterBuild` | boolean | `false` | After the planned work, one more step reads the app for code quality and usability, on the repair role's model. It works only when the `repair` role is set. `CODELEAD_REVIEW_PASS_AFTER_BUILD` wins over it. |
+| `probeAuthority` | string | `evidence` | How much the probes of [`/build-incremental`](../chat-commands/build-incremental.md) decide. `evidence`: an increment that builds and passes its tests is kept, with the probe's finding as a warning. A rejection of the acceptance probe first earns one retry. `gate`, in any case: every probe finding refuses the attempt, and the increment fails when its 3 attempts are spent. Any other value means `evidence`. A verified page that now renders nothing is refused either way. `/build-incremental` reads it once, at the start of the run. `CODELEAD_PROBE_AUTHORITY` wins over it. |
 | `templates` | object | none | Named templates for [`/create-app --template`](../chat-commands/create-app.md) and [`codelead rebuild init --template`](../cli/codelead-rebuild-init.md). |
 
 Each entry of `templates` has these keys:

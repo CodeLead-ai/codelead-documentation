@@ -53,7 +53,7 @@ A transform that does not land changes nothing past its last green step.
 | **T5D** | Moves the data layer of a web project into a new class library: the data context, its entities, their enums, the initializer. | Every namespace and type name. The controllers compile unchanged. The Identity context stays. | `/modernize --transform T5D --scope <WEB_PROJECT>` |
 | **T1** | Makes projects SDK-style, and adds a current .NET target beside the old one. | The compiled files, the assembly names, the namespaces, every source file. | `/modernize --transform T1 --scope <PROJECTS> [--target <FRAMEWORK>]` |
 | **T5** | Puts a seam (an interface) between the code and a static data gateway. | Every public method and constructor signature. | `/modernize --transform T5 [--scope <PROJECTS>]` |
-| **T10** | Puts one unmaintained package behind an adapter, as the first step of replacing it. Never the framework that the application is built on. | The package itself, in this step. Every signature. | `/modernize --transform T10 --dependency <PACKAGE>` |
+| **T10** | Puts one unmaintained package behind an adapter, as the first step of replacing it. Never the framework that the application is built on, and never an ORM that the code is written in. | The package itself, in this step. Every signature. | `/modernize --transform T10 --dependency <PACKAGE>` |
 | **S** | Fixes security findings of the dossier. | Everything but the findings. | `/modernize --transform S --security all\|<CLASS>\|<IDS>` |
 
 The rebuild has its own composed transform, `T9`, which builds a new application part by part. See [The rebuild](rebuild.md).
@@ -104,17 +104,39 @@ That is why the options report proposes T5D for this sample.
 
 ### T10: a dependency behind an adapter
 
-T10 takes one package that the options report names as unmaintained, for example `EntityFramework (EF6: maintenance only)` on the Basic Store sample. It adds an interface with the members that the code calls, and an adapter that delegates to the package. When one project takes the adapter, the request names both new files by their full path, at the top of that project's folder. A new file at any other path is refused by the patch check. It does not remove the package in this step. With no unmaintained package in scope, it refuses and asks for `--dependency <package>`.
+T10 takes one unmaintained package that the code calls through its methods. An example is `System.Data.SqlClient (superseded by Microsoft.Data.SqlClient)`, in a project that calls it. T10 adds an interface with the members that the code calls, and an adapter that delegates to the package. When one project takes the adapter, the request names both new files by their full path, at the top of that project's folder. A new file at any other path is refused by the patch check. It does not remove the package in this step. With no unmaintained package in scope, it refuses and asks for `--dependency <package>`.
 
-T10 never takes the platform: a package of the framework that a project is built on. An MVC project takes its controllers' base class, its routes and its views' helpers from `Microsoft.AspNet.Mvc`, so an adapter cannot stand in for it. That package is the work of T1 or the rebuild. On the Basic Store sample, the T10 section of `options.md` says so:
+T10 never takes two kinds of package, because an adapter cannot isolate them:
 
+- **The platform**: a package of the framework that a project is built on. An MVC project takes its controllers' base class, its routes and its views' helpers from `Microsoft.AspNet.Mvc`, so an adapter cannot stand in for it. That package is the work of T1 or the rebuild. CodeLead treats the packages of ASP.NET MVC, ASP.NET Web API, ASP.NET Web Forms and ASP.NET Core this way, in a project built on that framework.
+- **An ORM that the code is written in**: Entity Framework 6, Entity Framework Core, NHibernate, LINQ to SQL or LINQ to DB. An [ORM](../concepts/glossary.md#o) (object-relational mapper) maps the database's tables to classes. The code uses the ORM's own query types directly, for example `db.Orders.Include(o => o.Client)` on a `DbSet<Order>`. An adapter would have to expose those types, so every caller would still depend on the package. That package is the work of the data layer's own transform (T5D) or the rebuild.
+
+T10 keeps every library that the code calls through methods. A micro-ORM, such as Dapper, is one of them: the code calls its methods, and they take and return the application's own classes.
+
+On the Basic Store sample, the two unmaintained packages are of these two kinds. So T10 does not fit, and the options report lists it under "Possible, not indicated". The T10 section of `options.md` starts:
+
+<!-- described, not captured -->
 ```output
 ### T10 Dependency replacement
 
-Why it fits: webapp: EntityFramework (EF6: maintenance only); not for an adapter, the platform itself: T1 or the rebuild: webapp: Microsoft.AspNet.Mvc, the ASP.NET MVC it is built on.
+Why not now: no unmaintained dependency for an adapter; not for an adapter, the platform itself: T1 or the rebuild: webapp: Microsoft.AspNet.Mvc, the ASP.NET MVC it is built on; not for an adapter, an ORM the code is written in (its query types are used directly): the data layer's own transform (T5D) or the rebuild: webapp: EntityFramework (EF6: maintenance only).
 ```
 
-CodeLead treats the packages of ASP.NET MVC, ASP.NET Web API, ASP.NET Web Forms and ASP.NET Core this way, in a project built on that framework.
+When you name such an ORM, CodeLead refuses, with the reason and the way on. No option makes T10 take it. On the Basic Store sample, before T5D:
+
+```console
+/modernize --transform T10 --dependency EntityFramework
+```
+
+<!-- described, not captured -->
+```output
+T10 does not take EntityFramework (Entity Framework 6, webapp): not for an adapter, an ORM the code is written in (its query types are used directly): the data layer's own transform (T5D) or the rebuild. The code uses its query types: DbContext in WebApplication1/DAL/StoreContext.cs; DbSet<…> in WebApplication1/DAL/StoreContext.cs. The way on: /modernize --transform T5D --scope webapp, or the rebuild (/modernize --rebuild-plan); no flag makes T10 take it.
+```
+
+On the Basic Store sample, `/modernize --transform T10` without `--dependency` is refused in the same way, because the ORM is all that is left. The refusal then starts `No unmaintained package for an adapter according to the options report.`
+
+> [!TIP]
+> **For experienced users:** CodeLead reads the code to decide. A package of the five ORMs above counts when the code writes one of its query types, such as `DbContext` or `DbSet<Order>`. For NHibernate, a query call on a session counts too, such as `session.Query<Order>()`. Another package counts only when two things hold. Its own generic types, over the application's classes, stand in a member's signature. The code also applies a LINQ operator to one of them. When CodeLead is not sure, T10 keeps the package.
 
 ### S: the security findings
 
@@ -145,19 +167,23 @@ In the [program](the-program.md), the Upgrade in place stage reads the options r
 
 1. T5D for each web project that the T5 row names.
 2. T1 on the class libraries on disk, including the one that T5D made. The framework answer, when you gave one, is the target.
-3. T10 for each unmaintained package that the T10 row names. It leaves out the platform, and says so once.
+3. T10 for each unmaintained package that the T10 row names. It leaves out the platform and any ORM that the code is written in, and says so once for each kind.
 4. S on the open security findings that a patch can close, and whose fix changes nothing for a legitimate caller. S always names its classes. A landed S is known by the findings that it covered, so it is not run again.
 
 A finding that no patch can close is named with what closes it, and is not composed. These are the old runtime, a package with a known vulnerability, and a binary without source.
 
 On the Basic Store sample, the stage says this before its first transform:
 
+<!-- described, not captured -->
 ```output
 T10: not on Microsoft.AspNet.Mvc (ASP.NET MVC, webapp): the platform the application is built on is not put behind an adapter (the platform itself: T1 or the rebuild).
+T10: not on EntityFramework (Entity Framework 6, webapp): not for an adapter, an ORM the code is written in (its query types are used directly): the data layer's own transform (T5D) or the rebuild.
 S-002 end-of-life-runtime: closed by the platform upgrade (T1) or the rebuild; not a security patch.
 ```
 
-A transform that landed in an earlier run of the stage is not run again. When a transform is refused or does not land, the stage fails with its words, and the transforms after it wait. When the report indicates no transform, the stage is `skipped`.
+So the stage runs no T10 on this sample. Its last line keeps the reason, after the transforms that landed: `; T10 not on EntityFramework: an ORM the code is written in (its query types are used directly)`.
+
+A transform that landed in an earlier run of the stage is not run again. An earlier CodeLead could land T10 on such an ORM. The stage treats that T10 the same way. It says `<the line>: landed in an earlier run (<record>); not run again`, and does not compose it. When a transform is refused or does not land, the stage fails with its words, and the transforms after it wait. When the report indicates no transform, the stage is `skipped`.
 
 ### The security findings that wait for a person
 

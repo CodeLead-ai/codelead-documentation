@@ -132,9 +132,9 @@ Stage 1 of 8, **Read**, surveys the code and changes nothing. Then the Explorer,
    …
    Dossier bundle: docs/codelead/dossier/ (34 files)
    Survey: complete. Intake: defaults (all defaults).
-   Options: 5 of 12 fit (T1, T2, T5, T8, T10); recommended sequence: T5 → T10 → T1 → T2 → T8.
+   Options: 4 of 12 fit (T1, T2, T5, T8); recommended sequence: T5 → T1 → T2 → T8.
    …
-     Done: The dossier: 34 files; the options' sequence T5 → T10 → T1 → T2 → T8; the Explorer crawled http://localhost:5080/ into analyst-recordings/<time> (the old application started from its run profile, and stopped after).
+     Done: The dossier: 34 files; the options' sequence T5 → T1 → T2 → T8; the Explorer crawled http://localhost:5080/ into analyst-recordings/<time> (the old application started from its run profile, and stopped after).
    ▸ Record the journeys (codelead modernize run recordings)
      Waiting for you: The recordings are a person's: 0 recordings drafted so far; continue when they are made.
    ```
@@ -235,12 +235,13 @@ The stage runs in the terminal **CodeLead: modernize** (in the wizard) or in you
 Stage 4 of 8, **Upgrade in place**, changes the old code in small steps, under the pins. On this sample, it moves the data layer into a library, then upgrades that library. See [Transforms](../modernization/transforms.md).
 
 1. Move the program on with [`codelead modernize next`](../cli/codelead-modernize-next.md). Type it in a terminal, or in the wizard's terminal **CodeLead: modernize**. When the Pin stage ended `done` in the same run, the program is already on this stage.
-2. The stage first says which package T10 leaves out: `Microsoft.AspNet.Mvc`, the framework that the application is built on. It also names the security finding that no patch can close: the old runtime. Then it starts with T5D, the data layer into a library:
+2. The stage first says which packages T10 leaves out. `Microsoft.AspNet.Mvc` is the framework that the application is built on. `EntityFramework` is the ORM (a library that maps tables to classes) that the code is written in. The code uses its query types directly, such as `DbSet<Order>`. They are the sample's only unmaintained packages, so the stage runs no T10. It also names the security finding that no patch can close: the old runtime. Then it starts with T5D, the data layer into a library:
 
    <!-- described, not captured -->
    ```output
    ▸ Transform in place (codelead modernize run in-place)
    T10: not on Microsoft.AspNet.Mvc (ASP.NET MVC, webapp): the platform the application is built on is not put behind an adapter (the platform itself: T1 or the rebuild).
+   T10: not on EntityFramework (Entity Framework 6, webapp): not for an adapter, an ORM the code is written in (its query types are used directly): the data layer's own transform (T5D) or the rebuild.
    S-002 end-of-life-runtime: closed by the platform upgrade (T1) or the rebuild; not a security patch.
    Transform: /modernize --transform T5D --scope webapp
    Transform T5D on webapp, webapp.Data
@@ -251,9 +252,8 @@ Stage 4 of 8, **Upgrade in place**, changes the old code in small steps, under t
 3. At `Apply this patch? [Y/n]`, read the files that the patch check lists: the seven moved files, the new project `webapp.Data`, and the solution entry. Press **Enter**.
 4. Wait for the gate. The pins must pass with the moved files. The result reads `Transform T5D landed with the parity gate green`.
 5. The stage goes on with T1 on `webapp.Data`. The library gets the project format of current .NET, and targets current .NET beside .NET Framework 4.5. Approve it as in step 3.
-6. The stage goes on with T10 for `EntityFramework`, the package that the options report names. It puts the package behind an adapter. Approve it as in step 3.
-7. Then S fixes the security findings that a patch can close, and whose fix changes nothing for a legitimate caller. On the sample that is one finding: the debug setting. Read the patch before you approve it. The old runtime (S-002) is not patched here: the rebuild closes it.
-8. The stage then waits for you. Nine write actions of the store accept a write without `[Authorize]`, findings S-003 to S-011. A fix would refuse the callers that your journeys recorded, so the stage does not apply it. It lists each finding with its two ways on:
+6. Then S fixes the security findings that a patch can close, and whose fix changes nothing for a legitimate caller. On the sample that is one finding: the debug setting. Read the patch before you approve it. The old runtime (S-002) is not patched here: the rebuild closes it.
+7. The stage then waits for you. Nine write actions of the store accept a write without `[Authorize]`, findings S-003 to S-011. A fix would refuse the callers that your journeys recorded, so the stage does not apply it. It lists each finding with its two ways on:
 
    <!-- described, not captured -->
    ```output
@@ -263,23 +263,23 @@ Stage 4 of 8, **Upgrade in place**, changes the old code in small steps, under t
      Then: codelead modernize run in-place
    ```
 
-9. The store accepts writes without sign-in by design, so waive each of the nine findings. In the chat, type:
+8. The store accepts writes without sign-in by design, so waive each of the nine findings. In the chat, type:
 
    ```console
    /modernize --waive S-003 --reason the store accepts writes without sign-in by design
    ```
 
    Do the same for S-004 to S-011.
-10. Record your choice, then run the stage again:
+9. Record your choice, then run the stage again:
 
-    ```console
-    codelead modernize answer security=decided
-    codelead modernize run in-place
-    ```
+   ```console
+   codelead modernize answer security=decided
+   codelead modernize run in-place
+   ```
 
-    T5D, T1 and T10 landed before, and are not run again. S landed before too, and is not run again: the stage knows it by the findings that it covered. The stage ends `done`.
+   T5D and T1 landed before, and are not run again. S landed before too, and is not run again: the stage knows it by the findings that it covered. The stage ends `done`.
 
-11. When the stage ends, commit:
+10. When the stage ends, commit:
 
     ```console
     git add -A

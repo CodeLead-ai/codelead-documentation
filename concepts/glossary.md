@@ -94,6 +94,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 
 ## O
 
+- **ORM**. An object-relational mapper: a library that maps a database's tables to classes, such as Entity Framework. T10 never puts one behind an adapter when the code uses its query types directly. See [Transforms](../modernization/transforms.md#t10-a-dependency-behind-an-adapter).
 - **Outcome**. The one word of a result: `passed`, `failed`, `stopped`, `done` or `nothing`. See [Results and stops](results-and-stops.md).
 
 ## P
@@ -105,6 +106,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 - **Plan (of a change)**. The preflight's result: the files to change, the non-goals and how to validate. The patch check holds the patch to it. See [Requests, plans and patches](requests-plans-and-patches.md).
 - **Plan (of a licence)**. Free or pro: which parts of CodeLead a folder can use. See [Licence and plans](licence-and-plans.md).
 - **Preflight**. The first step of a change: CodeLead chooses the files, and a model analyzes them and writes the plan. It can ask questions. See [Requests, plans and patches](requests-plans-and-patches.md).
+- **Probe authority**. How much the probes of an increment decide. `evidence`, the default: a probe's finding is a warning, and code that builds and passes its tests is kept. `gate`: a finding refuses the attempt. See [New apps](new-apps.md#the-gates-of-an-increment).
 - **Problem**. A failure that needs you, with its reason, the ways out and the command to try again. In the chat it is a card with a **Retry** button. See [Results and stops](results-and-stops.md).
 - **Project library**. CodeLead's index of a repository's files, modules, symbols and relationships, built from the code with no model. See [The project library](project-library.md).
 - **Provider**. A model server that CodeLead can call, local or remote, named in the configuration. See [Models and roles](models-and-roles.md).

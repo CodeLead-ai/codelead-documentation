@@ -92,6 +92,7 @@ When a run profile is recorded with [`codelead modernize source`](codelead-moder
   codelead modernize start
   ```
 
+  <!-- described, not captured -->
   ```output
   The modernization program of webapp (aspnet-mvc), approve mode: started at .codelead/modernization.json; no address (the Explorer does not crawl).
   ▸ Read the application (codelead modernize run read)
@@ -101,9 +102,9 @@ When a run profile is recorded with [`codelead modernize source`](codelead-moder
   …
   Dossier bundle: docs/codelead/dossier/ (34 files)
   Survey: complete. Intake: defaults (all defaults).
-  Options: 5 of 12 fit (T1, T2, T5, T8, T10); recommended sequence: T5 → T10 → T1 → T2 → T8.
+  Options: 4 of 12 fit (T1, T2, T5, T8); recommended sequence: T5 → T1 → T2 → T8.
   …
-    Done: The dossier: 34 files; the options' sequence T5 → T10 → T1 → T2 → T8; no address, so no crawl (start with --base <url> for the Explorer).
+    Done: The dossier: 34 files; the options' sequence T5 → T1 → T2 → T8; no address, so no crawl (start with --base <url> for the Explorer).
   ▸ Record the journeys (codelead modernize run recordings)
     Waiting for you: The recordings are a person's: 0 recordings drafted so far; continue when they are made.
     Record the journeys: The Analyst's recordings are a person's: someone who knows the application walks its journeys while the Analyst records them.

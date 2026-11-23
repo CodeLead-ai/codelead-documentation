@@ -110,7 +110,9 @@ Each attempt records the result of each gate that ran. A gate's result is `passe
 | **Checkpoint** | The commit of the verified increment. |
 | **Inner loop** | Only when the inner loop is on: the model's own build and test turns inside the increment. |
 
-The build and the tests decide. The probes are heuristics: they can be wrong. A probe that rejects code that builds and passes its tests gets one more attempt, and then the code is kept with a warning. A failed spec walk is also a warning, never a revert. One finding is not a heuristic: a page of an earlier verified increment that renders nothing now. That is a hard regression: CodeLead retries with the reason, and refuses the increment on the third attempt.
+The build and the tests decide. The probes are heuristics: they can be wrong. When the acceptance probe rejects code that builds and passes its tests, the increment gets one more attempt. After a second rejection, CodeLead keeps the code with a warning. A finding of the regression probe is a warning at once. A failed spec walk is also a warning, never a revert. One finding is not a heuristic: a page of an earlier verified increment that renders nothing now. That is a hard regression: CodeLead retries with the reason, and refuses the increment on the third attempt.
+
+This rule is the default [probe authority](glossary.md#p), `evidence`. With the probe authority `gate`, every probe finding refuses the attempt, and the increment fails when its attempts are spent. Set it with `greenfield.probeAuthority` in `.codelead/config.json`, or with `CODELEAD_PROBE_AUTHORITY`, which wins over the file. See [Configuration](../reference/configuration.md#greenfield).
 
 An increment ends with one of these statuses: **Verified**, **Verified · warnings**, **Code committed · tests deferred** or **Failed**. A polish increment that changed nothing ends **Closed (no-op)**.
 
@@ -167,11 +169,11 @@ The page shows, from top to bottom:
 - One row for each increment: its status, its attempts, its duration, each gate's result, and the files that it touched.
 - The spec walks, step by step, and the coverage of the specs when CodeLead wrote it.
 
-Each warning and each failure of a row is a box with three parts. The title names the gate and what went wrong. **What the gate saw** holds the gate's own account, folded. **What you can do** lists the options. For example, a probe that saw nothing change:
+Each warning and each failure of a row is a box with three parts. The title names the attempt, the gate, the gate's result at that attempt, and what went wrong. **What the gate saw** holds the gate's own account, folded. **What you can do** lists the options. For example, a probe that saw nothing change on the first attempt:
 
 <!-- described, not captured -->
 ```output
-Attempt 1 · Acceptance probe flagged: The probe interacted and saw nothing change
+Attempt 1 · Acceptance probe failed: The probe interacted and saw nothing change
 What the gate saw
   …
 What you can do
@@ -179,6 +181,8 @@ What you can do
   - If the interaction the criteria describe needs a control the probe cannot operate (a select, a date picker), the verdict is uninformative — rely on the tests.
   - Open the app and perform the interaction by hand; if it works, keep the code.
 ```
+
+The journal records each rejection of the acceptance probe as `failed`, also the one that CodeLead keeps. The box is a warning when the increment was tried again or kept, and an error when the increment failed on it. A heuristic finding of the regression probe reads `flagged`, for example `Attempt 1 · Regression probe flagged: …`.
 
 Where it helps to build the increment again, an option names how to do it in the chat: `/implement <the increment's objective>`.
 
@@ -202,6 +206,7 @@ Where it helps to build the increment again, an option names how to do it in the
 
 - **The files.** `.codelead/run-journal.json` (schema `codelead.run-journal/1`), `.codelead/run-report.html`, and the ledger `.codeleadsessions/increment-ledger.json` (schema `codelead.increment-ledger/1`). The specs of the increments go to `docs/codelead/specs/<id>.md`. See [Files and folders](../reference/files-and-folders.md).
 - **Attempts.** At most 3 for each increment, for every cause of failure together.
+- **The probe's retry.** It counts the acceptance probe's rejections, not the attempts. A first rejection on an increment's last attempt has no attempt left for the retry, so the increment fails.
 - **A cut reply.** When the model's reply for a step stops at its cap, CodeLead applies nothing of it. This holds for the step's patch, its retry and its validation repair. The next request to the model says that the reply was cut, and asks for a shorter patch.
 - **The polish and the review pass.** With the `repair` role set, `greenfield.polishOnRepairRole` puts the polish step or the polish increment on the repair role's model. `greenfield.reviewPassAfterBuild` adds one last step or increment, `Quality and UX review`, in which that model reviews the app. A review pass that does not land never makes the build fail.
 - **A pause.** "No" to "Continue to the next increment?" pauses the run: "Incremental build paused after 2/4 increments. The app builds and every completed increment is committed." Run `/build-incremental` again to continue.

@@ -82,12 +82,17 @@ Read a row from left to right:
 5. **Tool h**, **Human h** and **Elapsed**: an estimate. The basis is under the row, in its own section.
 6. **Confidence**: how much the estimate is worth. "Low" means that one calibration project measured it.
 
-Under the table, the report recommends an order. On the Basic Store sample it is `Sequence: T5 → T10 → T1 → T2 → T8.`, with one reason for each step. Here the first reason is the rule of pinning first, because the project has no tests.
+Under the table, the report recommends an order. On the Basic Store sample it is `Sequence: T5 → T1 → T2 → T8.`, with one reason for each step. Here the first reason is the rule of pinning first, because the project has no tests.
 
 > [!NOTE]
 > **New to this?** CodeLead composes only some of these kinds by itself: T1, T5 and its data-layer form T5D, T10, and S for security. A person writes the others with [`/implement`](../chat-commands/implement.md), and the row is the brief. See [Transforms](transforms.md).
 
-The T10 row names the unmaintained packages to put behind an adapter. It names the framework that a project is built on apart, because no adapter can replace it. On the Basic Store sample, the row says `not for an adapter, the platform itself: T1 or the rebuild: webapp: Microsoft.AspNet.Mvc, the ASP.NET MVC it is built on`.
+The T10 row names the unmaintained packages to put behind an adapter. It names two kinds of package apart, because an adapter cannot isolate them:
+
+- The framework that a project is built on: `not for an adapter, the platform itself: T1 or the rebuild`.
+- An ORM (a library that maps the database's tables to classes) whose query types the code uses directly: `not for an adapter, an ORM the code is written in (its query types are used directly): the data layer's own transform (T5D) or the rebuild`.
+
+On the Basic Store sample, these are `Microsoft.AspNet.Mvc` and `EntityFramework`, and no other package is left. So T10 is `possible, not indicated`, and its reason starts `no unmaintained dependency for an adapter`. See [T10](transforms.md#t10-a-dependency-behind-an-adapter).
 
 ### The narration
 

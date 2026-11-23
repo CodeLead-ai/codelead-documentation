@@ -226,6 +226,19 @@ An increment does not always pass on its first attempt. CodeLead then tries agai
    Increment inc-3 did not pass the acceptance probe. Retrying with the failed criteria named (attempt 2/3).
    ```
 
+   The probe is a heuristic, so the build and the tests decide. When the probe rejects the second attempt too, CodeLead keeps the increment, because it builds and passes its tests. It commits the increment, with a warning:
+
+   <!-- described, not captured -->
+   ```output
+   WARNING Increment inc-3 (Mark a task done): acceptance probe failed (visual_delta) — kept on its build and tests (probe authority: evidence; the probe's one retry is spent). The probe's account:
+       The previous attempt built and changed code, but the app was then run and probed, and the capability could not be observed working.
+       …
+   …
+   Increment inc-3 verified and checkpointed (committed).
+   ```
+
+   The run report shows such an increment as `Verified · warnings`. Open the app later, and try the feature by hand.
+
 1. When the last increment is verified, read the last lines:
 
    <!-- described, not captured -->

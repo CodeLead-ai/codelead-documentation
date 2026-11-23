@@ -188,7 +188,7 @@ These switches exist to compare two ways of building a new app. Leave them unset
 | `CODELEAD_INCREMENT_ACCEPTANCE_PROBE` | `0`, `off`, `false`, `no`, `disabled` | Turns off the probe that opens each increment in a browser. |
 | `CODELEAD_CUMULATIVE_PROBES` | the same words | Turns off the probe of earlier increments after each new one. |
 | `CODELEAD_GREENFIELD_AUTO_REVISE` | the same words | Turns off the revise-and-continue cycle of `/create-app --auto`. |
-| `CODELEAD_PROBE_AUTHORITY` | `gate` | A refused probe fails the increment and reverts it. By default a probe warns with its reason, and keeps work that builds and passes its tests. |
+| `CODELEAD_PROBE_AUTHORITY` | `gate` | Every finding of the acceptance probe and the regression probe refuses the attempt. The increment fails when its 3 attempts are spent. `/build-incremental` records it as failed, goes on, and leaves the files as they are. The increment run driver, `scripts/incrementalBuildRun.ts`, also restores the files to the last checkpoint. Any other value means the default, `evidence`: a probe warns with its reason, and keeps work that builds and passes its tests. A verified page that now renders nothing is refused either way. The variable wins over `greenfield.probeAuthority`, and the run driver reads the variable only. |
 | `CODELEAD_NORTH_STAR` | `1` | Carries the whole request into every increment's prompt. |
 | `CODELEAD_INNER_LOOP` | `1` | Builds each increment in a loop of model turns that act, look and fix. |
 | `CODELEAD_BUILD_THEN_VERIFY` | `1` | Builds the whole app in one increment, then audits it. `CODELEAD_BUILD_TURNS` and `CODELEAD_BUILD_MINUTES` bound the loop (40 turns and 100 minutes by default). It needs `CODELEAD_INNER_LOOP=1` and `CODELEAD_NORTH_STAR=1`. |

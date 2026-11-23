@@ -109,9 +109,11 @@ The command is part of the modernization program, which is in CodeLead's Pro pla
   codelead modernize run in-place
   ```
 
+  <!-- described, not captured -->
   ```output
   ▸ Transform in place (codelead modernize run in-place)
   T10: not on Microsoft.AspNet.Mvc (ASP.NET MVC, webapp): the platform the application is built on is not put behind an adapter (the platform itself: T1 or the rebuild).
+  T10: not on EntityFramework (Entity Framework 6, webapp): not for an adapter, an ORM the code is written in (its query types are used directly): the data layer's own transform (T5D) or the rebuild.
     Failed: /modernize --transform T5D --scope webapp was refused.
     The transform T5D was refused: Pin first: the declared gate (.codelead/validation.json) carries no characterization suite, so no transform can be shown safe. …
     Then: codelead modernize run in-place

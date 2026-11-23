@@ -103,7 +103,7 @@ When it works, the stage's line says that CodeLead started the application and s
 
 <!-- described, not captured -->
 ```output
-  Done: The dossier: 34 files; the options' sequence T5 → T10 → T1 → T2 → T8; the Explorer crawled http://localhost:5080/ into analyst-recordings/<time> (the old application started from its run profile, and stopped after).
+  Done: The dossier: 34 files; the options' sequence T5 → T1 → T2 → T8; the Explorer crawled http://localhost:5080/ into analyst-recordings/<time> (the old application started from its run profile, and stopped after).
 ```
 
 When the application does not answer within the time, or when the profile has no yes, the stage waits. Its problem is titled **Start the old application**, and it says what CodeLead tried and the way out. Start the application by hand, or fix the profile, then run `codelead modernize run read`.

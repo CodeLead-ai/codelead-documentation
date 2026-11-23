@@ -169,6 +169,7 @@ Survey the Basic Store sample and take every default of the intake:
 /modernize --plan
 ```
 
+<!-- described, not captured -->
 ```output
 Modernization dossier
 Surveying <your project> into docs/codelead/dossier (read-only; D1–D15)...
@@ -190,7 +191,7 @@ Answer, press Enter to use default:
 …
 Dossier bundle: docs/codelead/dossier/ (34 files)
 Survey: complete. Intake: asked (all defaults).
-Options: 5 of 12 fit (T1, T2, T5, T8, T10); recommended sequence: T5 → T10 → T1 → T2 → T8.
+Options: 4 of 12 fit (T1, T2, T5, T8); recommended sequence: T5 → T1 → T2 → T8.
 
 Next: to write the dossier's documents, paste CodeLead's writer's brief (docs/dossier-writer-brief.md, installed with CodeLead) with the bundle into a Claude session (--redacted writes a copy without source lines, for code that may not leave the machine).
 ```
@@ -333,7 +334,7 @@ Composes an in-place transform from the survey and runs it as an `/implement`, u
 | `T1` | Makes the projects SDK-style and multi-target, for example .NET Framework and `net8.0`. |
 | `T5` | Puts a seam between the code and its data access. |
 | `T5D` | Moves the data layer (the data context, its entities, their enums and the initializer) into a new class library, `<project>.Data`, with the same framework and namespaces. The controllers compile unchanged. `T1` then upgrades the library. |
-| `T10` | Puts one dependency behind an adapter. Never a package of the framework that the project is built on, such as `Microsoft.AspNet.Mvc`. |
+| `T10` | Puts one dependency behind an adapter. Never a package of the framework that the project is built on, such as `Microsoft.AspNet.Mvc`. Never an ORM (a library that maps tables to classes) whose query types the code uses directly, such as `EntityFramework`. CodeLead refuses such a package with the reason and the way on: T5D or the rebuild. No option forces it. See [T10](../modernization/transforms.md#t10-a-dependency-behind-an-adapter). |
 | `S` | Fixes security findings of the dossier, with the pins as the gate. The re-run of the security scan is the proof. |
 
 - `--scope <PROJECTS>`: the projects, joined by commas.

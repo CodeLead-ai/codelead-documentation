@@ -95,11 +95,12 @@ Every subcommand except `stop` needs the Pro plan in the folder. On the free pla
   codelead modernize start
   ```
 
+  <!-- described, not captured -->
   ```output
   The modernization program of webapp (aspnet-mvc), approve mode: started at .codelead/modernization.json; no address (the Explorer does not crawl).
   ▸ Read the application (codelead modernize run read)
   …
-    Done: The dossier: 34 files; the options' sequence T5 → T10 → T1 → T2 → T8; no address, so no crawl (start with --base <url> for the Explorer).
+    Done: The dossier: 34 files; the options' sequence T5 → T1 → T2 → T8; no address, so no crawl (start with --base <url> for the Explorer).
   ▸ Record the journeys (codelead modernize run recordings)
     Waiting for you: The recordings are a person's: 0 recordings drafted so far; continue when they are made.
   …

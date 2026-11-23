@@ -61,6 +61,20 @@ When a role uses a remote provider, CodeLead asks you for the consent after your
 | You answered no to the consent for a remote model | `The incremental build did not start: <provider> was not allowed (the answer was no), and <role> uses it` (outcome `stopped`) |
 | The planner failed | `Failed to create the increment plan`, with the reason |
 
+### When a probe objects
+
+The probes of the running app are heuristics: they can be wrong. So by default, the build and the tests decide, and a probe warns. This default is the probe authority `evidence`. See [New apps](../concepts/new-apps.md#the-gates-of-an-increment).
+
+| Situation | What you see |
+|---|---|
+| The acceptance probe rejected an increment twice, and the increment builds and passes its tests | `WARNING Increment inc-3 (Mark a task done): acceptance probe failed (visual_delta) — kept on its build and tests (probe authority: evidence; the probe's one retry is spent). The probe's account:`, then the account. The increment is committed. |
+| The regression probe no longer finds the words or the drawing of an earlier increment | `WARNING Increment inc-3 (Mark a task done): cumulative regression: inc-2 no longer observable after inc-3 — flagged, not refused (probe authority: evidence). The probe's account:`, then the account. The increment is committed. |
+| A page that was verified now renders nothing | `Increment inc-3 hard regression (a verified page is blank): <reason>. Retrying with the reason (attempt 2/3).` After the third attempt: `Increment inc-3 (Mark a task done) FAILED (not built): hard regression (a verified page is blank): <reason>.` |
+
+An increment that is kept with a warning counts as built, verified and checkpointed in the last line. Its row in the run report reads `Verified · warnings`, with the probe's account. The blank page is the one finding that a probe still refuses.
+
+With `greenfield.probeAuthority` set to `gate` in `.codelead/config.json`, or `CODELEAD_PROBE_AUTHORITY=gate`, every probe finding refuses the attempt. The increment fails when its 3 attempts are spent, for example: `Increment inc-3 (Mark a task done) FAILED (not built): built but could not be observed working.` See [Configuration](../reference/configuration.md#greenfield).
+
 ## Examples
 
 - Build a task manager in increments:
