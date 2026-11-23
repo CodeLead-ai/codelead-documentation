@@ -51,6 +51,8 @@ A feature that the plan drops by a disposition (a recorded decision) is marked w
 > [!TIP]
 > **For experienced users:** the register is `codelead.register/1`. The same inputs write the same bytes, so the register can be committed and compared.
 
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Options
 
 - **`--model <SYSTEM_MODEL>`**
@@ -142,7 +144,7 @@ A feature that the plan drops by a disposition (a recorded decision) is marked w
 | Code | Meaning |
 |---|---|
 | `0` | Both files were written. |
-| `2` | Nothing was written: an input is missing or cannot be read, a file has another schema, or an option was refused. |
+| `2` | Nothing was written: the folder does not have the Pro plan, an input is missing or cannot be read, a file has another schema, or an option was refused. |
 
 ## Files
 

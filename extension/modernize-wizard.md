@@ -13,7 +13,7 @@ The Modernize wizard is a page in VS Code that drives the [modernization program
 **In short**
 - Open the wizard with the rocket, **Modernize this application**, in the [Modernization view](modernization-view.md). It needs the pro plan.
 - You select **Start**, record the journeys, select **Continue**, give two answers, and select **Save**. CodeLead runs the other stages by itself.
-- A stage that fails shows a card with the reason, how to continue, **Retry** and **Stop**.
+- A stage that fails shows a card with the reason, how to continue, **Retry**, **Stop** and **Skip this stage…**.
 - The page reads `.codelead/modernization.json` and follows it. It never calls a model.
 
 ![The wizard at the step Read. The page Modernize · store has six steps. Step 1, The application, is done. Step 2, Read, is running for 1m 12s, with links to the dossier and the sitemap. A Stop button follows, with the lines The same, by hand and In chat.](../media/extension/modernize-wizard-read.png)
@@ -101,6 +101,10 @@ The step says `The program runs the remaining stages in order and stops when it 
 
 A click on an evidence id opens the record's page. When `.codelead/rebuild-report.html` exists in the project's folder, the step shows the rebuild report under the list.
 
+Under **Pin the contracts**, a muted line says: "When the project has no narration, the stage asks in its terminal whether to write one first. Yes is recommended."
+
+Under **Transform in place**, a muted line counts the security findings that another transform or the rebuild closes, with their classes. For example: "1 finding is closed by another transform or the rebuild: end-of-life-runtime". You decide nothing for them.
+
 In approve mode, the commands ask before each landing. Answer in the terminal **CodeLead: modernize**: type `y` or `n` and press Enter.
 
 ### 6. Done
@@ -115,17 +119,51 @@ A stage that failed, or that waits for you, shows a card with a yellow border:
 - **How to continue**: the fix, in full.
 - **Retry**: runs the stage again with the line that the program gave, for example `codelead modernize run rebuild`.
 - **Stop**: runs `codelead modernize stop`.
+- **Skip this stage…**: goes past the stage, with your reason. See [Skip a stage](#skip-a-stage).
 
 ![The step Rebuild with a failed stage. Four stages are done, with their evidence links. Build and verify failed. A problem card titled The acceptance walk could not connect gives the reason and How to continue. Retry and Stop follow, each with its command by hand.](../media/extension/modernize-wizard-problem.png)
 
 **Retry** runs only a `codelead modernize run <stage>`, `next` or `continue` line. Any other line is refused with "This retry line is not a supported modernization command. Run the displayed line by hand after checking it."
+
+### Skip a stage
+
+A stage that failed or waits for you can be skipped, except the recordings. Skip it when the cause cannot be fixed now, and the program must go on without it.
+
+1. Select **Skip this stage…**. A field opens: **Reason for skipping <stage>**.
+2. Type why. The reason is required. Without it, the page says "Say why this stage is skipped: the audit pack keeps the reason".
+3. Select **Skip stage**. It runs `codelead modernize skip <stage> --reason '<your reason>'`. The line under the button shows it, quoted for your shell.
+
+![The failed stage Build and verify, with its problem card, Retry and Stop. Below them, Skip this stage is open. The field Reason for skipping Build and verify holds a reason: the acceptance server is unavailable, and the team will verify it later. The Skip stage button follows, with the same command by hand.](../media/extension/wizard-skip-reason.jpg)
+
+The skipped stage then shows a muted line: "Skipped by you on <date>: <reason>". The skip does not run the next stage. When a stage is skipped, stages are pending, and no stage failed or waits, a separate **Continue** button appears under the steps. It runs `codelead modernize next`. See [`codelead modernize skip`](../cli/codelead-modernize-skip.md).
+
+### Security decisions
+
+The Upgrade in place stage can wait on security findings whose fix changes who may do what. The card then keeps the program's full explanation, and lists each finding with two lines for the chat:
+
+- `/modernize --waive <finding> --reason <why>`: waive it, with your reason.
+- `/modernize --transform S --security <finding>`: fix it on purpose.
+
+Each line has two buttons. **Copy** copies the line. **Open the chat** puts the line in the chat's message box, and does not send it: you complete the reason, then send it yourself.
+
+Three plain answers follow, each with its command by hand:
+
+| Button | What the stage does then | The command |
+|---|---|---|
+| **I decided each one** | It leaves each finding as you decided: waived with its reason, or fixed on purpose. | `codelead modernize answer security=decided` |
+| **Fix them all** | It fixes every open decision finding on purpose, never a waived one. | `codelead modernize answer security=fix-all` |
+| **Leave them open** | It leaves them open. Waive each with its reason, so that the audit pack says why. | `codelead modernize answer security=fix-none` |
+
+The card has no **Retry** while the findings wait. Once one of the three answers is recorded, **Run the stage again** appears. See [Waive a security finding](../how-to/waive-a-security-finding.md).
+
+![The stage Transform in place, waiting for you. A muted line says 1 finding is closed by another transform or the rebuild: end-of-life-runtime. The card 2 security findings are decisions for a person gives the program's explanation. The findings S-003 and S-004 each show a waive line and a fix line, each with Copy and Open the chat. The buttons I decided each one, Fix them all and Leave them open follow, each with its help and its command. Stop and Skip this stage come last.](../media/extension/wizard-security-decisions.jpg)
 
 > [!TIP]
 > **For experienced users:** the waiting card of the Pin stage can say that facts still wait at a lower level. **Retry** runs the stage again. To accept the coverage, run `codelead modernize answer pins=enough` in the terminal. See [Pins](../modernization/pins.md).
 
 ## When a command is refused
 
-The program refuses a command with exit code 2. A refusal is not a failed stage. The page shows a card **Refused** with the last lines of the terminal, and no **Retry**. It adds "After resolving this, refresh to return to the program's current stage." Typical refusals:
+The program refuses a command with exit code 2. A refusal is not a failed stage. The page shows a card **Refused** with the last lines of the terminal, and no **Retry**. It adds: "After resolving this, refresh to return to the program's current stage". A skip or a security answer that ends with exit code 1 shows its own output in the same card, not a general failure. Typical refusals:
 
 - A program that runs in another process. The program holds one run at a time, with the folder's run lock. See [One program at a time](../modernization/the-program.md#one-program-at-a-time).
 - `start` in a folder with several web projects, without `--project`.

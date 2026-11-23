@@ -8,11 +8,12 @@ date: 2026-11-20
 
 # Unattended runs and the run lock
 
-An unattended run is CodeLead working while nobody answers its questions: overnight, in a scheduled job, or while you do other work. CodeLead answers each question by a fixed policy, records every answer, and stops at the caps (the limits) that you set. The **run lock** makes sure that only one such run works in a clone (one copy of the repository) at a time.
+An unattended run is CodeLead working while nobody answers its questions: overnight, in a scheduled job, or while you do other work. CodeLead gives each question its recommended answer, records every answer, and stops at the caps (the limits) that you set. The **run lock** makes sure that only one such run works in a clone (one copy of the repository) at a time.
 
 **In short**
 - Three commands run unattended: [`codelead implement`](../cli/codelead-implement.md), [`codelead rebuild run`](../cli/codelead-rebuild-run.md) and [`codelead modernize`](../cli/codelead-modernize.md) in its unattended mode.
-- A fixed policy answers the questions. It says yes to apply, to validate and to run commands. It says no to a manual pass.
+- CodeLead gives each question its recommended answer: yes or no. It does not say yes to everything.
+- A run stops at once at a step that is hard to undo, with the reason and the way out. It also stops at a question with no recommended answer.
 - A run stops at a cap, at a stop file, or on Ctrl+C. The card or the part that is running finishes first.
 - A run takes the lock `.codelead/run.lock`. A second run in the same clone is refused, with the owner's name.
 
@@ -26,12 +27,29 @@ Two runs in one clone would overwrite each other's files: the run journal, the l
 
 ### Who answers
 
-Nobody types in an unattended run. CodeLead answers each question itself:
+Nobody types in an unattended run. CodeLead answers each question itself, with the question's [recommended answer](prompts-and-recommended-answers.md):
 
-- **Yes** to "Apply this patch?", "Run validation now?" and "Run these commands?".
+- **Yes** to "Apply this patch?" when the patch check passed with no blocking finding. **No** when it found a blocking finding.
+- **Yes** to "Run validation now?" and "Run these commands?".
+- **No** where no is recommended, for example "Continue planning for this folder?" in a folder that holds a project.
 - **No** to "Mark validation as manually passed?". No person checked it, so CodeLead never says that a person did.
+- **One retry** of a failed scaffold command, by itself. After a second failure, "Retry scaffold command?" gets the recommended no.
 - **The default** of each clarifying question of the preflight.
-- **Nothing** to a step that is hard to undo. CodeLead asks three times, gets no answer, and declines.
+
+Two kinds of question stop the run, because nobody is there to choose:
+
+- **A step that is hard to undo**, such as a question that deletes files. CodeLead does not answer it. The run stops at once, with the outcome `stopped`, the reason and the way out.
+- **A question with no recommended answer**. CodeLead does not guess.
+
+A stop at a step that is hard to undo reads like this:
+
+<!-- described, not captured -->
+```output
+The unattended run stopped: this deletes 4 entries of the target folder, and nobody is here to answer.
+■ The unattended run stopped: this deletes 4 entries of the target folder, and nobody is here to answer; next: Run it where a person answers: the same command at the terminal or in the chat asks this question
+```
+
+Three questions are asked of a person only, and never in a run. They are the trust of a template package, the recovery menu of a build that stays red, and the chat's offer to run a command. A run declines them.
 
 A composed request (a pin or a transform of a modernization) asks no questions at all. It takes each default and shows the list once as "CodeLead assumed". The evidence record keeps every assumption. See [Prompts and recommended answers](prompts-and-recommended-answers.md).
 
@@ -41,7 +59,7 @@ A composed request (a pin or a transform of a modernization) asks no questions a
 |---|---|---|
 | `codelead implement --card <id>` or `--queue` | The board's cards tagged `for:codelead`, one session for each card, with up to 2 repair rounds each | `--max-cards`, `--max-minutes`, `--until`, `--repair-rounds` |
 | `codelead rebuild run` | The parts of a rebuild's plan: each composed, validated, walked and judged | `--max-parts`, `--max-cost-usd`, `--max-minutes`, `--until`, or `run.unattended` in the rebuild's manifest |
-| `codelead modernize start --unattended`, then `next` | The stages of a modernization program, with the transforms' approvals answered yes | The caps of each stage, such as the pins' increments |
+| `codelead modernize start --unattended`, then `next` | The stages of a modernization program, with the recommended answer to each transform's approval | The caps of each stage, such as the pins' increments |
 
 ### How a run stops
 
@@ -85,7 +103,7 @@ A lock is **stale** when it has had no heartbeat for 10 minutes, or when its pro
 
 ## What it is not
 
-- **Not a way around consent**. Nobody can answer a consent question. So a run whose model is remote is refused, unless `CODELEAD_ALLOW_REMOTE_MODELS=1` is set or the configuration allows remote models with no question. See [Privacy and remote models](privacy-and-remote-models.md).
+- **Not a way around consent**. Nobody can answer a consent question during the run. `codelead rebuild run` and `codelead implement` refuse before the start when their model is remote, unless `CODELEAD_ALLOW_REMOTE_MODELS=1` is set or the configuration allows remote models with no question. The modernization program in unattended mode asks you for the consent at its start, while you are there. See [Privacy and remote models](privacy-and-remote-models.md).
 - **Not a lock for reading**. The plan, the chat, [`codelead doctor`](../cli/codelead-doctor.md) and the reports never take the lock.
 - **Not a lock across machines**. The run lock is in the clone. A walk database has its own lock on the machine.
 
@@ -93,7 +111,8 @@ A lock is **stale** when it has had no heartbeat for 10 minutes, or when its pro
 
 - **The walk database lock**. The walk database is the database that the walks of a rebuild use. When the rebuild's run profile names it, the run also locks that database on this machine, in `~/.codelead/locks/walk-<key>.lock`. `CODELEAD_LOCKS_DIR` moves the folder. The key is a hash: no connection string is written. Two walks on one database at once would corrupt each other's evidence.
 - **Who takes the lock**. `codelead rebuild run`, `codelead implement`, the modernization program, and the interactive `/modernize --transform T9 --next`, `--judge-again` and `--intervene` for the rest of their session. A session that a run drives belongs to the run and takes nothing.
-- **Remote models**. A run is also refused when the configuration asks before every remote call, because nobody answers. Set `CODELEAD_ALLOW_REMOTE_MODELS=1`, or `privacy.confirmBeforeSendingRepoContextToRemote` to `false`.
+- **Remote models**. `codelead rebuild run` and `codelead implement` are also refused when the configuration asks before every remote call, because nobody answers. Set `CODELEAD_ALLOW_REMOTE_MODELS=1`, or `privacy.confirmBeforeSendingRepoContextToRemote` to `false`. The modernization program in unattended mode asks the consent at its start, once for each remote provider. It does so when you start it from the chat, or from a terminal where you can type. A no ends the command before any work, with the outcome `stopped`. A consent that still comes up during the run stops the run.
+- **The answer table**. One table in CodeLead decides every answer that no person typed. Each row has its reason. The session log records the table's row in the field `answerPolicy` of the event that records the answer: `user.input`, or `greenfield.auto.prompt_answered` in an automated build.
 - **The terms**. A packaged release asks once for a typed `yes` to its evaluation terms. Set `CODELEAD_ACCEPT_TERMS=yes` for a scheduled job.
 - **Sleep**. On macOS, a run keeps the machine awake with `caffeinate -i -s`. A Mac that sleeps makes a run very slow.
 - **Evidence**. Each change of the run writes its evidence record. Each card's thread says how the card ended, with the id of its evidence record.

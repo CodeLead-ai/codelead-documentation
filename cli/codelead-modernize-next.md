@@ -40,6 +40,8 @@ Use `next` after you gave an answer with [`codelead modernize answer`](codelead-
 > [!TIP]
 > **For experienced users:** `--no-install` passes to the `rebuild-init` stage, which then does not run `npm install` in the new rebuild. Run it yourself before the `rebuild` stage.
 
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Options
 
 - **`--no-install`**
@@ -102,7 +104,7 @@ Use `next` after you gave an answer with [`codelead modernize answer`](codelead-
 |---|---|
 | `0` | The run ended at a stage that waits for you, or every stage is done. |
 | `1` | A stage failed. |
-| `2` | The command was refused: another process runs a program here, or the state file cannot be read. |
+| `2` | The command was refused: a folder without the Pro plan, another process runs a program here, or the state file cannot be read. |
 
 ## Files
 

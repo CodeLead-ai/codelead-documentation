@@ -44,7 +44,7 @@ The old application's profile lives in its own configuration, under `modernizati
 | `env` | object | No | Variables set for it. |
 | `unsetEnv` | list of strings | No | Variables taken out for it. |
 | `url` | string | Yes | Where it answers: `http://localhost:<port>/` or `http://127.0.0.1:<port>/`, nothing after the port. |
-| `ready` | string | No | The path that answers 200 once it is up, starting with `/`. The default is `/`. |
+| `ready` | string | No | The path that answers once it is up, starting with `/`. The default is `/`. The application is ready when the path answers HTTP 200 to 399, 401 or 403: a page, a redirect (not followed) or a sign-in challenge. No answer, a 5xx or another status is not ready. |
 | `startMs` | whole number, 1000 or more | No | How long it may take to answer `ready`, in milliseconds. The default is 120000: IIS Express compiles the site on its first request. |
 | `allowed` | boolean | No | Your yes to CodeLead starting the application. Absent or `false`, nothing is started, and the stage waits for you to start it. |
 
@@ -73,10 +73,11 @@ writes this block:
 
 and prints it in words:
 
+<!-- described, not captured -->
 ```output
 The old application's run profile is recorded in .codelead/config.json (modernization.source):
   command: dotnet run --project WebApplication1/webapp.csproj --urls http://localhost:5080
-  answers at: http://localhost:5080/ (ready when / answers 200, within 120 s)
+  answers at: http://localhost:5080/ (ready when / answers with a page, a redirect or a sign-in challenge (HTTP 200 to 399, 401 or 403), within 120 s)
   allowed: yes, CodeLead starts it for the stages that need it running (the read stage's Explorer crawl) and stops it after
 ```
 

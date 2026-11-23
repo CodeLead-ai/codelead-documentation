@@ -108,7 +108,7 @@ Run it in the chat with [`/modernize --narrate`](../chat-commands/modernize.md#-
 - **A copy without code**: `/modernize --plan --redacted` also writes `redacted/`, a copy of the dossier without source lines, for a reader who must not see the code.
 - **The narration's files**: `functional-narration.json` and `functional-narration.md`, in the bundle. Every statement starts with the status `Inferred`. A pin that proves it changes it to `Pinned`.
 - **The knowledge base**: the survey also seeds findings into `.codelead/knowledge.json`. See [The knowledge base](../concepts/knowledge-base.md).
-- **The Explorer**: when the program has the application's address, the Read stage also runs the Explorer. It writes `analyst-recordings/<time>/`, with `sitemap.json`. See [Explore an application](../analyst/explore-an-application.md).
+- **The Explorer**: when the program has the application's address, the Read stage also runs the Explorer. It writes `analyst-recordings/<time>/`, with `sitemap.json`. With `--as <role>=<account>` on `codelead modernize start`, the Explorer signs in as each account. See [Explore an application](../analyst/explore-an-application.md).
 
 ## What it is not
 

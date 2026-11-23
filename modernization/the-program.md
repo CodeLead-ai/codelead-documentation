@@ -64,7 +64,7 @@ Each stage has a status: `pending`, `running`, `waiting`, `done`, `failed` or `s
 | Run one stage, again | [`codelead modernize run <STAGE>`](../cli/codelead-modernize-run.md) | `/modernize --run <STAGE>` | **Retry** |
 | Say the recordings are made | [`codelead modernize continue`](../cli/codelead-modernize-continue.md) | `/modernize --continue` | **Continue** |
 | Give answers | [`codelead modernize answer <KEY=VALUE>...`](../cli/codelead-modernize-answer.md) | `/modernize --answer <KEY>=<VALUE>` | **Save** |
-| Go past a stage that failed or waits | [`codelead modernize skip <STAGE> --reason <WHY>`](../cli/codelead-modernize-skip.md) | `/modernize --skip <STAGE> --reason <WHY>` | |
+| Go past a stage that failed or waits | [`codelead modernize skip <STAGE> --reason <WHY>`](../cli/codelead-modernize-skip.md) | `/modernize --skip <STAGE> --reason <WHY>` | **Skip this stage…** |
 | See where it stands | [`codelead modernize status`](../cli/codelead-modernize-status.md) | | the page itself |
 | Stop | [`codelead modernize stop`](../cli/codelead-modernize-stop.md) | the **Stop** button | **Stop** |
 | Let CodeLead start the old application | [`codelead modernize source`](../cli/codelead-modernize-source.md) | `/modernize --source` | |
@@ -136,12 +136,26 @@ A key that the program does not take is refused, with the list of all eight. A c
 The program runs in one of two modes. You choose it when you start: **Approve each landing** or **Run unattended** in the wizard, or `codelead modernize start --unattended` in a terminal.
 
 - **Approve mode** is the default. Before each landing of a pin or a transform, CodeLead asks `Apply this patch? [Y/n]`, and you answer in the terminal **CodeLead: modernize** or the chat. The recommended answer is in capitals, and Enter gives it.
-- **Unattended mode** answers those questions yes.
+- **Unattended mode** gives those questions their recommended answer. A patch that passed the patch check with no blocking finding gets yes and lands. A patch with a blocking finding gets no.
+
+In unattended mode, a step that is hard to undo is never answered. The stage stops there at once, with the reason and the way out. A question with no recommended answer stops it too: CodeLead does not guess.
+
+When a role uses a remote provider, unattended mode asks you for the consent at its start, before the first model call. It asks once for each remote provider that the configured roles would use. This happens when you run the program from the chat, or from a terminal where you can type. A no ends the command before any stage runs, with exit code 2 at the terminal and the outcome `stopped` in the chat:
+
+<!-- described, not captured -->
+```output
+The modernization program did not start: anthropic was not allowed (the answer was no), and the repair role uses it.
+  The way out: Pick a local model for the repair role (Settings → Model roles, or modelRoles in .codelead/config.json), then send the command again
+  The way out: Once the code's owner agreed, set CODELEAD_ALLOW_REMOTE_MODELS=1 (environment or .env), or privacy.confirmBeforeSendingRepoContextToRemote false in .codelead/config.json
+  The way out: Or send the command again and answer y
+```
+
+A consent that still comes up later, while nobody is there, stops the run. Approve mode asks the consent where it comes, as before. See [Privacy and remote models](../concepts/privacy-and-remote-models.md).
 
 The Pin stage can ask one more question. The pins take their facts from the [narration](dossier.md#the-narration). When the web project has none, the stage asks `Narrate webapp now? [Y/n]` in approve mode, and yes is recommended. In unattended mode, it narrates without asking. Where no answer can come, for example when no terminal is attached, the question is declined, as every yes-or-no question is. See [Narrate the code before you pin it](../how-to/narrate-before-pins.md).
 
 > [!WARNING]
-> **Unattended means this:** CodeLead lands changes without asking you. It stops only at a refusal or a failure. It spends money on the models, up to the caps. By default, the Pin stage runs up to 24 increments. The rebuild stops at 12 parts, 20 US dollars or 480 minutes. Read the dossier and the options before you choose it.
+> **Unattended means this:** CodeLead lands changes without asking you. It stops only at a refusal, a failure, or a step that is hard to undo. It spends money on the models, up to the caps. By default, the Pin stage runs up to 24 increments. The rebuild stops at 12 parts, 20 US dollars or 480 minutes. Read the dossier and the options before you choose it.
 
 The Rebuild stage is unattended in both modes: [`codelead rebuild run`](../cli/codelead-rebuild-run.md) answers its own questions, under its caps. Some things only you can give, so they wait in both modes. They are the recordings, the answers, the reasons of the extraction gate, the pins' database, and the security decisions.
 
@@ -154,7 +168,7 @@ One program runs in a folder at a time. A run takes the folder's run lock, `.cod
 ## Details
 
 - **Evidence**: every stage that ends writes an [evidence record](../concepts/evidence-records.md), `modernize · <stage>`, with the outcome success, failure or asked.
-- **Exit codes** of the subcommands: `0` when every stage is done or a stage waits for you. `1` when a stage failed. `2` when the command was refused. Your turn is not a failure.
+- **Exit codes** of the subcommands: `0` when every stage is done or a stage waits for you. `1` when a stage failed. `2` when the command was refused, for example in a folder without the Pro plan. Your turn is not a failure.
 - **`status --json`** prints the state file as it is. The wizard reads the same file and watches it.
 - **The address**: `application.baseUrl` is `--base` when you give it, else the run profile's address.
 - **Ignored by git**: the state file and the stop file are listed in `.codelead/.gitignore`.

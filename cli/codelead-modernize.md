@@ -19,7 +19,7 @@ date: 2026-11-20
 ## Synopsis
 
 ```console
-codelead modernize start [--base <URL>] [--unattended] [--project <NAME>]
+codelead modernize start [--base <URL>] [--unattended] [--project <NAME>] [--as <ROLE>=<ACCOUNT>]...
 codelead modernize next [--no-install]
 codelead modernize run <STAGE> [--no-install]
 codelead modernize continue [--no-install]
@@ -73,7 +73,7 @@ To modernize an application is to move it to a current platform without losing w
 
 ### Approve mode and unattended mode
 
-In **approve** mode (the default), you approve each landing of a transform, as the transforms ask. The Pin stage also asks `Narrate webapp now? [Y/n]` when the web project has no narration. With `start --unattended`, the approvals are answered yes, and the Pin stage narrates without asking.
+In **approve** mode (the default), you approve each landing of a transform, as the transforms ask. The Pin stage also asks `Narrate webapp now? [Y/n]` when the web project has no narration. With `start --unattended`, each approval gets CodeLead's recommended answer: yes when the patch check passed with no blocking finding. The Pin stage narrates without asking. A step that is hard to undo stops the stage, because nobody is there to answer.
 
 ### One program at a time
 
@@ -84,6 +84,8 @@ One program runs at a time in a folder. A run takes the old application's run lo
 
 > [!NOTE]
 > **For team leads:** the [audit pack](../modernization/audit-pack.md) at the end gathers every stage's evidence for a review.
+
+Every subcommand except `stop` needs the Pro plan in the folder. On the free plan, the subcommand is refused before anything runs, with exit code 2. Every `--help`, and `codelead modernize stop`, stay free: a person can always stop what runs on the machine. See [Licence and plans](../concepts/licence-and-plans.md).
 
 ## Examples
 
@@ -142,7 +144,7 @@ The subcommands share these codes.
 |---|---|
 | `0` | The run ended with every stage done, or at a stage that waits for a person. Your turn is not a failure. |
 | `1` | A stage failed. For `status`: there is no program in this folder. |
-| `2` | The command was refused before anything ran: a word that it does not take, a wrong option, a required option that is missing (such as `skip` without `--reason`), a program that runs in another process, a state file that cannot be read. |
+| `2` | The command was refused before anything ran: a word that it does not take, a wrong option, a required option that is missing (such as `skip` without `--reason`), a program that runs in another process, a state file that cannot be read, a folder without the Pro plan. |
 
 ## Files
 

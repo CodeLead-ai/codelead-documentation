@@ -147,7 +147,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 
 ## U
 
-- **Unattended run**. A run that nobody watches. It answers its questions by fixed rules, records each answer and stops at its caps. See [Unattended runs and the run lock](unattended-runs.md).
+- **Unattended run**. A run that nobody watches. It gives each question its recommended answer, records each answer and stops at its caps. It stops at a step that is hard to undo. See [Unattended runs and the run lock](unattended-runs.md).
 
 ## V
 

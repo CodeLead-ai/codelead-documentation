@@ -121,6 +121,7 @@ CodeLead refuses these before they can do harm. Each refusal says the way out.
 - **A gate entry of database pins that points at the application's database**. The gate does not run it.
 - **A request that the preflight objects to**. When the preflight says that the request cannot be done, the pin stops with those words.
 - **A wrong level**. `--level must be memory or database.`
+- **Pins that cannot run on this machine**. A .NET Framework test project needs the .NET Framework runtime, or Mono. On a machine with neither, the pin stops before any model call, with `The pins of webapp cannot run on this machine`. See [Details](#details).
 
 ## The repair rounds
 
@@ -158,6 +159,7 @@ In unattended mode, the stage narrates without asking. The narration's files the
 | `The pins of webapp are complete at the in-memory level` | Every provable in-memory fact has a test. | Run `/modernize --pin webapp --level database`. |
 | `The database pins need a database that is not the application's` | The database is on a server, and the pins have none of their own yet. | Put a copy's connection string in the file that CodeLead prepared, and answer `done`. |
 | `The pins of webapp need Visual Studio's MSBuild, and it is not on this machine` | The project builds only with Visual Studio's MSBuild. | Run it on Windows with Visual Studio or its Build Tools. |
+| `The pins of webapp cannot run on this machine` | The project targets .NET Framework, and this machine has neither the .NET Framework runtime nor Mono. Nothing was asked of the model. | Install Mono (on macOS: `brew install mono`), then run the pin again. Or pin on Windows. Or declare the pins' commands in `.codelead/validation.json`. |
 | `The gate refused the pins: … Repair it? [Y/n]` | The tests do not build or do not pass yet. | Press Enter. CodeLead runs up to two repair rounds. |
 | `The repair loop stopped: this repair returns <file> to its state after repair 1, …` | The repairs went in a circle. | Read what each round tried. Fix it by hand, or with [`/repair`](../chat-commands/repair.md). |
 | `The model's reply was cut at its cap: …` | The request was too big for one reply. CodeLead already tried once more. | Pin fewer units: `/modernize --pin webapp --units <one unit>`. |
@@ -182,6 +184,10 @@ The configuration keys, in `.codelead/config.json`:
 
 - **The commands**: [`/modernize --pin <PROJECT>`](../chat-commands/modernize.md#--pin) with `--level memory|database`, `--units <TYPE>,...`, `--facts <WORDS>` and `--again`. In the program: `codelead modernize run pins`.
 - **The test projects**: `<project>.Characterization/` (in memory) and `<project>.Characterization.Db/` (database), beside the project. For a project that targets only .NET Framework, they target `net48`.
+- **The test form on a machine without the .NET Framework**. CodeLead decides the form of a .NET Framework test project by what the machine has, never by the system's name alone:
+  - **The .NET Framework 4 runtime is installed** (its `clr.dll` under the Windows folder's `Microsoft.NET\Framework64\v4.0.30319`, or `Framework\v4.0.30319`). The pins use xunit 2 with the VSTest runner, as before. Windows has it, so nothing changes on Windows.
+  - **The runtime is not installed, and Mono is on the `PATH`**, as on macOS or Linux. The pins use xunit.v3 3.2.2 on the Microsoft Testing Platform: the test project is an executable (`OutputType` `Exe`, `TestingPlatformDotnetTestSupport`). The gate runs it with the same `dotnet test <project> -nologo`, and the .NET SDK runs it with Mono. An existing classic pins project is converted to this form.
+  - **Neither**. The pins are refused before any model call, with the ways out: install Mono, pin on Windows, or declare the pins' commands in `.codelead/validation.json`. Commands that you declare there are used as they are, and the pin is not refused.
 - **The gate entries**: labelled with their project, for example `pins build: webapp.Characterization (MSBuild, net48)`, `pins in-memory: …` and `pins database: …`.
 - **The ledger**: `docs/codelead/dossier/pin-levels.json` (`codelead.pin-levels/1`). It holds each fact, its unit, its lines, its level and why. When two increments name a fact and no test for it lands, the fact is left for a person.
 - **The model**: without `patchRole`, the pins' patch goes to the repair role's model. It does so when that model is remote and remote models are allowed. See [Models and roles](../concepts/models-and-roles.md).

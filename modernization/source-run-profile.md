@@ -54,10 +54,11 @@ Use your own command for an SDK-style project, or for any other way to start the
 codelead modernize source --url http://localhost:5080/ --command dotnet -- run --project WebApplication1/webapp.csproj --urls http://localhost:5080
 ```
 
+<!-- described, not captured -->
 ```output
 The old application's run profile is recorded in .codelead/config.json (modernization.source):
   command: dotnet run --project WebApplication1/webapp.csproj --urls http://localhost:5080
-  answers at: http://localhost:5080/ (ready when / answers 200, within 120 s)
+  answers at: http://localhost:5080/ (ready when / answers with a page, a redirect or a sign-in challenge (HTTP 200 to 399, 401 or 403), within 120 s)
   allowed: yes, CodeLead starts it for the stages that need it running (the read stage's Explorer crawl) and stops it after
 Then: codelead modernize start (or codelead modernize run read): the read stage starts the application for the Explorer's crawl and stops it after.
 ```
@@ -69,7 +70,7 @@ Refused: the run profile is not recorded: modernization.source.command "dotnet r
 ```
 
 > [!TIP]
-> **For experienced users:** `--ready <PATH>` names the page that must answer 200 before the application counts as ready (the default is `/`). `--start-ms <MS>` is how long to wait (the default is 120000). `--cwd <FOLDER>` and `--env NAME=value` set where and with what it runs.
+> **For experienced users:** `--ready <PATH>` names the page that must answer before the application counts as ready (the default is `/`). It counts as ready on HTTP 200 to 399, 401 or 403: a page, a redirect or a sign-in challenge. A 5xx is not ready. `--start-ms <MS>` is how long to wait (the default is 120000). `--cwd <FOLDER>` and `--env NAME=value` set where and with what it runs.
 
 ## Record the profile without your yes
 
@@ -79,10 +80,11 @@ Recording a profile is your yes to CodeLead starting the application. To keep th
 codelead modernize source --url http://localhost:5080/ --command dotnet --no-allow -- run
 ```
 
+<!-- described, not captured -->
 ```output
 The old application's run profile is recorded in .codelead/config.json (modernization.source):
   command: dotnet run
-  answers at: http://localhost:5080/ (ready when / answers 200, within 120 s)
+  answers at: http://localhost:5080/ (ready when / answers with a page, a redirect or a sign-in challenge (HTTP 200 to 399, 401 or 403), within 120 s)
   allowed: no, CodeLead does not start it: start it by hand before the read stage, or record the profile again without --no-allow
 Then: codelead modernize start (or codelead modernize run read): the read stage waits for you to start the application.
 ```

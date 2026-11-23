@@ -47,7 +47,7 @@ Then `/build-step` builds the next step:
 3. CodeLead applies the patch after your yes.
 4. CodeLead runs the step's validation. When it passes, the step is complete.
 
-`/create-app --auto` does all of this for every step, without stopping, and gives each question its recommended answer. A no is included: in a folder that holds a project, the command stops before it plans. When every step is done, it says "Automated build completed: all plan steps are done." A step whose validation fails needs [`/build-step --repair`](../chat-commands/build-step.md). [`/greenfield`](../chat-commands/greenfield.md) shows where the plan and the build stand.
+`/create-app --auto` does all of this for every step, without stopping, and gives each question its recommended answer. A no is included: in a folder that holds a project, the command stops before it plans. A step that is hard to undo is never answered: the build stops there, with the reason and the way out. A consent for a remote model is asked of you at the start, before the first model call. When every step is done, it says "Automated build completed: all plan steps are done." A step whose validation fails needs [`/build-step --repair`](../chat-commands/build-step.md). [`/greenfield`](../chat-commands/greenfield.md) shows where the plan and the build stand.
 
 Here is a step that passed:
 

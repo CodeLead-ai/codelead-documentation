@@ -47,12 +47,12 @@ Not sure which one you are? Read [Choose your path](get-started/choose-your-path
 ## Which versions these pages describe
 
 - CodeLead 0.1.0
-- CodeLead for VS Code 0.7.15
+- CodeLead for VS Code 0.7.16
 
 A page says so when it is about a later or an earlier version.
 
 <!-- copied:start -->
-Last copied on **2026-11-21**: 204 pages, 37 pictures.
+Last copied on **2026-11-23**: 204 pages, 40 pictures.
 <!-- copied:end -->
 
 ## How the pages are kept true

@@ -61,6 +61,8 @@ This gate is for the end of a rebuild, not for each part. It fails until the fir
 > [!TIP]
 > **For experienced users:** a feature is `landed`, `endpoint only`, `screen only`, `endpoint not read`, `screen not read`, `dropped by decision` or `missing`. "Not read" means that CodeLead could not read the API's inventory or the SPA's route table, so it cannot show that the part landed. A rebuild without a web target has nothing to wire or walk.
 
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Options
 
 - **`--capture <BASE_URL>`**
@@ -182,7 +184,7 @@ The first three examples ran against a small local site with three pages, on por
 |---|---|
 | `0` | The capture fetched every route; the check passed; the rebuild is finished. |
 | `1` | A route could not be fetched at capture; the check found a difference that is not waived; the rebuild has a blocker. |
-| `2` | Nothing to compare or read: no `--capture`, `--check` or `--rebuild`; no routes; no baseline; no rebuild manifest. |
+| `2` | Nothing to compare or read: no `--capture`, `--check` or `--rebuild`; no routes; no baseline; no rebuild manifest; a folder without the Pro plan. |
 
 ## Files
 

@@ -13,6 +13,7 @@ CodeLead runs on your machine. The one thing that leaves the machine while it wo
 **In short**
 - By default every role (a kind of work) uses a local provider (a model server on your machine), and remote models are not allowed.
 - A remote provider is refused until you allow remote models. Then CodeLead asks before the first call to each remote provider, and you type `y` or `n`.
+- An automated build or an unattended program run asks you for the consent at its start, while you are there.
 - `CODELEAD_ALLOW_REMOTE_MODELS=1` is the consent of a run that nobody watches.
 - Keys live only in the repository's `.env`, which git ignores. CodeLead never prints a key.
 
@@ -70,6 +71,34 @@ A real refusal, in a folder whose repair role is remote, as the chat's session r
 {"type":"session.ended","reason":"error","message":"A remote model is configured but the privacy settings block remote models, so the session does not start. Turn on \"Allow remote models\" in the settings (privacy.allowRemoteModels in .codelead/config.json), or set CODELEAD_ALLOW_REMOTE_MODELS=1. the repair role goes to anthropic, a remote provider the privacy settings block: …"}
 ```
 
+### The consent at the start of a run that you leave
+
+Some commands go on while nobody answers:
+
+- [`/create-app --auto`](../chat-commands/create-app.md), and `/create-app --auto-after-plan` once the automated build takes over;
+- [`/build-incremental`](../chat-commands/build-incremental.md), once you approved the increments;
+- the [modernization program](../modernization/the-program.md) in unattended mode.
+
+When you start one of them from the chat or from a terminal where you can type, CodeLead asks the consent first. It asks before the first model call, once for each remote provider that the configured roles would use. The roles are the default, the preflight, the architect, the critic, each strategy's and the repair role. CodeLead asks only when remote models are allowed and `confirmBeforeSendingRepoContextToRemote` is `true`. With `CODELEAD_ALLOW_REMOTE_MODELS=1`, nothing is asked.
+
+A yes holds for that provider until the process ends, so no consent question comes during the run. A no ends the command before it starts, with the outcome `stopped`:
+
+<!-- described, not captured -->
+```output
+The automated build did not start: anthropic was not allowed (the answer was no), and the repair role uses it.
+```
+
+The way out: a local model for that role, the settings that allow remote models, or the same command again with the answer `y`. The modernization program says `The modernization program did not start: …` and exits with code 2 at the terminal.
+
+A consent that still comes up during such a run, for a provider that no role named, is not answered. The run stops, with the outcome `stopped` and the settings that allow it:
+
+<!-- described, not captured -->
+```output
+The automated build stopped: this sends repository snippets to anthropic / <model id>, and nobody is here to answer.
+```
+
+[`codelead rebuild run`](../cli/codelead-rebuild-run.md) and the board queue of [`codelead implement`](../cli/codelead-implement.md) start with nobody there. They do not ask: they refuse before the start when a consent is missing.
+
 ### Keys
 
 A provider names the environment variable of its key, such as `ANTHROPIC_API_KEY` or `OPENROUTER_API_KEY`. Put the key in the `.env` file of the repository. `codelead init` adds `.env`, `.env.local` and `.env.*.local` to `.gitignore`, so that git never commits the key. [`codelead config`](../cli/codelead-config.md) and [`codelead doctor`](../cli/codelead-doctor.md) say whether a key is set, never its value. `codelead config` masks a default key, for example `lm*******`.
@@ -84,9 +113,9 @@ A provider names the environment variable of its key, such as `ANTHROPIC_API_KEY
 
 - **What a remote provider receives** is exactly what the session log keeps under `model/` for each call. Treat the sessions folder as you treat the repository. See [Sessions](sessions.md).
 - **Evidence records** hold the request, the file names, the check's verdict and the commands with their exit codes. They hold no code and no diff. See [Evidence records](evidence-records.md).
-- **`redactSensitiveFiles`**. `codelead config` shows this switch, and says that it is not used. Whatever its value, CodeLead's ignore rules keep the sensitive files out of its scans, the chat's sources and the patch prompt. The rules go by the file's name. They leave out `.env` and `.env.*`, `id_rsa` and `id_ed25519`. They also leave out files that end in `.pem`, `.key`, `.p12`, `.pfx`, `.sqlite` or `.db`, and files named `secrets.*` or `credentials.*`. Nothing inside a file that is sent is redacted. What you type or paste is sent as you wrote it.
+- **`redactSensitiveFiles`**. `codelead config` shows this switch, and says that it is not used. The extension's Settings page no longer shows it, from version 0.7.16. A value in a project's `.codelead/config.json` stays as it is when the page saves. Whatever its value, CodeLead's ignore rules keep the sensitive files out of its scans, the chat's sources and the patch prompt. The rules go by the file's name. They leave out `.env` and `.env.*`, `id_rsa` and `id_ed25519`. They also leave out files that end in `.pem`, `.key`, `.p12`, `.pfx`, `.sqlite` or `.db`, and files named `secrets.*` or `credentials.*`. Nothing inside a file that is sent is redacted. What you type or paste is sent as you wrote it.
 - **The doctor's line**. `codelead doctor` has the row "Remote models consent (CODELEAD_ALLOW_REMOTE_MODELS)". Without consent and with a local default, it says: `not given (the default provider is local; nothing is sent off this machine)`.
-- **Unattended runs**. A run that nobody watches is refused when its model is remote and the consent is missing. It is also refused when the configuration would ask before each call. See [Unattended runs and the run lock](unattended-runs.md).
+- **Unattended runs**. `codelead rebuild run` and `codelead implement` are refused when their model is remote and the consent is missing. They are also refused when the configuration would ask before each call. The modernization program in unattended mode asks you at its start instead. See [Unattended runs and the run lock](unattended-runs.md).
 - **A modernization's documents**. [`/modernize --plan --redacted`](../chat-commands/modernize.md) writes a copy of the survey with every line of source removed, for a reader who may not see the code. See [The dossier](../modernization/dossier.md).
 
 > [!NOTE]

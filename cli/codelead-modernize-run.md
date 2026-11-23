@@ -35,6 +35,8 @@ Each stage's problem ends with the line to run after the fix, for example `Then:
 > [!TIP]
 > **For experienced users:** the chat runs the same stage with `/modernize --run <stage>`. See [`/modernize`](../chat-commands/modernize.md).
 
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Arguments
 
 - **`<STAGE>`**
@@ -100,7 +102,7 @@ Each stage's problem ends with the line to run after the fix, for example `Then:
 |---|---|
 | `0` | The stage is done, or it waits for a person. |
 | `1` | The stage failed. |
-| `2` | The command was refused: an unknown stage, a program that runs in another process, a state file that cannot be read. |
+| `2` | The command was refused: a folder without the Pro plan, an unknown stage, a program that runs in another process, a state file that cannot be read. |
 
 ## Files
 

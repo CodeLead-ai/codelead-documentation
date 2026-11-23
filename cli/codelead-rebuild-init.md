@@ -49,10 +49,11 @@ Then it makes the rebuild in ten steps:
 
 ### The ports
 
-The new application and the old one run side by side during the walk and the parity check. So `init` reads the ports that the old application answers on, from four places:
+The new application and the old one run side by side during the walk and the parity check. So `init` reads the ports that the old application answers on, from five places:
 
 - the program's address, `application.baseUrl` in `.codelead/modernization.json`;
 - the old application's run profile, `modernization.source.url` in `.codelead/config.json`;
+- the base address of the Analyst's recordings: `base` in each `analyst-recordings/<time>/recording.json`, and in the Explorer's `explore-<role>/recording.json`. So a program started without `--base` and without a run profile still moves the new API off the port that the journeys were recorded on. The ports line then says `(the Analyst's recordings)`;
 - the web project's file: `<IISUrl>` and `<DevelopmentServerPort>`;
 - the web project's `Properties/launchSettings.json`.
 
@@ -82,6 +83,8 @@ When `--out` already holds a rebuild that this command made, `init` says so and 
 
 > [!TIP]
 > **For experienced users:** the unattended caps start at 12 parts, $20 and 480 minutes, with 8 repairs for each session. Raise them under `run.unattended` in the manifest. With `sample-seed`, the run profile's day reset is `node scripts/reset-sample-seed.mjs`.
+
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
 
 ## Options
 
@@ -224,7 +227,7 @@ When `--out` already holds a rebuild that this command made, `init` says so and 
 |---|---|
 | `0` | The rebuild is made, the plan has no blocker, and the dry run's checks passed. |
 | `1` | The rebuild is made but not ready to run. The words say what to do. A commit that could not be made does not change the code. |
-| `2` | A refusal: nothing was made. The words say why, and the way out. |
+| `2` | A refusal: nothing was made. The words say why, and the way out. A folder without the Pro plan is refused too. |
 
 ## Files
 

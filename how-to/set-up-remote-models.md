@@ -93,6 +93,8 @@ With `allowRemoteModels` set to `false`, a call to a remote provider is refused 
 > [!IMPORTANT]
 > A run that nobody watches cannot answer the question. Give it the consent with `CODELEAD_ALLOW_REMOTE_MODELS=1` in `.env`, once the code's owner has agreed. That variable also turns the question off.
 
+An automated build (`/create-app --auto`, `/build-incremental`) and the modernization program in unattended mode ask the question at their start, while you are there. They ask once for each remote provider that the roles would use, before the first model call. Type `y` for each one. A no ends the command before it starts, with the outcome `stopped`. The words are `The automated build did not start: anthropic was not allowed (the answer was no), and the repair role uses it.` A consent that still comes up later in such a run stops it, because nobody is there to answer. <!-- described, not captured -->
+
 ## Read the cost of the calls
 
 CodeLead records the tokens of every call. It also records the cost, when it is known:
@@ -133,6 +135,7 @@ You find the cost in three places:
 - **Where the key is read.** CodeLead reads `.env` in the folder where it runs, and the environment. An environment variable wins over `.env`.
 - **What leaves the machine.** Each call sends the prompt: CodeLead's rules, the request, the plan, the selected files and build output. The session log keeps every prompt under `model/`. See [Privacy and remote models](../concepts/privacy-and-remote-models.md#details).
 - **The extension's chat.** A remote role with remote models not allowed stops the chat's session before it starts, and names the setting. With remote models allowed, the chat asks the same consent question.
+- **Runs that start with nobody there.** [`codelead rebuild run`](../cli/codelead-rebuild-run.md) and [`codelead implement`](../cli/codelead-implement.md) do not ask. They refuse before the start when a remote role has no consent. See [Unattended runs and the run lock](../concepts/unattended-runs.md).
 - **The run report of a new app** says when a remote provider was in use, and what left the machine.
 
 ## See also

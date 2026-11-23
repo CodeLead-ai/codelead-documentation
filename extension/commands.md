@@ -8,7 +8,7 @@ date: 2026-11-20
 
 # Commands and settings of the extension
 
-**Applies to:** CodeLead for VS Code 0.7.15 and later
+**Applies to:** CodeLead for VS Code 0.7.16 and later
 
 ## Description
 

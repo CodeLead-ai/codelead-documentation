@@ -19,7 +19,7 @@ This page installs CodeLead for VS Code from its `.vsix` file, prepares a folder
 
 - **VS Code 1.95 or newer.** **Help** > **About** shows the version.
 - **CodeLead, installed.** In a terminal, `codelead --version` must print a version. See [Install CodeLead](../get-started/install.md).
-- **The extension's file.** It is named like `codelead-vscode-0.7.15.vsix`.
+- **The extension's file.** It is named like `codelead-vscode-0.7.16.vsix`.
 - **A trusted folder.** VS Code asks whether you trust the authors of a folder. The extension runs `codelead` only in a trusted folder.
 
 > [!NOTE]
@@ -35,11 +35,11 @@ Choose one of the two ways.
 2. Run this command:
 
    ```console
-   code --install-extension codelead-vscode-0.7.15.vsix
+   code --install-extension codelead-vscode-0.7.16.vsix
    ```
 
    ```output
-   Extension 'codelead-vscode-0.7.15.vsix' was successfully installed.
+   Extension 'codelead-vscode-0.7.16.vsix' was successfully installed.
    ```
 
 **From VS Code:**

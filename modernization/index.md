@@ -49,10 +49,10 @@ See [The eight stages](the-eight-stages.md) for what each stage needs, produces 
 
 - **ASP.NET MVC on .NET Framework is the class that CodeLead reads in full**. The Basic Store sample is one.
 - **Web Forms pages are not read**. For a Web Forms project, the System Model holds only the database. There is no rebuild of its pages.
-- **Windows is needed for the pins and the transforms of a .NET Framework web project**. They build with Visual Studio's MSBuild, and it runs on Windows only. See [Build .NET Framework projects on Windows](../how-to/build-on-windows.md).
+- **Windows is needed for the pins and the transforms of a .NET Framework web project in the old project format**. They build with Visual Studio's MSBuild, and it runs on Windows only. See [Build .NET Framework projects on Windows](../how-to/build-on-windows.md). The pins of an SDK-style .NET Framework project can also run on macOS or Linux, when Mono is installed. See [Pins](pins.md#details).
 - **A model is needed for the narration, the pins, the transforms and the rebuild**. The other parts call no model: the dossier, the Explorer, the System Model, the rebuild's set-up and plan, the walk, parity and the audit pack.
 - **The walk and the Explorer need the application running**. CodeLead can start it for you. See [Start the old application for CodeLead](source-run-profile.md).
-- **The Explorer, the Analyst and the wizard are in the Pro plan**. See [Licence and plans](../concepts/licence-and-plans.md).
+- **The modernization program is in the Pro plan**: the Explorer, the Analyst, the wizard, and every command of the program. That is `codelead modernize`, the chat's `/modernize`, `codelead rebuild`, `codelead model`, `register`, `seed`, `parity`, `rebuild-report` and `codelead walk --rebuild`. On the free plan, each one is refused before it runs. `codelead modernize stop`, every `--help`, and the walk of a spec stay free. See [Licence and plans](../concepts/licence-and-plans.md).
 
 > [!WARNING]
 > The pins, the transforms and the rebuild call models for every increment. With a paid provider, they cost money. One recorded run of the pins on the Basic Store sample cost about 13 US dollars, for 14 calls to a remote model. The rebuild's run stops at a cost cap, 20 US dollars by default.

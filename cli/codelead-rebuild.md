@@ -63,6 +63,8 @@ The [modernization program](codelead-modernize.md) runs steps 1, 2, 4 and 5 as i
 
 Without `--plan` and without a subcommand, `codelead rebuild` prints its help.
 
+`codelead rebuild` is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, `--plan` and `run` are refused before anything runs, with exit code 1. `init` is refused with exit code 2. The help is free. A rebuild counts as on the Pro plan when its own folder has the plan, or the old application that its manifest names has it. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Options
 
 These options belong to `codelead rebuild --plan`. Each subcommand has its own options.
@@ -167,7 +169,7 @@ These options belong to `codelead rebuild --plan`. Each subcommand has its own o
 | Code | Meaning |
 |---|---|
 | `0` | The plan was printed. |
-| `1` | The rebuild cannot be read: no manifest, or the old application's files are missing. |
+| `1` | The rebuild cannot be read: no manifest, or the old application's files are missing. Also a folder without the Pro plan. |
 
 ## Files
 

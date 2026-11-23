@@ -129,7 +129,7 @@ By default, CodeLead calls a model server on your machine or on your network. Yo
 
 ## What it is not
 
-- **Not an autonomous agent that edits freely.** A model never writes to your files. It proposes a patch. CodeLead checks it, and only your yes applies it. An unattended run (a run that nobody watches) answers for you, but by fixed rules, and it records every answer.
+- **Not an autonomous agent that edits freely.** A model never writes to your files. It proposes a patch. CodeLead checks it, and only your yes applies it. An unattended run (a run that nobody watches) answers for you with the recommended answers, and it records every answer. It stops at a step that is hard to undo.
 - **Not a model.** CodeLead contains no model. It works with the model that you choose: a local server, or a key for a remote provider. See [Models and roles](models-and-roles.md).
 - **Not a replacement for your build and tests.** CodeLead runs your project's own commands. When your project has no tests, the gate can only say that it builds.
 - **Not a cloud service.** There is no account and no CodeLead server. No data about your use is sent anywhere. The licence check works with no network. See [Licence and plans](licence-and-plans.md).

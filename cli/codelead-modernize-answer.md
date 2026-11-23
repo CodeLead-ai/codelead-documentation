@@ -56,6 +56,8 @@ What the values mean:
 > [!TIP]
 > **For experienced users:** a wrong key or a wrong value is refused, and nothing is recorded. The refusal of an unknown key lists all eight. A connection string is never an answer, because the shell keeps the command line in its history.
 
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Arguments
 
 - **`<KEY=VALUE>...`**
@@ -121,7 +123,7 @@ What the values mean:
 | Code | Meaning |
 |---|---|
 | `0` | The answers were recorded, or the pins were accepted. |
-| `2` | A key or a value was refused, or `pins=enough` came while the Pin stage neither waits nor failed. Nothing was recorded. |
+| `2` | The folder does not have the Pro plan, or a key or a value was refused, or `pins=enough` came while the Pin stage neither waits nor failed. Nothing was recorded. |
 
 ## Files
 

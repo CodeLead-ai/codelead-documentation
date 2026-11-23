@@ -8,7 +8,7 @@ date: 2026-11-20
 
 # Settings
 
-**Applies to:** CodeLead for VS Code 0.7.15 and later
+**Applies to:** CodeLead for VS Code 0.7.16 and later
 
 The **Settings page** sets a project's models, privacy, build switches, conventions, Analyst passwords and board in one place. The **Settings view** in the side bar shows every setting of the project, and edits some of them row by row. Both write CodeLead's own files: the extension keeps no copy. Each **Save** writes one file, and a value that CodeLead would refuse is refused next to its field, in words.
 
@@ -84,13 +84,16 @@ See [The repair role](../concepts/models-and-roles.md#the-repair-role) and [Use 
 
 ## Privacy
 
-Three switches, each **on** or **off**. See [Privacy and remote models](../concepts/privacy-and-remote-models.md).
+Two switches, each **on** or **off**. See [Privacy and remote models](../concepts/privacy-and-remote-models.md).
+
+![The Privacy section of the Settings page. Allow remote models is off, with the help Lets CodeLead use a model on the internet. Ask before sending code is on, with the help Asks you before your code goes to a remote model.](../media/extension/settings-privacy.jpg)
 
 | Switch | Help on the page | What it writes |
 |---|---|---|
 | **Allow remote models** | Lets CodeLead use a model on the internet. | `.codelead/config.json`: `privacy.allowRemoteModels` |
 | **Ask before sending code** | Asks you before your code goes to a remote model. | `.codelead/config.json`: `privacy.confirmBeforeSendingRepoContextToRemote` |
-| **Leave out secret files** | Keeps files such as .env out of what is sent. | `.codelead/config.json`: `privacy.redactSensitiveFiles`. The switch is stored and not used. Files such as `.env` stay out of what is sent whatever its value, because CodeLead's ignore rules go by the file's name. |
+
+The key `privacy.redactSensitiveFiles` has no switch here, because CodeLead does not use it. When the project's `.codelead/config.json` holds it, a **Save** leaves it as it is.
 
 > [!IMPORTANT]
 > With a remote model in a role and **Allow remote models** off, the chat does not start. It says why, and names the setting. Turn the switch on only when the code's owner agrees.
@@ -198,7 +201,7 @@ The **Settings** view in the side bar shows every setting of the project, in sec
 | **Providers** | Each provider: its type, local or remote, its address, and `key: set` or `key: not set`. The tooltip names the key's variable and where it comes from: the environment, `.env`, or nowhere. | Yes: the type, the base URL, the key variable, remote or local, set the key, remove the key. |
 | **Model roles** | Each role: its provider and model, or *(not set)*. | Yes: a provider, then a model from the server's list. |
 | **Strategies** | Which role answers each [strategy](../concepts/strategies.md): `fast`, `clarify`, `architect`, `deep`. | Yes. |
-| **Privacy** | The three switches: `on`, `off` or *(not set)*. | Yes. |
+| **Privacy** | The two switches: `on`, `off` or *(not set)*. | Yes. |
 | **Context** | `maxFiles`, `maxSnippetCharsPerFile`, `includeTests`, `includePackageJson`. | Yes. |
 | **Call budgets** | The profile, and each role's limits. Only when the configuration has them. | The profile: `fast`, `balanced` or `quality`. |
 | **Board** | The participants, the columns and the check interval. | The participants and the interval. |

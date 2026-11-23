@@ -37,7 +37,13 @@ The rebuild's plan is a queue of **parts**: an endpoint of the new API, a screen
 When a check fails, the **model ladder** decides what comes next. First a repair round, then an intervention by a stronger model, as the run profile allows. A part that the ladder gives up on is **parked** for a person, with the reason. The run continues with the next part.
 
 > [!NOTE]
-> **New to this?** *Unattended* means that nobody answers questions during the run. CodeLead answers "Apply this patch?" itself, and records every answer in the evidence records. A person reads the result after the run.
+> **New to this?** *Unattended* means that nobody answers questions during the run. CodeLead gives each question its recommended answer, yes or no, and records every answer in the evidence records. A person reads the result after the run.
+
+A step that is hard to undo is never answered: the run stops there at once, with the reason and the way out. A question with no recommended answer stops it too. See [Unattended runs and the run lock](../concepts/unattended-runs.md#who-answers).
+
+### The Pro plan
+
+The rebuild is part of the modernization program, which is in CodeLead's Pro plan. On the free plan, the run is refused before it starts, with exit code 1. A rebuild counts as on the Pro plan when its own folder has the plan, or the old application that its manifest names has it. See [Licence and plans](../concepts/licence-and-plans.md).
 
 ### Lanes
 
@@ -168,7 +174,7 @@ The run ends at the queue's end, at `--until`, at a cap, when `.codelead/STOP` a
 | Code | Meaning |
 |---|---|
 | `0` | The run ended: the queue's end, `--until`, a cap, or the stop file. A dry run whose checks passed. |
-| `1` | The run was refused, or stopped on a blocker, a held port or no progress. |
+| `1` | The run was refused, or stopped on a blocker, a held port or no progress. Also a folder without the Pro plan. |
 | `130` | Ctrl+C. The part that was running finished first. |
 
 ## Files

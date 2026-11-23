@@ -33,9 +33,9 @@ In this tutorial, you:
 
 - **Windows**, with **Visual Studio 2022 or later** and the workload **ASP.NET and web development**. It brings Visual Studio's MSBuild, which builds the old project, and IIS Express, which runs it. See [Build .NET Framework projects on Windows](../how-to/build-on-windows.md).
 - **The .NET SDK** 8 or later, **Node.js** 20 or later, and **git**.
-- **CodeLead**, installed. See [Install CodeLead](../get-started/install.md). For the wizard, also **CodeLead for VS Code** 0.7.15 or later. See [Install the extension](../extension/install.md).
+- **CodeLead**, installed. See [Install CodeLead](../get-started/install.md). For the wizard, also **CodeLead for VS Code** 0.7.16 or later. See [Install the extension](../extension/install.md).
 - **A model**: a local model server, or a key for a remote provider. A stronger model on the repair role helps the pins land. See [Set up local models](../how-to/set-up-local-models.md), [Set up remote models](../how-to/set-up-remote-models.md) and [Use a stronger model for repairs](../how-to/use-a-stronger-model-for-repairs.md).
-- **A licence of the Pro plan**. The Explorer, the Analyst and the wizard are in it. See [Licence and plans](../concepts/licence-and-plans.md).
+- **A licence of the Pro plan**, in the folder of the sample: `docs/codelead/licence.json`. The whole modernization program is in the Pro plan: the Explorer, the Analyst, the wizard, and the commands `codelead modernize` and `/modernize`. Without it, `codelead modernize start` is refused before any work. See [Licence and plans](../concepts/licence-and-plans.md).
 - **The Basic Store sample** on your machine: the folder that holds `sampleapp.slnx` and `WebApplication1/`.
 
 **Knowledge**

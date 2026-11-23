@@ -41,6 +41,8 @@ A stage has one of six statuses: `pending`, `running`, `waiting`, `done`, `faile
 > [!TIP]
 > **For experienced users:** `--json` prints the state file as it is: `schema`, `application`, `mode`, `answers`, `current`, and `stages`. Each stage has `id`, `title`, `status`, `command`, `chat`, `startedAt`, `finishedAt`, `outputs`, `evidence` and `problem`. The [Modernize wizard](../extension/modernize-wizard.md) reads the same file. See [Modernization state file](../reference/modernization-state-file.md).
 
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Options
 
 - **`--json`**
@@ -145,7 +147,7 @@ A stage has one of six statuses: `pending`, `running`, `waiting`, `done`, `faile
 |---|---|
 | `0` | The state was printed. |
 | `1` | There is no program in this folder. |
-| `2` | The state file cannot be read. |
+| `2` | The state file cannot be read, or the folder does not have the Pro plan. |
 
 ## Files
 

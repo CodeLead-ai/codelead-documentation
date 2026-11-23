@@ -120,8 +120,8 @@ Three answers that are neither yes nor no also decline: "No valid answer receive
 ## What it is not
 
 - **Not a way for CodeLead to decide for you.** The recommended answer is a suggestion. Your typed answer always wins.
-- **Not the same in unattended runs.** A run that nobody watches answers by fixed rules, and it records each answer. See [Unattended runs and the run lock](unattended-runs.md).
-- **Not asked again for every remote call.** CodeLead asks for the consent to send code once for each remote provider in a session.
+- **Not the same in unattended runs.** A run that nobody watches gives each question its recommended answer, and it records each answer. It stops at a step that is hard to undo. See [Unattended runs and the run lock](unattended-runs.md).
+- **Not asked again for every remote call.** CodeLead asks for the consent to send code once for each remote provider in a session. An automated build asks it at its start, while you are there.
 
 > [!TIP]
 > **For experienced users:** a pin or an in-place transform writes its own request, and its preflight asks nothing. It takes each default and shows the list once as "CodeLead assumed". The list is kept in the evidence record's `preflight.assumptions`.
@@ -130,8 +130,10 @@ Three answers that are neither yes nor no also decline: "No valid answer receive
 
 - **The typed prompt**. Each question has a `kind`: `yes-no`, `choice`, `enter-default` or `text`. It has a `recommended` answer and an `emptyAnswer`, which is what Enter gives, or `null`. It can also have a `why`, and a `consequence` for a hard step. The session protocol's `prompt` line carries these fields. `default` stays for older clients. See [Session protocol](../reference/session-io-protocol.md).
 - **Choices.** A numbered list marks the recommended option, and Enter gives it: `Choose validation scope [1-3], or press Enter for 1:`.
-- **The session log.** The `user.input` event of an answer keeps the question's words, `recommended`, `emptyAnswer`, and `answered: false` when no answer came. Passwords in answers are redacted.
-- **`--auto` and the unattended runners.** [`/create-app --auto`](../chat-commands/create-app.md) gives each question its recommended answer, also a no. It says each no in one line: `Automated build: answered no, as CodeLead recommends (<why>).` The unattended runners answer yes to apply, to validate and to run, and no to a manual pass.
+- **The session log.** The `user.input` event of an answer keeps the question's words, `recommended`, `emptyAnswer`, and `answered: false` when no answer came. Passwords in answers are redacted. An answer that the answer table gave, not a person, also carries `answerPolicy`: the table, the row, the inputs and the answer. When an automated build ends on a stop, the log adds the event `answer.stopped`. A no to the consent at the start adds `answer.consent_refused_at_start`.
+- **`--auto` and the unattended runners.** [`/create-app --auto`](../chat-commands/create-app.md) gives each question its recommended answer, also a no. It says each no in one line: `Automated build: answered no, as CodeLead recommends (<why>).` The unattended runners also give the recommended answer, yes or no, and no to a manual pass.
+- **Nobody there, and a step that is hard to undo.** An automated build or an unattended run never answers such a question. The command stops at once, with the outcome `stopped`, the reason and the way out. A question with no recommended answer stops it too: CodeLead does not guess.
+- **The answer table.** One table decides each answer that no person typed. It reads who is there: a person, a closed input, an automated build or an unattended run. It also reads the kind of question, its recommendation, and whether it is hard to undo. Each row has its reason. The same table holds the manual validation and the one automatic retry of a scaffold command. It also holds three questions for a person only: a template's trust, the recovery menu of a red build, and the chat's offer.
 - **The question mark.** A question prints one question mark, before the bracket: `Apply this patch? [Y/n]`.
 
 ## Related content

@@ -99,7 +99,9 @@ A folder that already holds a build in progress is continued, not planned again.
 With `--auto`, CodeLead answers these questions by itself:
 
 - A question with a recommended answer gets that answer, also when it is no. For each no, CodeLead writes a line: `Automated build: answered no, as CodeLead recommends (<why>).`
-- A question with no recommended answer gets yes when it is a yes-or-no question, and its default otherwise.
+- A clarifying question gets its default.
+- A step that is hard to undo is not answered. The build stops at once, with the outcome `stopped`, the reason and the way out. For example: `The automated build stopped: this deletes 4 entries of the target folder, and nobody is here to answer.`
+- A yes-or-no question or a choice with no recommended answer also stops the build. CodeLead does not guess.
 - The template question is the exception. CodeLead always asks you.
 
 So in a folder that holds a project, or in a workspace or root folder, `--auto` takes the recommended no. The command stops with the outcome `stopped`, and nothing is planned.
@@ -109,6 +111,23 @@ Two questions of a build step get special care with `--auto`:
 - `Retry scaffold command?`: CodeLead first runs the failed scaffold command once more by itself. It says `Automated build: the scaffold command failed; retrying it once.` After a second failure, it takes the recommended no, and the model writes the files.
 - `Mark manual validation as passed?`: nobody confirms the manual check. CodeLead takes the recommended no, and the step's gates run and decide the step. It says `Automated build: nobody confirmed the manual validation; the step's gates ran instead.` The step's record says `manualValidation: "unconfirmed"`.
 
+### The consent for a remote model
+
+When a role of the build uses a remote provider, `--auto` asks you for the consent first, before the first model call. It asks once for each remote provider that the build's roles would use. It asks only when remote models are allowed and the settings ask before sending. `--auto-after-plan` asks when the automated build takes over, after your yes to the plan. A yes holds for the whole build, so no consent question comes while nobody is there. A no ends the command before it starts, with the outcome `stopped`:
+
+<!-- described, not captured -->
+```output
+The automated build did not start: anthropic was not allowed (the answer was no), and the repair role uses it.
+```
+
+The way out names three choices:
+
+- Pick a local model for that role, then send the command again.
+- Once the code's owner agreed, set `CODELEAD_ALLOW_REMOTE_MODELS=1`, or `privacy.confirmBeforeSendingRepoContextToRemote` to `false`.
+- Send the command again and answer `y`.
+
+A consent that still comes up during the build stops it, with the setting that allows it. See [Privacy and remote models](../concepts/privacy-and-remote-models.md).
+
 ## What you see
 
 | Outcome | Headline | The way on |
@@ -117,6 +136,8 @@ Two questions of a build step get special care with `--auto`:
 | `done` | `Automated build completed: all plan steps are done. Run npm run dev in the target folder to open the app.` | Open the app. |
 | `stopped` | `Planning stopped: the folder holds an existing project` (a no to the folder question, yours or the recommended no of `--auto`). A workspace or root folder gives `Planning stopped: the folder looks like a workspace or root folder`. | `Open or create a dedicated folder for the app, then send the request again`, `Or send the request again and answer y to plan in this folder`. With `--auto`, the second line is `Or plan in this folder on your own word: /create-app --plan <request>, and answer y`. |
 | `stopped` | `You did not confirm the package, so nothing was run (npm create <package>)` (`--template`) | `Name the template again (/create-app --template <template> <request>) and answer y to run the package`, `Or give a template on the trusted list (vite, next-app), a folder or a git address`, `Or build without a template: /create-app <request>` |
+| `stopped` | `The automated build did not start: <provider> was not allowed (the answer was no), and <role> uses it` (`--auto`, `--auto-after-plan`) | `Pick a local model for <role> (Settings → Model roles, or modelRoles in .codelead/config.json), then send the command again`, the settings that allow remote models, `Or send the command again and answer y` |
+| `stopped` | `The automated build stopped: <what the step does>, and nobody is here to answer` (a step that is hard to undo) | The setting that allows the step, where one exists, then `Or run it where a person answers: the same command at the terminal or in the chat asks this question` |
 | `failed` | `Failed to create greenfield plan` | `Send the request again (Retry): the planner is asked again`, `Or a larger model for the planner: Settings → Model roles` |
 | `failed` | `Automated build stopped: step <id> is blocked.` | `Continue the build: send the request again (Retry)`, `/plan --revise <what to change>`, `/build-step` |
 

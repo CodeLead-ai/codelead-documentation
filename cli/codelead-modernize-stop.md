@@ -40,6 +40,8 @@ Nothing else is stopped. `stop` never kills a process that CodeLead did not star
 > [!TIP]
 > **For experienced users:** sometimes a process ends before it reads the stop file. The next run then removes that stop file, with a note. In the chat, stop a program with the Stop button.
 
+This command is free: it needs no licence. A person can always stop what runs on the machine. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Examples
 
 - Stop a program while a stage runs. In the first terminal:

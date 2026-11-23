@@ -199,6 +199,7 @@ Next, record the journeys that matter, with what each step must show. See [Recor
 - **`--no-derive`** writes the recordings, the site map, the forms and the stories only. You can make the drafts, the rules and the facts later with [`draft`](reference/analyst-draft.md), [`rules`](reference/analyst-rules.md) and [`facts`](reference/analyst-facts.md).
 - **The same result each time**: the Explorer calls no model. The site map, the forms and the stories hold no time, and their order is fixed.
 - **In the modernization program**: the Read stage runs the Explorer when the program has the application's address. Then [`codelead rebuild init`](../cli/codelead-rebuild-init.md) turns each story into a journey of the rebuild. See [The eight stages](../modernization/the-eight-stages.md).
+- **Given accounts in the program**: `codelead modernize start --as clerk=store.clerk` (or `/modernize --run --as …` in the chat) keeps each role and its account in the program's state file. Every run of the Read stage then explores with `--given-accounts --as <role>=<account>`. The passwords come from the same places as above. A missing password makes the stage wait, and its problem names the variable. See [`codelead modernize start`](../cli/codelead-modernize-start.md#sign-in-accounts-for-the-crawl).
 - **In spec-based validation**: [`codelead spec coverage`](../cli/codelead-spec.md) runs the Explorer in Observe only, then says which screens and forms no spec names.
 
 ## See also

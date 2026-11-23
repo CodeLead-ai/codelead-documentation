@@ -83,6 +83,8 @@ When you run a skipped stage again, it is no longer skipped: its three skip fiel
 > [!NOTE]
 > **For team leads:** the reason stays on the stage in the state file, and in the skip's evidence record. The [audit pack](../modernization/audit-pack.md) states every skipped stage first in its README: who, when and why.
 
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Arguments
 
 - **`<STAGE>`**
@@ -194,7 +196,7 @@ When you run a skipped stage again, it is no longer skipped: its three skip fiel
 | Code | Meaning |
 |---|---|
 | `0` | The stage was skipped. |
-| `2` | The skip was refused, and nothing was recorded: no `--reason` option, an empty reason, a word that is no stage, the recordings, a stage that is not failed or waiting, a folder with no program, or a state file that cannot be read. |
+| `2` | The skip was refused, and nothing was recorded: no `--reason` option, an empty reason, a word that is no stage, the recordings, a stage that is not failed or waiting, a folder with no program, a folder without the Pro plan, or a state file that cannot be read. |
 
 ## Files
 

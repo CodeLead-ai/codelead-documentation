@@ -278,7 +278,7 @@ See [Privacy and remote models](../concepts/privacy-and-remote-models.md).
 |---|---|---|---|
 | `allowRemoteModels` | boolean | `false` | `false` refuses every call to a provider with `isRemote: true`, with the words `Remote model blocked by privacy settings.` `CODELEAD_ALLOW_REMOTE_MODELS=1` sets it to `true` for one run. |
 | `confirmBeforeSendingRepoContextToRemote` | boolean | `true` | Asks before the first call that sends the repository's code to a remote provider. `CODELEAD_ALLOW_REMOTE_MODELS=1` turns it off. |
-| `redactSensitiveFiles` | boolean | `true` | Not used. A file that sets it still loads, and `codelead config` prints it with `(not used: …)`. Whatever its value, CodeLead's ignore rules keep sensitive files, such as `.env`, out of its scans, the chat's sources and the patch prompt. The [patch check](../concepts/the-patch-check.md) refuses a patch that names one. Nothing inside a file that is sent is redacted. |
+| `redactSensitiveFiles` | boolean | `true` | Not used. A file that sets it still loads, and `codelead config` prints it with `(not used: …)`. Whatever its value, CodeLead's ignore rules keep sensitive files, such as `.env`, out of its scans, the chat's sources and the patch prompt. The [patch check](../concepts/the-patch-check.md) refuses a patch that names one. Nothing inside a file that is sent is redacted. The extension's Settings page no longer shows it, from version 0.7.16, and its **Save** leaves the key as it is. |
 
 ## output
 

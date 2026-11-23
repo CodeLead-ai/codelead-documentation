@@ -35,7 +35,7 @@ The **run profile** of the old application says how to start it on this machine.
 When the profile is recorded and allowed, the `read` stage of [`codelead modernize start`](codelead-modernize-start.md) does this:
 
 1. It starts the application with the command.
-2. It waits until the `--ready` path answers 200, for at most `--start-ms` milliseconds.
+2. It waits for at most `--start-ms` milliseconds, until the `--ready` path answers. A page, a redirect or a sign-in challenge counts: HTTP 200 to 399, 401 or 403. A server error (5xx) is not ready.
 3. The [Explorer](../analyst/explore-an-application.md) crawls the application.
 4. It stops the application. An application that already answered before the stage is never stopped.
 
@@ -63,6 +63,8 @@ On Windows, `--preset iis-express` composes the profile for you: `iisexpress.exe
 > [!TIP]
 > **For experienced users:** IIS Express answers 400 to `127.0.0.1`, so the preset's URL uses `localhost`. An absolute path in `--command` can hold spaces, as in `C:\Program Files (x86)\…`.
 
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Arguments
 
 - **`<WORDS>...`**
@@ -85,7 +87,7 @@ On Windows, `--preset iis-express` composes the profile for you: `iisexpress.exe
 
 - **`--ready <PATH>`**
 
-  A path that answers 200 once the application is up. The default is `/`.
+  A path that answers once the application is up. The default is `/`. The application counts as ready when the path answers HTTP 200 to 399: a page, or a redirect such as one to the sign-in page. A 401 or a 403, a sign-in challenge, counts too. CodeLead does not follow the redirect. No answer, a 5xx or another status is not ready.
 
 - **`--cwd <FOLDER>`**
 
@@ -127,10 +129,11 @@ On Windows, `--preset iis-express` composes the profile for you: `iisexpress.exe
   codelead modernize source --url http://localhost:5080/ --command dotnet -- run --project WebApplication1/webapp.csproj --urls http://localhost:5080
   ```
 
+  <!-- described, not captured -->
   ```output
   The old application's run profile is recorded in .codelead/config.json (modernization.source):
     command: dotnet run --project WebApplication1/webapp.csproj --urls http://localhost:5080
-    answers at: http://localhost:5080/ (ready when / answers 200, within 120 s)
+    answers at: http://localhost:5080/ (ready when / answers with a page, a redirect or a sign-in challenge (HTTP 200 to 399, 401 or 403), within 120 s)
     allowed: yes, CodeLead starts it for the stages that need it running (the read stage's Explorer crawl) and stops it after
   Then: codelead modernize start (or codelead modernize run read): the read stage starts the application for the Explorer's crawl and stops it after.
   ```
@@ -141,10 +144,11 @@ On Windows, `--preset iis-express` composes the profile for you: `iisexpress.exe
   codelead modernize source --url http://localhost:5080/ --command dotnet --no-allow -- run
   ```
 
+  <!-- described, not captured -->
   ```output
   The old application's run profile is recorded in .codelead/config.json (modernization.source):
     command: dotnet run
-    answers at: http://localhost:5080/ (ready when / answers 200, within 120 s)
+    answers at: http://localhost:5080/ (ready when / answers with a page, a redirect or a sign-in challenge (HTTP 200 to 399, 401 or 403), within 120 s)
     allowed: no, CodeLead does not start it: start it by hand before the read stage, or record the profile again without --no-allow
   Then: codelead modernize start (or codelead modernize run read): the read stage waits for you to start the application.
   ```
@@ -156,10 +160,11 @@ On Windows, `--preset iis-express` composes the profile for you: `iisexpress.exe
   codelead modernize source --clear
   ```
 
+  <!-- described, not captured -->
   ```output
   The old application's run profile (modernization.source in .codelead/config.json):
     command: dotnet run --project WebApplication1/webapp.csproj --urls http://localhost:5080
-    answers at: http://localhost:5080/ (ready when / answers 200, within 120 s)
+    answers at: http://localhost:5080/ (ready when / answers with a page, a redirect or a sign-in challenge (HTTP 200 to 399, 401 or 403), within 120 s)
     allowed: yes, CodeLead starts it for the stages that need it running (the read stage's Explorer crawl) and stops it after
   The run profile is taken out of .codelead/config.json: the program starts nothing; the read stage's Explorer crawls the address the state file names (codelead modernize start without --base names none).
   ```
@@ -190,7 +195,7 @@ On Windows, `--preset iis-express` composes the profile for you: `iisexpress.exe
 | Code | Meaning |
 |---|---|
 | `0` | The profile was recorded, shown or taken out. |
-| `2` | The profile was refused: a missing `--url`, a shell line, a preset on the wrong system, a folder with no CodeLead configuration. Nothing was recorded. |
+| `2` | The profile was refused: a missing `--url`, a shell line, a preset on the wrong system, a folder with no CodeLead configuration, a folder without the Pro plan. Nothing was recorded. |
 
 ## Files
 

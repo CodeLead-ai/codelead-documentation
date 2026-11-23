@@ -148,6 +148,7 @@ The optional answers, here `security`, follow the five that the file always hold
 | `webProject` | string or `null` | The old web project's name. |
 | `kind` | string | The kind of application, such as `aspnet-mvc`, or `unknown`. |
 | `baseUrl` | string or `null` | The address where the old application answers, from `--base` or the [run profile](run-profile.md#the-old-applications-run-profile). |
+| `accounts` | list, optional | The roles that the read stage's Explorer signs in as, from `codelead modernize start --as` or `/modernize --run --as`. Each entry is `{ "role": "clerk", "account": "clerk@example.test" }`. It never holds a password: the stage reads each password when it runs, from `CODELEAD_WALK_PASSWORD_<ROLE>`, else from the file that `CODELEAD_WALK_CREDENTIALS` names. Absent when no `--as` was given. A later `--as` replaces the list. |
 
 ## Stages
 

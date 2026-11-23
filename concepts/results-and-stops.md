@@ -96,13 +96,16 @@ A failure that you must act on also comes as a **problem**: a title, the reason,
 | `The repair loop stopped: this repair returns <file> to its state after repair 1, …` | The repairs go in circles. | Fix the file by hand, then run `/validate`. See [Repair](repair.md). |
 | `Automated build stopped: step <id> is blocked.` | A step of a new app could not be built. | Send the request again (Retry) to continue, revise the plan with [`/plan --revise`](../chat-commands/plan.md), or build one step with [`/build-step`](../chat-commands/build-step.md). |
 | `This clone is in use: …` | Another unattended run holds the run lock of this folder. | Wait for it to end, or stop it. See [Unattended runs and the run lock](unattended-runs.md). |
+| `The automated build stopped: <what the step does>, and nobody is here to answer` | An automated build or an unattended run came to a step that is hard to undo. Nobody was there, so CodeLead did not answer. The outcome is `stopped`. | Use the setting that allows the step, when the words name one. Or run the same command where a person answers: at the terminal or in the chat. |
+| `The automated build did not start: <provider> was not allowed (the answer was no), …` | You answered no to the consent for a remote model at the start. Nothing was sent, and nothing ran. | Pick a local model for that role, allow remote models, or send the command again and answer `y`. See [Privacy and remote models](privacy-and-remote-models.md). |
+| `The modernization program is in CodeLead's Pro plan; …` | A modernization command ran in a folder without the Pro plan. Nothing ran. | Bring a licence of the Pro plan into the folder. See [Licence and plans](licence-and-plans.md). |
 
 The full list is on [Messages and what to do](../reference/messages.md). The steps for each case are in [Fix a stop](../how-to/fix-a-stop.md).
 
 ## What it is not
 
 - **Not the full output.** The result is a summary. The full words are one click away: **Show details** in the chat, or the block above the closing line in the terminal.
-- **Not a judgement of you.** `stopped` is the outcome of a "no": your own, or the recommended no that [`/create-app --auto`](../chat-commands/create-app.md) gives. It is not shown as a failure.
+- **Not a judgement of you.** `stopped` is the outcome of a "no": your own, or the recommended no that [`/create-app --auto`](../chat-commands/create-app.md) gives. It is also the outcome of a run that stopped at a step that is hard to undo, because nobody was there to answer. It is not shown as a failure.
 - **Not always the end of the work.** Many stops wait for one command from you, and then the same task continues.
 
 ## Details

@@ -19,7 +19,7 @@ date: 2026-11-20
 ## Synopsis
 
 ```console
-codelead modernize start [--base <URL>] [--unattended] [--project <NAME>]
+codelead modernize start [--base <URL>] [--unattended] [--project <NAME>] [--as <ROLE>=<ACCOUNT>]...
 codelead modernize start -h|--help
 ```
 
@@ -31,14 +31,24 @@ codelead modernize start -h|--help
 2. It runs the `read` stage. The stage writes the [dossier](../modernization/dossier.md) under `docs/codelead/dossier/`: the survey of the application, its dependencies, its security exposure and the options to modernize it. No model is called.
 3. It moves to the `recordings` stage, which waits for a person.
 
-Run [`codelead init`](codelead-init.md) in the folder first.
+Run [`codelead init`](codelead-init.md) in the folder first. In a folder where CodeLead is not initialized, `start` is refused before any work, with exit code 2: `Refused: There is no CodeLead configuration in this folder (.codelead/config.json): initialize the folder first (codelead init, or Initialize in the extension), then start the program. Nothing was written or run.`
+
+The program is in CodeLead's Pro plan. In a folder without the Pro plan, `start` is refused before any work, with exit code 2, and nothing is written. See [Licence and plans](../concepts/licence-and-plans.md).
 
 > [!NOTE]
 > **New to this?** The dossier is CodeLead's report on the old application. It says what the application is made of, what is risky, and which ways to modernize it fit. Read it before you decide anything.
 
 ### The Explorer's crawl
 
-With `--base <url>`, the `read` stage also runs the [Explorer](../analyst/explore-an-application.md) on the running application. The Explorer clicks every link and menu item that sends no form, and records each screen. The Explorer is in the pro plan. See [Licence and plans](../concepts/licence-and-plans.md).
+With `--base <url>`, the `read` stage also runs the [Explorer](../analyst/explore-an-application.md) on the running application. The Explorer clicks every link and menu item that sends no form, and records each screen.
+
+### Sign-in accounts for the crawl
+
+With `--as <role>=<account>`, the Explorer signs in as that account, and explores what the role can reach. Repeat `--as` for each role. The program keeps the roles and the accounts in the state file, as `application.accounts`, for every later run of the `read` stage. It never keeps a password.
+
+The `read` stage reads each password when it runs: from `CODELEAD_WALK_PASSWORD_<ROLE>`, with the role in capitals, else from the file that `CODELEAD_WALK_CREDENTIALS` names. That file must be outside the folder. When a password is missing, the stage waits, and its problem names the variable. Nothing is started or crawled. Set the variable, then run the stage again with [`codelead modernize run read`](codelead-modernize-run.md).
+
+A role's name starts with a letter, then holds letters, digits or underscores. A wrong `--as` is refused before any work, with exit code 2, and nothing is recorded.
 
 When a run profile is recorded with [`codelead modernize source`](codelead-modernize-source.md), CodeLead starts the old application for the crawl and stops it after. Its address is then the default for `--base`.
 
@@ -53,15 +63,19 @@ When a run profile is recorded with [`codelead modernize source`](codelead-moder
 
 - **`--base <URL>`**
 
-  The running application's address. The `read` stage's Explorer crawls it. This needs the pro plan.
+  The running application's address. The `read` stage's Explorer crawls it.
 
 - **`--unattended`**
 
-  The transforms' approvals are answered yes. The default is approve mode: you approve each landing, as the transforms ask.
+  Unattended mode: the transforms' approvals get CodeLead's recommended answer, which is yes when the patch check passed with no blocking finding. A step that is hard to undo stops the stage. A remote model's consent is asked at the start. The default is approve mode: you approve each landing, as the transforms ask. See [Approve mode and unattended mode](../modernization/the-program.md#approve-mode-and-unattended-mode).
 
 - **`--project <NAME>`**
 
   The web project to modernize, when the folder holds several.
+
+- **`--as <ROLE>=<ACCOUNT>`**
+
+  A role that the `read` stage's Explorer signs in as, and its account. Repeat it for each role. The state file keeps it for every run of the stage. The password is read when the stage runs, from `CODELEAD_WALK_PASSWORD_<ROLE>`, else from the file that `CODELEAD_WALK_CREDENTIALS` names. It is never written. See [Sign-in accounts for the crawl](#sign-in-accounts-for-the-crawl).
 
 ## Examples
 
@@ -106,7 +120,35 @@ When a run profile is recorded with [`codelead modernize source`](codelead-moder
     Waiting for you: …
   ```
 
-  In a folder without the pro plan, the crawl is refused. The dossier is still written, and the stage says so.
+- Start the program, and let the Explorer sign in as a clerk. Set the password in the environment first:
+
+  ```console
+  export CODELEAD_WALK_PASSWORD_CLERK=<the password>
+  codelead modernize start --base http://localhost:5080/ --as clerk=clerk@example.test
+  ```
+
+  <!-- described, not captured -->
+  ```output
+  The modernization program of webapp (aspnet-mvc), approve mode: started at .codelead/modernization.json; …
+  The Explorer signs in as clerk (clerk@example.test), kept in .codelead/modernization.json for every run of the read stage; each password is read when the stage runs, from CODELEAD_WALK_PASSWORD_CLERK, else the file CODELEAD_WALK_CREDENTIALS names, and is never written.
+  ▸ Read the application (codelead modernize run read)
+  …
+  The Explorer: crawling http://localhost:5080/ as clerk (clerk@example.test) (no forms sent) into …
+  ```
+
+  Without the password, the stage waits with the problem `The Explorer needs the password of an account`, and names `CODELEAD_WALK_PASSWORD_CLERK`.
+
+- Start the program in a folder without the Pro plan. The start is refused before any work:
+
+  ```console
+  codelead modernize start
+  ```
+
+  ```output
+  The modernization program is in CodeLead's Pro plan; this folder's licence is missing. Ask for a licence that includes it.
+  ```
+
+  The exit code is 2. Nothing is written.
 
 - Start the program in unattended mode, for a folder with two web projects:
 
@@ -125,13 +167,13 @@ When a run profile is recorded with [`codelead modernize source`](codelead-moder
 |---|---|
 | `0` | The `read` stage is done, and the program waits at the recordings. |
 | `1` | The `read` stage failed. Its problem says why, and what to do. |
-| `2` | The command was refused: another process runs a program here, or the state file cannot be read. |
+| `2` | The command was refused before any work: a folder without the Pro plan, a folder where CodeLead is not initialized, another process that runs a program here, a state file that cannot be read, or an `--as` that is not valid. |
 
 ## Files
 
 | File | What `start` does with it |
 |---|---|
-| `.codelead/modernization.json` | Writes the state file, or keeps the one that is there. |
+| `.codelead/modernization.json` | Writes the state file, or keeps the one that is there. With `--as`, writes the roles and the accounts in `application.accounts`. |
 | `docs/codelead/dossier/` | The `read` stage writes the dossier. |
 | `.codelead/config.json` | Reads the run profile, `modernization.source`. |
 | `.codelead/evidence/ev-*.json` | One record for the `read` stage, and one for the waiting recordings. |

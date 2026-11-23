@@ -42,6 +42,7 @@ Every `codelead` command ends with an exit code. A script, a scheduled job or a 
 | [`codelead lint`](../cli/codelead-lint.md), [`codelead walk`](../cli/codelead-walk.md), [`codelead model`](../cli/codelead-model.md) and [`codelead modernize`](../cli/codelead-modernize.md) | A missing required option, a wrong option or an unknown word is `2`, not `1`: the command refused before anything ran. |
 | [`codelead licence`](../cli/codelead-licence.md) | `0` in every state of the licence: none, valid or invalid. |
 | [`codelead modernize status`](../cli/codelead-modernize-status.md) | `1` when there is no program in this folder. |
+| [`codelead rebuild run`](../cli/codelead-rebuild-run.md) and [`codelead rebuild --plan`](../cli/codelead-rebuild.md) | `1`, not `2`, on a folder without the Pro plan. Every other command of the modernization program refuses it with `2`. |
 | [`codelead scan`](../cli/codelead-scan.md) | `1` with `--expect-absent` when an expected-absent key is still there. |
 | [`codelead lint`](../cli/codelead-lint.md) | `0` whatever the lint finds. |
 
@@ -87,32 +88,34 @@ Every `codelead` command ends with an exit code. A script, a scheduled job or a 
 | `codelead spec new` | Written. | Refused: the file is there, or the name is not valid. | |
 | `codelead spec draft` | Every spec was drafted. | A spec was refused or failed. | No spec found, or a remote provider is blocked. |
 | `codelead spec walk` | Every step passed. | A step failed or was blocked, or there was a finding. | Nothing was walked, or a journey was refused. |
-| [`codelead walk`](../cli/codelead-walk.md) | Every step passed, with no finding. | A step failed or was blocked, a finding, or no step walked. | Nothing honest could be recorded: a refused spec, nothing that answers at `--base`, a browser that is not installed, a wrong option, no `--base`. |
+| [`codelead walk`](../cli/codelead-walk.md) | Every step passed, with no finding. | A step failed or was blocked, a finding, or no step walked. | Nothing honest could be recorded: a refused spec, nothing that answers at `--base`, a browser that is not installed, a wrong option, no `--base`, `--rebuild` on the free plan. |
 | [`codelead analyst`](../cli/codelead-analyst.md) | Each subcommand's. | Each subcommand's, and the free plan. | Each subcommand's. |
 
 ### Modernization
 
+Every command of this table but `codelead modernize stop` needs the Pro plan. On the free plan, it ends with `2` before anything runs: `The modernization program is in CodeLead's Pro plan; this folder's licence is missing. Ask for a licence that includes it.` The commands of the rebuild below need it too. See [Licence and plans](../concepts/licence-and-plans.md).
+
 | Command | `0` | `1` | `2` |
 |---|---|---|---|
-| [`codelead modernize start`](../cli/codelead-modernize-start.md), [`next`](../cli/codelead-modernize-next.md), [`run`](../cli/codelead-modernize-run.md), [`continue`](../cli/codelead-modernize-continue.md) | The run ended with every stage done, or at a stage that waits for you. | A stage failed. | Refused: an unknown stage, another process runs a program here, the state file cannot be read. |
-| [`codelead modernize answer`](../cli/codelead-modernize-answer.md) | The answers were recorded. | | A key or a value was refused. |
-| [`codelead modernize skip`](../cli/codelead-modernize-skip.md) | The stage was skipped. | | Refused: no `--reason` option, an empty reason, a word that is no stage, the recordings, a stage that is pending, running, done or skipped already. |
-| [`codelead modernize status`](../cli/codelead-modernize-status.md) | The state was printed. | No program in this folder. | The state file cannot be read. |
-| [`codelead modernize stop`](../cli/codelead-modernize-stop.md) | The stop was asked, or nothing ran. | | The state file cannot be read. |
-| [`codelead modernize source`](../cli/codelead-modernize-source.md) | The profile was recorded, shown or taken out. | | The profile was refused. |
-| [`codelead model`](../cli/codelead-model.md) | The extraction gate passed. | The gate did not pass. | Nothing could be extracted or written, or `--source` was not given. |
-| [`codelead parity`](../cli/codelead-parity.md) | The capture fetched every route, the check passed, or the rebuild is finished. | A route could not be fetched, an unwaived difference, or a rebuild blocker. | Nothing to compare: no mode, no routes, no baseline, no manifest. |
-| [`codelead seed`](../cli/codelead-seed.md) | Written, and everything seeded. | Written, and something not seeded. | Nothing written. |
-| [`codelead register`](../cli/codelead-register.md) | Both files written. | | Nothing written. |
+| [`codelead modernize start`](../cli/codelead-modernize-start.md), [`next`](../cli/codelead-modernize-next.md), [`run`](../cli/codelead-modernize-run.md), [`continue`](../cli/codelead-modernize-continue.md) | The run ended with every stage done, or at a stage that waits for you. | A stage failed. | Refused: the free plan, an unknown stage, another process runs a program here, the state file cannot be read. `start` also in a folder where CodeLead is not initialized. |
+| [`codelead modernize answer`](../cli/codelead-modernize-answer.md) | The answers were recorded. | | The free plan, or a key or a value was refused. |
+| [`codelead modernize skip`](../cli/codelead-modernize-skip.md) | The stage was skipped. | | Refused: the free plan, no `--reason` option, an empty reason, a word that is no stage, the recordings, a stage that is pending, running, done or skipped already. |
+| [`codelead modernize status`](../cli/codelead-modernize-status.md) | The state was printed. | No program in this folder. | The free plan, or the state file cannot be read. |
+| [`codelead modernize stop`](../cli/codelead-modernize-stop.md) (free) | The stop was asked, or nothing ran. | | The state file cannot be read. |
+| [`codelead modernize source`](../cli/codelead-modernize-source.md) | The profile was recorded, shown or taken out. | | The free plan, or the profile was refused. |
+| [`codelead model`](../cli/codelead-model.md) | The extraction gate passed. | The gate did not pass. | The free plan, nothing could be extracted or written, or `--source` was not given. |
+| [`codelead parity`](../cli/codelead-parity.md) | The capture fetched every route, the check passed, or the rebuild is finished. | A route could not be fetched, an unwaived difference, or a rebuild blocker. | The free plan, or nothing to compare: no mode, no routes, no baseline, no manifest. |
+| [`codelead seed`](../cli/codelead-seed.md) | Written, and everything seeded. | Written, and something not seeded. | The free plan, or nothing written. |
+| [`codelead register`](../cli/codelead-register.md) | Both files written. | | The free plan, or nothing written. |
 
 ### Rebuilds
 
 | Command | `0` | `1` | `2` | `130` |
 |---|---|---|---|---|
-| [`codelead rebuild init`](../cli/codelead-rebuild-init.md) | Made, no blocker, and the dry run passed. | Made and not ready to run. | Refused: nothing was made. | |
-| [`codelead rebuild`](../cli/codelead-rebuild.md) | The plan was printed. | The rebuild cannot be read. | | |
-| [`codelead rebuild run`](../cli/codelead-rebuild-run.md) | The run ended: the queue's end, `--until`, a cap, the stop file. A dry run whose checks passed. | Refused, or stopped on a blocker, a held port or no progress. | | Ctrl+C. |
-| [`codelead rebuild-report`](../cli/codelead-rebuild-report.md) | The page was written. | The page was not written. | Refused: the folder is not a rebuild. | |
+| [`codelead rebuild init`](../cli/codelead-rebuild-init.md) | Made, no blocker, and the dry run passed. | Made and not ready to run. | Refused, the free plan included: nothing was made. | |
+| [`codelead rebuild`](../cli/codelead-rebuild.md) | The plan was printed. | The rebuild cannot be read, or the free plan. | | |
+| [`codelead rebuild run`](../cli/codelead-rebuild-run.md) | The run ended: the queue's end, `--until`, a cap, the stop file. A dry run whose checks passed. | Refused (the free plan included), or stopped on a blocker, a held port or no progress. | | Ctrl+C. |
+| [`codelead rebuild-report`](../cli/codelead-rebuild-report.md) | The page was written. | The page was not written. | Refused: the free plan, or the folder is not a rebuild. | |
 
 ### The board
 

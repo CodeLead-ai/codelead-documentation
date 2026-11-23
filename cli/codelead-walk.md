@@ -52,6 +52,8 @@ The passwords of a spec's accounts come from `CODELEAD_WALK_PASSWORD_<USER>`, or
 > [!TIP]
 > **For experienced users:** the walk reads the server's day in the `--time-zone` zone. This day sets each step's server time, `{today}`, and the journeys bound to one day. Without it, the walk uses the run profile's zone or the spec's.
 
+`--rebuild` is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, `codelead walk --rebuild` is refused before anything is walked, with exit code 2. The walk of a spec, without `--rebuild`, stays free. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Options
 
 - **`--base <URL>`**
@@ -165,7 +167,7 @@ The passwords of a spec's accounts come from `CODELEAD_WALK_PASSWORD_<USER>`, or
 |---|---|
 | `0` | Every step passed, and there was no finding. |
 | `1` | A step failed or was blocked, there was a finding, or no step was walked. |
-| `2` | Nothing honest could be recorded: a refused spec, nothing that answers at `--base`, a server that lends an identity, a root that is not a rebuild, a browser that is not installed, an option that is not valid. `--base` missing is also `2`. |
+| `2` | Nothing honest could be recorded: a refused spec, nothing that answers at `--base`, a server that lends an identity, a root that is not a rebuild, a browser that is not installed, an option that is not valid, `--rebuild` in a folder without the Pro plan. `--base` missing is also `2`. |
 
 ## Files
 

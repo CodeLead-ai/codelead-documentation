@@ -63,6 +63,8 @@ CodeLead then reconciles the schema read from the code with the definition. Each
 > [!TIP]
 > **For experienced users:** when several projects build the assembly that a reference names, CodeLead reads the one under `--project-root`. Without it, CodeLead reads the one that a solution lists, then the one the web project references by its project file. The summary says which one, and why.
 
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. The folder that counts is the one that `--source` names. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Options
 
 - **`--source <REPO>`**
@@ -168,7 +170,7 @@ CodeLead then reconciles the schema read from the code with the definition. Each
 |---|---|
 | `0` | The gate passed (a schema-only model included). |
 | `1` | The gate did not pass. The report names each finding and the key to record a reason under. |
-| `2` | Nothing could be extracted or written, the extraction read nothing, or a definition of the database was refused. `--source` missing, or a wrong option, is also `2`. |
+| `2` | Nothing could be extracted or written, the extraction read nothing, or a definition of the database was refused. `--source` missing, a wrong option, or a folder without the Pro plan is also `2`. |
 
 ## Files
 

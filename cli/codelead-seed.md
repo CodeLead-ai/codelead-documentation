@@ -51,6 +51,8 @@ A table gets rows only when something asks for them. That can be `--rows`, a rul
 > [!TIP]
 > **For experienced users:** a run covers `--days` days that end the day before the script runs, by the database server's clock. The day of the run is left to the walk. For `--rows`, `N` counts in three ways. A catalog table gets `N` rows in all. A day table gets `N` per person per day. A table that points at the people gets `N` per person.
 
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Options
 
 - **`--schema <SCHEMA_JSON>`**
@@ -165,7 +167,7 @@ A table gets rows only when something asks for them. That can be `--rows`, a rul
 |---|---|
 | `0` | The script was written, and everything asked for was seeded. |
 | `1` | The script was written, and something could not be seeded. The markdown lists it. |
-| `2` | Nothing was written: an input is missing or cannot be read, or an option was refused. |
+| `2` | Nothing was written: the folder does not have the Pro plan, an input is missing or cannot be read, or an option was refused. |
 
 ## Files
 

@@ -42,6 +42,8 @@ By default the page is `.codelead/rebuild-report.html` in the rebuild. An intera
 > [!TIP]
 > **For experienced users:** use `--out` to write the report outside the repository, for example into a folder that a build server publishes.
 
+The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
+
 ## Options
 
 - **`--root <REBUILD>`**
@@ -100,7 +102,7 @@ By default the page is `.codelead/rebuild-report.html` in the rebuild. An intera
 |---|---|
 | `0` | The page was written. Its path is printed. |
 | `1` | The page was not written. The line says why. |
-| `2` | Refused before anything was written: the folder is not a rebuild, because it has no `docs/codelead/rebuild/rebuild.json`. |
+| `2` | Refused before anything was written: the folder is not a rebuild, because it has no `docs/codelead/rebuild/rebuild.json`, or it does not have the Pro plan. |
 
 ## Files
 

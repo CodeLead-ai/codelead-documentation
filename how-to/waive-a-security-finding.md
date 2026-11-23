@@ -21,6 +21,9 @@ This guide decides the security findings that the modernization program leaves t
 - The program ran up to the Upgrade in place stage, and the stage waits. Or the dossier exists, and you work by hand. See [The modernization program](../modernization/the-program.md).
 - You know what the application is meant to allow. For example, the Basic Store sample is a store that accepts writes without sign-in, by design.
 
+> [!TIP]
+> In the [Modernize wizard](../extension/modernize-wizard.md#security-decisions), the waiting card lists each finding with its two lines, **Copy** and **Open the chat**, and the three answers as buttons.
+
 > [!NOTE]
 > **New to this?** The [journeys](../analyst/concepts.md) recorded the application as it is today. A fix that adds a sign-in requirement refuses callers that the journeys saw succeed. That can be right, or it can break what the store is for. So a person decides.
 

@@ -14,7 +14,7 @@ A CodeLead licence is a signed file in the repository: `docs/codelead/licence.js
 - The free plan has projects, the chat, sessions, the board, settings, the evidence and the knowledge base. It also has the spec walk: CodeLead following a written spec on the running app.
 - The pro plan adds the Analyst and the Explorer, which record and crawl a running application, and modernization.
 - CodeLead checks the licence's signature on your machine. It never calls a server.
-- A licence problem is a warning. It never stops a run. One exception: the Analyst and the Explorer refuse on the free plan.
+- A licence problem is a warning. It never stops a run. One exception: the pro features refuse on the free plan. They are the Analyst, the Explorer and the modernization program.
 
 ## Why it exists
 
@@ -38,6 +38,18 @@ codelead analyst check journeys.json
 ```output
 The Analyst is in CodeLead's Pro plan; this folder's licence is missing. Ask for a licence that includes it.
 ```
+
+The modernization program's commands refuse in the same words. A real refusal, in a folder with no licence file:
+
+```console
+codelead modernize status
+```
+
+```output
+The modernization program is in CodeLead's Pro plan; this folder's licence is missing. Ask for a licence that includes it.
+```
+
+The exit code is 2. Nothing ran, and nothing was written.
 
 On the free plan, the extension still lists the pro views. Each one shows a single row, for example "Explorer is in CodeLead's Pro plan", and its buttons are hidden. That is a convenience. The check in CodeLead's commands is what counts.
 
@@ -110,7 +122,14 @@ A warning never stops a run and never changes a result.
 - **The plan field**. `free` or `pro`. A licence without the field is free.
 - **`onOverage`**. `warn` is the only behaviour built today.
 - **JSON**. `codelead licence --json` prints `state` (`none`, `valid` or `invalid`) and `plan`. A valid licence adds `repositoryListed`, `holder`, `project`, `term`, `seatBlocks` and `issued`. An invalid one adds `why`.
-- **Where the plan is checked**. Today the Analyst's commands and the Explorer check it. So does the read stage of the modernization program, because it runs the Explorer. Other modernization commands do not check the plan today.
+- **Where the plan is checked**. Each pro command checks it once, before it runs:
+  - the Analyst's commands and the Explorer ([`codelead analyst`](../cli/codelead-analyst.md)), exit code 1;
+  - every subcommand of [`codelead modernize`](../cli/codelead-modernize.md) except `stop`, and the chat's [`/modernize`](../chat-commands/modernize.md);
+  - [`codelead rebuild`](../cli/codelead-rebuild.md) (`--plan`, `run` and `init`), [`codelead model`](../cli/codelead-model.md), [`codelead register`](../cli/codelead-register.md), [`codelead seed`](../cli/codelead-seed.md), [`codelead parity`](../cli/codelead-parity.md), [`codelead rebuild-report`](../cli/codelead-rebuild-report.md) and [`codelead walk --rebuild`](../cli/codelead-walk.md).
+- **The exit codes of the program's refusal**. `2`, except `codelead rebuild run` and `codelead rebuild --plan`, which exit with `1`.
+- **What stays free**. Every `--help`. `codelead modernize stop`, so that a person can always stop what runs on the machine. [`codelead walk`](../cli/codelead-walk.md) on a spec, [`codelead spec`](../cli/codelead-spec.md), `codelead licence` and `codelead doctor`.
+- **A rebuild's plan**. A rebuild is a new repository with its own root commit, which a licence of the old application does not list. So a rebuild is on the Pro plan when its own folder is, or when the old application that its manifest names is.
+- **Unattended runs** check the plan once, at their start: `codelead rebuild run`, the program's run and the board queue.
 - **The doctor**. `codelead doctor --licence` prints the same report after the machine's checks.
 
 ## Related content

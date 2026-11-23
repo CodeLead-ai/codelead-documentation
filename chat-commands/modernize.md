@@ -37,7 +37,7 @@ date: 2026-11-20
 /modernize --rebuild-init --out <FOLDER> [--source <FOLDER>] [--template <NAME|PATH>] [--framework net10.0|net8.0] [--identity keep|drop] [--database <CONNECTION_NAME>|sample-seed] [--no-install] [--no-commit]
 /modernize --rebuild-plan [--scope <PREFIX>]
 /modernize --review channel
-/modernize --run [<STAGE>]
+/modernize --run [<STAGE>] [--as <ROLE>=<ACCOUNT>...]
 /modernize --continue
 /modernize --answer <KEY>=<VALUE>...
 /modernize --skip <STAGE> --reason <WHY>
@@ -71,6 +71,8 @@ Two rules hold for the actions that change code:
 
 > [!NOTE]
 > **New to this?** Start with `/modernize --plan` on the Basic Store sample. It reads the repository and changes nothing. Then read `docs/codelead/dossier/DOSSIER.md`. The [tutorial](../tutorials/modernize-a-dotnet-framework-app.md) walks the rest, and the [Modernize wizard](../extension/modernize-wizard.md) runs it with buttons.
+
+Every action of `/modernize` needs the Pro plan in the folder. On the free plan, the chat refuses it before anything runs, with the outcome `failed` and a problem card: `The modernization program is in CodeLead's Pro plan; this folder's licence is missing. Ask for a licence that includes it.` See [Licence and plans](../concepts/licence-and-plans.md).
 
 > [!TIP]
 > **For experienced users:** the command line runs the same program: [`codelead modernize`](../cli/codelead-modernize.md) with `start`, `next`, `run`, `continue`, `answer`, `skip`, `status`, `stop` and `source`. The program's state is `.codelead/modernization.json`. See [Modernization state file](../reference/modernization-state-file.md).
@@ -126,6 +128,7 @@ Each option belongs to one action. The action's section below says more.
 | `--rebuild-plan` | | Writes the rebuild's plan. |
 | `--review channel` | | Reviews the drafted rows of the channel translation table. |
 | `--run [<STAGE>]` | | Runs the program's next stages, or one stage again. |
+| `--as <ROLE>=<ACCOUNT>` | `--run` | A role that the read stage's Explorer signs in as, and its account. Repeat it for each role. |
 | `--continue` | | Says that the recordings are made, then runs the next stages. |
 | `--answer <KEY>=<VALUE>` | | Records the program's answers. |
 | `--skip <STAGE>` | | Goes past a stage of the program that failed or waits, with `--reason`. |
@@ -496,6 +499,7 @@ Runs in the rebuild repository. It shows each drafted row of the channel transla
 ```console
 /modernize --run
 /modernize --run <STAGE>
+/modernize --run [<STAGE>] --as <ROLE>=<ACCOUNT>...
 /modernize --continue
 /modernize --answer <KEY>=<VALUE>...
 /modernize --skip <STAGE> --reason <WHY>
@@ -505,9 +509,12 @@ The modernization program in the chat. It is the same program as [`codelead mode
 
 - `--run`: runs the next stages in order, until one waits on you, one fails, or all are done. The same as [`codelead modernize next`](../cli/codelead-modernize-next.md).
 - `--run <STAGE>`: runs one stage again: `read`, `recordings`, `pins`, `in-place`, `model`, `rebuild-init`, `rebuild` or `audit`.
+- `--as <ROLE>=<ACCOUNT>`, after `--run`: a role that the read stage's Explorer signs in as, and its account, as [`codelead modernize start --as`](../cli/codelead-modernize-start.md#sign-in-accounts-for-the-crawl) does. Repeat it for each role. The state file keeps the roles and the accounts, never a password, for every run of the stage. Each password is read when the stage runs, from `CODELEAD_WALK_PASSWORD_<ROLE>`, else from the file that `CODELEAD_WALK_CREDENTIALS` names. A missing password makes the stage wait, and its problem names the variable.
 - `--continue`: the recordings are made; CodeLead marks them done and runs the next stages. It takes nothing after it.
 - `--answer <KEY>=<VALUE>`: records answers, and runs nothing. The same as [`codelead modernize answer`](../cli/codelead-modernize-answer.md), with the same eight keys: `rebuildFolder`, `template`, `framework`, `identity`, `database`, `pinsDatabase`, `security` and `pins`. `pinsDatabase=done` (or `env:<NAME>`) answers the pins' database question. `security=decided`, `fix-all` or `fix-none` answers the security findings that wait for a person. `pins=enough` ends the pins stage with the coverage as it stands, only while the stage waits or failed.
 - `--skip <STAGE> --reason <WHY>`: goes past a stage that failed or waits for you, as [`codelead modernize skip`](../cli/codelead-modernize-skip.md) does. The reason is required. The recordings are never skipped.
+
+In unattended mode, `--run` and `--continue` ask you for the consent for each remote provider at their start, before the first model call. A no ends the command before any stage runs, with the outcome `stopped`. See [The modernization program](../modernization/the-program.md#approve-mode-and-unattended-mode).
 
 The pins stage runs both levels and waits while provable facts remain. When the web project has no narration, the stage first asks `Narrate webapp now? [Y/n]`, in this session. A stage that waits on you shows its question as a problem, with the answer to give and the command that runs it again.
 
@@ -572,7 +579,7 @@ Records how CodeLead starts the old application: its run profile, `modernization
 
 - `--command <EXE>` and `--args <WORDS>`: the program and its arguments. An argument that starts with `-` goes after `--`.
 - `--url <URL>`: where the application answers.
-- `--ready <PATH>`: the page that must answer 200 before the application counts as ready. The default is `/`.
+- `--ready <PATH>`: the page that must answer before the application counts as ready. The default is `/`. The application is ready when the page answers with a page, a redirect or a sign-in challenge: HTTP 200 to 399, 401 or 403. A server error (5xx) is not ready.
 - `--cwd <FOLDER>`, `--start-ms <MS>`, `--env NAME=value`: the folder, the time to wait (the default is 120 s), and environment variables.
 - `--preset iis-express`: IIS Express on Windows, for a .NET Framework web project; `--project <NAME>` names the web project.
 - `--show`: prints the profile. `--clear`: removes it.
@@ -583,10 +590,11 @@ Record a profile for an application that you start yourself:
 /modernize --source --command dotnet --url http://localhost:5000/ --no-allow -- run --urls http://localhost:5000
 ```
 
+<!-- described, not captured -->
 ```output
 The old application's run profile is recorded in .codelead/config.json (modernization.source):
   command: dotnet run --urls http://localhost:5000
-  answers at: http://localhost:5000/ (ready when / answers 200, within 120 s)
+  answers at: http://localhost:5000/ (ready when / answers with a page, a redirect or a sign-in challenge (HTTP 200 to 399, 401 or 403), within 120 s)
   allowed: no, CodeLead does not start it: start it by hand before the read stage, or record the profile again without --no-allow
 Then: codelead modernize start (or codelead modernize run read): the read stage waits for you to start the application.
 ```

@@ -46,7 +46,9 @@ CodeLead writes a run report while it builds: `.codelead/run-report.html`. The p
 | `Build these increments one at a time? [Y/n]` | Yes. | Yes. |
 | `Continue to the next increment? [Y/n]` | Yes. | Yes. |
 
-Inside each increment, CodeLead answers the questions of its steps by their recommended answers.
+Inside each increment, CodeLead answers the questions of its steps by their recommended answers. A step that is hard to undo is never answered: the build stops there, with the outcome `stopped`, the reason and the way out. A question with no recommended answer stops it too.
+
+When a role uses a remote provider, CodeLead asks you for the consent after your yes to the increments, before the first model call. It asks once for each remote provider that the roles would use. A no ends the command before anything is built: `The incremental build did not start: <provider> was not allowed (the answer was no), and <role> uses it.` See [Privacy and remote models](../concepts/privacy-and-remote-models.md).
 
 ## What you see
 
@@ -56,6 +58,7 @@ Inside each increment, CodeLead answers the questions of its steps by their reco
 | Some increments failed | `Incremental build finished with failures: 3/4 increments built, verified, and checkpointed.`, with one `FAILED (not built)` line each, then `Next:` `Build each failed increment with /implement <the increment's objective>; the increments above are committed` |
 | You answered no between increments | `Incremental build paused after 2/4 increments.`, then `Next: rerun /build-incremental to continue, or use /implement for the rest.` |
 | You answered no to the plan | `Incremental build not started. Nothing was created.` |
+| You answered no to the consent for a remote model | `The incremental build did not start: <provider> was not allowed (the answer was no), and <role> uses it` (outcome `stopped`) |
 | The planner failed | `Failed to create the increment plan`, with the reason |
 
 ## Examples

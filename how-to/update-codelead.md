@@ -18,7 +18,7 @@ This guide updates CodeLead, the CodeLead extension for VS Code, and the files t
 
 ## Before you begin
 
-- You have the newer package file, named like `codelead-0.1.0.tgz`, and the newer extension file, named like `codelead-vscode-0.7.15.vsix`.
+- You have the newer package file, named like `codelead-0.1.0.tgz`, and the newer extension file, named like `codelead-vscode-0.7.16.vsix`.
 - No CodeLead command runs: no session, no chat and no unattended run. A running command keeps the old version until it ends.
 
 ## Check the version you have
@@ -70,7 +70,7 @@ The commit names the exact build. Write it down: it tells you later which build 
 1. Install the newer `.vsix` file, as the first time:
 
    ```console
-   code --install-extension codelead-vscode-0.7.15.vsix
+   code --install-extension codelead-vscode-0.7.16.vsix
    ```
 
    Or use **Install from VSIX…** in the **Extensions** view. You do not uninstall first.
