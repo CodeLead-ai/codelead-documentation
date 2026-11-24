@@ -47,7 +47,7 @@ The walk refuses to record a result that it cannot trust. It stops with exit cod
 
 The passwords of the journeys' accounts come from `CODELEAD_WALK_PASSWORD_<USER>`, or from the file that `CODELEAD_WALK_CREDENTIALS` names. They never come from the journeys, and the walk never prints them. See [Passwords](../analyst/passwords.md).
 
-In a rebuild whose API holds a fake directory, CodeLead signs the walk's first account in itself before the walk. When the API refuses it, the walk is not run, and the line says `the API refused the walk's own account …`. An account may have no roles, and the fake directory must accept it so. When its code shows that it needs roles, the plan plans the sign-in's endpoint again, to be revised in place.
+In a rebuild whose API holds a fake directory, CodeLead signs the walk's first account in itself before the walk. It sends the fields of the old sign-in form: the account, the password, and each hidden field, empty. When the API refuses it (HTTP 401 or 403), the walk is not run, and the line says `the API refused the walk's own account …`. Any other answer says nothing about the account, so the walk runs and its own sign-in step judges. An account may have no roles, and the fake directory must accept it so. When its code shows that it needs roles, the plan plans the sign-in's endpoint again, to be revised in place.
 
 ### The walk of a rebuild's part
 

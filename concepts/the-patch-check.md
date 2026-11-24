@@ -3,7 +3,7 @@ title: The patch check
 description: What CodeLead checks in a patch before it asks you to apply it, the difference between a blocking finding and a note, and what each status means.
 kind: concept
 area: concepts
-date: 2026-11-20
+date: 2026-11-23
 ---
 
 # The patch check
@@ -40,7 +40,7 @@ The patch check catches these problems before the apply, without a model. A refu
 | Safety | Every path is inside the repository. No absolute path, no `..`, no generated, dependency, build, cache or session file, no sensitive file. | Blocking: `unsafe`. |
 | Sanity | `package.json` and `tsconfig.json` stay valid. Local imports point to files that exist. TypeScript and C# keep their basic syntax rules. No top-level name is declared twice. | Blocking: `cannot_apply`. |
 | Tests | The patch does not remove tests that the request did not ask to remove. | Blocking, or a note when tests are only renamed. |
-| Scope | The patch includes the files that the plan requires, and the files that must change together. | Blocking when a required file is missing. A file outside the plan, or a non-goal crossed, is a note. |
+| Scope | The patch includes the files that the plan requires, and the files that must change together. | Blocking when a required file is missing, with two exceptions in the details below. A file outside the plan, or a non-goal crossed, is a note. |
 | Habits | New lines follow the repository's [conventions](conventions.md). The layout, stub markers such as `TODO`, controls that do nothing, files with uncommitted changes. | Notes only. |
 
 ### A patch that passes, with a note
@@ -143,6 +143,8 @@ Next:
 
 - **Statuses.** `can_apply` (shown as "can apply cleanly"), `cannot_apply`, `unsafe`, `invalid_patch`, and `no_patch` when nothing waits to be checked.
 - **Retries.** After a refusal, `/implement` asks for a new patch at most 2 times. The retry carries the problems and asks for smaller hunks. [`/patch --retry`](../chat-commands/patch.md) does the same by hand.
+- **Files the request does not name.** A missing planned file is a note when the request names other files and not this one. A name that several files share names none of them. In a web project where every screen is a `page.tsx` in its own folder, "the page web/src/app/items/list/page.tsx" names that page only. Another screen's `page.tsx` that the plan added stays a note when the patch leaves it out. Only a path that tells the files apart names one of them.
+- **The file a change goes through.** Some requests name an existing file only as the way the change goes. For example: "through the API client module (src/lib/api.ts)". The patch may change that file, but it does not have to. The note then says: "the request names it as what the change goes through, not as a file to change". A file that does not exist yet stays required. So does a file that the request also asks to change, as in "and add the same data to the mock".
 - **The change surface.** CodeLead derives the files that a request is likely to change. A file outside them gets a note that ends with the words "a note, it does not block applying". In a .NET repository, some files must change together, for example a class and the base class it relies on. A patch that changes only one side gets a blocking finding.
 - **Re-anchoring.** A hunk whose context differs at its first or last line is placed where the rest matches, with a note that says where.
 - **A cut reply.** A patch whose reply was cut at the model's cap is refused whole, so that what arrived is never applied.
