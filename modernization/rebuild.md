@@ -106,7 +106,7 @@ The default template is `dotnet-next-shadcn`: an ASP.NET Core API with its tests
 See [Rebuild manifest](../reference/rebuild-manifest.md).
 
 > [!IMPORTANT]
-> With `identity` keep, no part of the plan builds the directory that checks a password outside Development and the tests. The sign-in part registers a stand-in directory for Development and the tests only, so a build for production signs nobody in. The plan says so in a note on the part `sign-in:endpoint`, under **Notes on parts** in `rebuild-plan.md`. A person adds the real directory.
+> With `identity` keep, the sign-in part registers a stand-in directory for Development and the tests only. The part `user-directory` builds the real directory, which checks a password against the old user table. Until it is accepted, a build for production signs nobody in. When CodeLead cannot read the old password check, there is no such part, and a person adds the real directory. See [The user directory](#the-user-directory).
 
 ### The run profile
 
@@ -364,6 +364,65 @@ Data access: of 17 endpoints whose old action reads or writes the database, 0 re
 ```
 
 An endpoint that reads no data is never finished. The run takes it as work left, and the run summary, the stage and the audit pack say the same count.
+
+### The user directory
+
+A **user directory** answers one question: is this account and this password right? The old application has one. For example, the Basic Store's sign-in reads a row of `Users` and calls `PasswordHasher.Verify`.
+
+The sign-in part builds a stand-in directory, `FakeUserDirectory`, for Development and the tests. Its accounts come from configuration, not from the database. So with `--identity keep`, the plan adds the part `user-directory`. It builds the real directory, `UserDirectory`, behind the same interface, `IUserDirectory`.
+
+The part needs two others: `data-access`, because it reads the accounts through the rebuild's data access, and `sign-in:endpoint`, which declares the interface. It waits until both have landed.
+
+**The password check is read from the old code, never invented.** CodeLead reads it with no model call:
+
+1. It finds the call of the old sign-in action that passes the typed password, such as `PasswordHasher.Verify(model.Password, user.PasswordHash, user.PasswordSalt)`.
+2. It finds where the old repository declares that member, and quotes its file whole.
+3. It checks that the old check calls nothing but .NET's own base library, such as `Rfc2898DeriveBytes` and `Convert`.
+
+The part's request shows the old sign-in action and the old check's source. It asks for a port that gives the same answer for the same stored hash and salt. That means the same algorithm, the same iteration count, the same key length, the same encoding and the same comparison. A default of the old framework is written out. For example, an old constructor called without a hash algorithm takes HMAC-SHA1 on the .NET Framework.
+
+When CodeLead cannot read the check to its source, the plan has no `user-directory` part. For example, the old sign-in calls `Membership.ValidateUser`, a membership provider set up outside the code. Other examples are a library with no source here, or a directory of the operating system's accounts. The note on `sign-in:endpoint` then says what was read and what was not:
+
+<!-- described, not captured -->
+```output
+No part of this plan builds the directory that checks a password outside Development and the tests: … the old sign-in's password check cannot be read to its source, so the plan builds no directory of its own: CodeLead never invents a password check. Read: the old sign-in action Account.SignIn (…); the call that checks the password, `Membership.ValidateUser(email, model.Password)` (…). Not read: Membership.ValidateUser is not declared in the old repository …
+```
+
+It is a person's turn: port the check and record it in the manifest under `decisions.identity.directory`.
+
+**How the two directories are chosen at start-up.** `Program.cs` makes the choice once, and a test can see it:
+
+- In Development, the stand-in directory stays, unless the setting `SignIn:Directory` is `real`.
+- In every other environment, the real directory is registered, and the stand-in never is.
+
+**Roles.** The real directory answers the roles the old application gives a user. When the old application names no role, as the Basic Store does, it answers none. An account without roles still signs in.
+
+**The proof, with no password in the repository.** CodeLead never writes a password into a request, a file, a log or a record. So the part's tests make their own rows:
+
+- A test inserts a row for a made-up account, its hash made by the port from a made-up password. That account signs in.
+- A wrong password and an unknown account are refused, with the old refusal's words.
+- A copy of the old check's own source, in the tests, verifies what the port makes for 20 made-up passwords.
+
+Then the part's walk proves that a real account signs in. CodeLead starts the API in Development with `SignIn__Directory=real`, and gives the stand-in no account. Its own sign-in check then signs the walk's account in, with the password from the walk's credentials only. Only a 2xx answer passes. Two more checks follow, each with a password made at random and never written:
+
+- the walk's account with a wrong password must be refused (401 or 403);
+- an account that no database holds must be refused too.
+
+So a directory that signs every account in fails its walk. The acceptance line says which directory the check went through:
+
+<!-- described, not captured -->
+```output
+Acceptance (walk r0): accepted. … CodeLead's own sign-in of the walk's account <ACCOUNT> went through the real directory UserDirectory before this walk, and it refused a wrong password and an account no database holds (…).
+```
+
+Every other walk stays on the stand-in directory. Once the part is accepted, CodeLead records the directory in the manifest, with `builtBy: "user-directory"`. The note "a build for production signs nobody in" then goes. The plan, the run summary, the stage and the audit pack say what was built and how it was proved:
+
+<!-- described, not captured -->
+```output
+User directory: the part user-directory is accepted (ev-<ID>): UserDirectory behind IUserDirectory, its password check ported from PasswordHasher.Verify (…). Proved by its contract tests … and by its walk (ev-<ID>): …
+```
+
+With `--identity drop`, or a directory a person recorded, there is no such part.
 
 ### Lanes
 
