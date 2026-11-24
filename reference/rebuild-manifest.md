@@ -52,7 +52,7 @@ The answers of the [modernization program](modernization-state-file.md#answers) 
   },
   "decisions": {
     "identity": "keep: the new API keeps the old application's accounts and signs users in with ASP.NET Core Identity over the old user tables (codelead rebuild init --identity keep)",
-    "database": "sample-seed: the new API starts on a sample database seeded at start-up (api/Api/sample-seed.db); the day reset (run.reset) deletes it before every journey, so that each journey starts on the seed",
+    "database": "sample-seed: the new API starts on a sample database seeded at start-up (api/Api/sample-seed.db); the day reset (run.reset) puts the seed back in it before every journey, in place while the API runs, so that each journey starts on the seed",
     "channel": "none"
   },
   "run": {

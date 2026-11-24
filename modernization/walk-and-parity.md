@@ -53,9 +53,22 @@ A walk shows one tree. So CodeLead stamps the code when the walk begins and agai
 The code changed while the walk ran (…): no single tree was walked, and parity will not treat this walk as current. What differs: api/Api/sample-seed.db (removed). The day reset (scripts/reset-sample-seed.mjs) removed api/Api/sample-seed.db, a tracked file: it should be ignored, not tracked. The way out: …
 ```
 
-The sample database is the usual case. The API makes it at start-up, and the day reset deletes it before every journey. So it must never be tracked. See [The data access](rebuild.md#the-data-access).
+The sample database is the usual case. Every walk changes it: its journeys write, and the day reset puts the seed back before each one. So it must never be tracked. See [The data access](rebuild.md#the-data-access).
 
 The passwords of the journeys' accounts come from `CODELEAD_WALK_PASSWORD_<USER>`, or from the file that `CODELEAD_WALK_CREDENTIALS` names. They never come from the journeys, and the walk never prints them. See [Passwords](../analyst/passwords.md).
+
+### The checks before a walk
+
+CodeLead never walks blind. Once the servers answer, and before the first step, it makes its own checks. A failed check means no walk: the part is "not walked", and it is not blamed.
+
+**The data after the day reset.** A walk on a database that the API cannot read judges every screen wrongly. So CodeLead runs the day reset once against the started servers. Then it asks one endpoint that reads data. It takes that endpoint from the plan. The endpoint's old action only reads, it answers GET with no parameter in its route, and it is never the part being judged. When the walk has an account with a password, CodeLead signs it in first. The check fails on a 500 or no answer, and on an empty answer when the seed's rows are known. For example:
+
+<!-- described, not captured -->
+```output
+sailors.create-post:endpoint: landed (walk r0); it was not walked (check-failed: the data after the day reset: after the day reset the API answers 500 at GET /api/home/index ("Microsoft.Data.Sqlite.SqliteException (0x80004005): SQLite Error 1: 'no such table: Orders'."): the reset removes the sample database and the API does not make it again).
+```
+
+The words say why, by what the reset is: CodeLead's reset, its earlier one, or yours. The plan then plans `data-access` again, as [the data access](rebuild.md#the-day-reset-and-the-api-one-contract) says. The part that was not walked waits on that check, and the run judges it again by itself once a walk gets past it. A check that passes is said once in a session: `Acceptance: CodeLead's check of the data: after the day reset GET /api/sailors/index answers 200, with the seed's row …`. Before any endpoint reads data, there is no such check.
 
 In a rebuild whose API holds a fake directory, CodeLead signs the walk's first account in itself before the walk. It sends the fields of the old sign-in form: the account, the password, and each hidden field, empty. When the API refuses it (HTTP 401 or 403), the walk is not run, and the line says `the API refused the walk's own account …`. Any other answer says nothing about the account, so the walk runs and its own sign-in step judges. An account may have no roles, and the fake directory must accept it so. When its code shows that it needs roles, the plan plans the sign-in's endpoint again, to be revised in place.
 
@@ -63,7 +76,18 @@ The walk of the part `user-directory` is different. Once the API's code holds th
 
 ### The walk of a rebuild's part
 
-In the Rebuild stage, the walk judges each part that lands. The part is accepted when its own steps pass, no step regresses, and no new finding counts. A step has two ends: the page where its control is, and the page that it reaches. The step judges the screen that it reaches, once the page that holds its control exists. See [A step has two ends](rebuild.md#a-step-has-two-ends). When an earlier step fails, the walk cannot reach the part's own steps. Then no walk judges the part, and it is not finished. The run judges it again once that step passes. An accepted part stays accepted only while its own steps are the ones its walk judged. See [When a part's steps change](rebuild.md#when-a-parts-steps-change).
+In the Rebuild stage, the walk judges each part that lands. The part is accepted when its own steps pass, no step regresses, and no new finding counts.
+
+**What a regression is.** A step regresses when it passed in the walk before the change and fails in the walk after it. It is that change's regression, whoever owns the step. The step may be the own step of another part, landed and not accepted. It passed before this change, so this change broke it. The acceptance line says whose step it is:
+
+<!-- described, not captured -->
+```output
+Acceptance (walk r0): not accepted. No step of the journeys covers this request. Regressions: account.sign-out-2, clients.create-post-2. They are own steps of sign-in:screen, landed and not accepted: they passed before this change, so they are this change's. New findings: none.
+```
+
+A step that failed before the change is no regression, even when it fails again. A new finding at such a step, at another unfinished part's own step, is still that part's. A step that passes in one walk after the change and fails in the other is flaky, and it does not count.
+
+A step has two ends: the page where its control is, and the page that it reaches. The step judges the screen that it reaches, once the page that holds its control exists. See [A step has two ends](rebuild.md#a-step-has-two-ends). When an earlier step fails, the walk cannot reach the part's own steps. Then no walk judges the part, and it is not finished. The run judges it again once that step passes. An accepted part stays accepted only while its own steps are the ones its walk judged. See [When a part's steps change](rebuild.md#when-a-parts-steps-change).
 
 A step can pass on empty data. For example, "click Clients, the address is the clients' list" passes when the list is empty. So an endpoint is not accepted on its contract alone when its old action reads or writes the database. CodeLead reads the endpoint's code too. An endpoint that reaches no data is accepted on its contract, and it reads no data yet. It is revised once the data access lands. The screens judged on its empty answer are judged again. See [The data access](rebuild.md#the-data-access).
 

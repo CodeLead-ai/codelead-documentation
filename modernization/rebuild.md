@@ -98,7 +98,7 @@ The default template is `dotnet-next-shadcn`: an ASP.NET Core API with its tests
 },
 "decisions": {
   "identity": "keep: the new API keeps the old application's accounts and signs users in with ASP.NET Core Identity over the old user tables (codelead rebuild init --identity keep)",
-  "database": "sample-seed: the new API starts on a sample database seeded at start-up (api/Api/sample-seed.db); the day reset (run.reset) deletes it before every journey, so that each journey starts on the seed",
+  "database": "sample-seed: the new API starts on a sample database seeded at start-up (api/Api/sample-seed.db); the day reset (run.reset) puts the seed back in it before every journey, in place while the API runs, so that each journey starts on the seed",
   "channel": "none"
 }
 ```
@@ -313,14 +313,56 @@ The copies live in the rebuild, in the API project's folder `SampleSeed`, so the
 The source's schema changed since the copy: the old application's database/schema.sql is not the file it was (copied as api/Api/SampleSeed/schema.sql at 2026-11-24T12:00:00.000Z). Copy it again: …
 ```
 
-The sample database file itself, such as `api/Api/sample-seed.db`, is never tracked. The API makes it at start-up, and the day reset deletes it before every journey. A tracked file that disappears while the walk runs changes the tree, and no walk can be made. So CodeLead writes its ignore lines into the rebuild's `.gitignore`, under a comment that says they are CodeLead's. It does so at `codelead rebuild init`, and at the start of every run or `--next`. When the file is tracked already, CodeLead takes it out of the index by its path, `git rm --cached -- <path>`. It commits that with the ignore lines, in a commit of its own. The file on disk stays, and the line says so:
+#### The day reset and the API: one contract
+
+A walk does not restart the API between journeys. So the day reset and the API agree on one contract:
+
+- **The day reset puts the seed back in place.** Before every journey, it drops each table. Then it makes each one again from the copies. It works through SQLite itself, while the API runs. The file is never deleted, moved or replaced.
+- **The API makes the file once.** When the file is missing at start-up, the API makes it from the same copies. Once it has started, it never deletes, moves or replaces the file.
+
+The data access's request states the API's half. It begins: "Once the API has started, nothing in it deletes, moves or replaces that file …".
+
+Why not delete the file and let the API make it again? A run did that, and the walk broke. The API kept its open connections to the deleted file, and those still read the old rows. Each new connection made an empty file and answered "no such table". On Windows, a file that SQLite holds open cannot be deleted at all. Putting the rows back in place avoids all three problems. The API's open connections keep reading the same file. The ids start again at the seed's.
+
+The reset needs Node.js 22.13 or later, for its `node:sqlite` module. On an older Node.js, it stops with words that say so, and the walk does not start.
+
+A rebuild made before kept CodeLead's earlier reset, which deleted the file. At the start of every run and `--next`, CodeLead writes that reset again. It recognises its own text, and commits the new script alone, in a commit of its own:
 
 <!-- described, not captured -->
 ```output
-Note: The sample database api/Api/sample-seed.db was tracked, and the day reset deletes it before every journey: CodeLead ignores it in .gitignore and took api/Api/sample-seed.db out of the index, in a commit of its own (…); the file on disk stays.
+Note: The day reset scripts/reset-sample-seed.mjs deleted the sample database under the running API (…): CodeLead wrote it again to put the seed back in place, through SQLite, while the API runs, in a commit of its own (…).
+```
+
+A reset that a person changed is kept as it is. CodeLead's check of the data before every walk then judges it, as [walk and parity](walk-and-parity.md#the-checks-before-a-walk) says.
+
+A database that is not a file, such as `--database Store`, gets no reset from CodeLead. The database is yours, and a day reset there is your own script in `run.reset`. The contract is the same: the reset changes rows, and the API keeps running.
+
+When CodeLead's check refuses a walk, the plan plans `data-access` again, to be revised in place. Its request quotes what the check found. It opens with `(revised in place for the sample database: CodeLead's check of the data after the day reset refused it)`. The plan also reads the API's code with no model call. Sometimes no file of the API names `sample-seed.db`. Then the API reads another database than the one a walk resets, and the part is planned again too. When a revision has landed and the check still refuses, the part gets a note: a person's turn.
+
+#### The tests and the sample database
+
+The contract tests read the same file as the walk: the API's own sample database, in its content root. It outlives a run. A row that a failed test run left is still there at the next run. So two rules keep the gate honest:
+
+- **The gate starts on the seed.** Before a part's gate runs, CodeLead runs the day reset once. The line says `Gate: the sample database put back to the seed first (node scripts/reset-sample-seed.mjs), …`. It does this only with CodeLead's own reset.
+- **A test's own rows get fresh values.** An endpoint's request asks each row a test arranges to get a value made at run time. This applies to every column the schema keeps unique, such as a SKU. The request names those columns when the schema says them, for example `the schema keeps Products.Sku unique`.
+
+#### The file is never tracked
+
+The sample database file itself, such as `api/Api/sample-seed.db`, is never tracked. Every walk changes it: its journeys write, and the day reset puts the seed back. A tracked file that changes while the walk runs changes the tree, and no walk can be made. So CodeLead writes its ignore lines into the rebuild's `.gitignore`, under a comment that says they are CodeLead's. It does so at `codelead rebuild init`, and at the start of every run or `--next`. When the file is tracked already, CodeLead takes it out of the index by its path, `git rm --cached -- <path>`. It commits that with the ignore lines, in a commit of its own. The file on disk stays, and the line says so:
+
+<!-- described, not captured -->
+```output
+Note: The sample database api/Api/sample-seed.db was tracked, and every walk changes it (its journeys write, and the day reset puts the seed back before each one): CodeLead ignores it in .gitignore and took api/Api/sample-seed.db out of the index, in a commit of its own (…); the file on disk stays.
 ```
 
 A part's landing commits what its patches changed or created, and CodeLead's own files, and nothing else. A file that the gate made, such as a test run's results, is left out of the commit. The line names it: `Left out of the commit: api/Api.Tests/TestResults, which the gate made (not the patch's): …`.
+
+A lock file is the one exception. When the patch changes a `package.json`, the gate runs `npm install`, which rewrites the lock file beside it. That lock file belongs to the landing, so it is committed with it. CodeLead commits it only when git tracks it and the install rewrote it. The line says so:
+
+<!-- described, not captured -->
+```output
+Committed with the landing: web/package-lock.json, which the gate's install (npm install --no-audit --no-fund) rewrote for the manifest the patch changed (web/package.json): it belongs to this landing.
+```
 
 No request of the rebuild names a path outside it. The old application's files are named by their place there, such as `BasicStore.Web.Data/DAL/StoreContext.cs in the old application`.
 
@@ -477,6 +519,8 @@ Acceptance (walk r0): no step of the journeys covers this request; nothing that 
 
 The run then says `accepted on what regresses (no step of its own yet)`, and never `accepted at the first walk`. The run summary counts the two kinds of acceptance apart.
 
+"Nothing that passed before fails" counts every step, whoever owns it. A step of another part, landed and not accepted, that passed before this change and fails after it is this change's regression. See [what a regression is](walk-and-parity.md#the-walk-of-a-rebuilds-part).
+
 When a check fails, the **model ladder** decides what comes next. First repair rounds on the compose model. Then the part moves to a stronger repair model. Then an intervention: an agent on a frontier model takes the part over once, within limits of turns, minutes and dollars. When that fails too, the part is **parked** for a person, and the run continues with the next part. See [Use a stronger model for repairs](../how-to/use-a-stronger-model-for-repairs.md).
 
 Sometimes nothing planned has its needs met, and the planned parts wait on a part that landed and was not accepted. Then the run judges that part again by itself first. It makes no model call and offers no repair round. The judgement's record says what keeps the part. For example, CodeLead's own sign-in check refuses the walk's account. The next plan reads that record and plans the sign-in's endpoint again, with no person. The run does this once for each landing.
@@ -524,6 +568,25 @@ What a part is held to is its **baseline**: the tree that its acceptance judged.
 - So a part is never accepted and planned again in the same breath, for a change that came before its acceptance.
 - A landing is named only when its own commit broke the work: it held at the commit before the landing, and not after it. When no landing of the rebuild did that, the plan says `a change made outside the rebuild's parts`.
 - Two parts that share a file cannot plan each other again in a loop. Each is held to the tree that accepted it, and the check refuses a later patch that breaks the other.
+
+#### Two parts that share a page and its test file
+
+Some parts share a page and its test file. For example, one part shows a form, and another wires its submit. A revision of the first must change tests that the second added. Refusing that would leave the first part stuck for good.
+
+So a part revised in place may change what another accepted part's tests send or assert. Three things must hold:
+
+- the part is revised in place: a person reopened it, or the plan planned it again;
+- both parts built the file: the revised part's own landings changed or created it too;
+- its request says so. CodeLead writes that sentence itself: `web/src/app/orders/create/page.test.tsx also holds tests the accepted part orders.create-post:screen added (…), because both parts built it. Where this revision changes what the code sends or shows, those tests may follow it: …`.
+
+No test may be removed, and no endpoint or page. Those stay refused. The patch check says what it allowed, as a note:
+
+<!-- described, not captured -->
+```output
+accepted_parts: allowed: the patch changes what 3 tests the accepted part orders.create-post:screen added in web/src/app/orders/create/page.test.tsx send (…): this revision of orders.create-get:screen may, because both parts built web/src/app/orders/create/page.test.tsx and its request says those tests may follow it; the run judges orders.create-post:screen again on the tree this landing leaves, with no model call.
+```
+
+Then the run judges the other part again by itself, on the new tree, with no model call. When its walk accepts it, both parts are accepted. When its walk refuses it, it is your turn, and its note says why. Neither part is composed again for it, so the two never loop.
 
 ### Parked parts
 

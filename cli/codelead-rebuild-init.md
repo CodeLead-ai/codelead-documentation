@@ -86,7 +86,18 @@ The manifest records it as `decisions.dataAccess`. To change it later, answer `d
 Sample database: the sample database's scripts copied into api/Api/SampleSeed: schema.sql (from the old application's database/schema.sql) and seed.sql (from the old application's database/seed.sql), the statements only (2 comment lines left out), with where each came from and its hash in copied.json.
 ```
 
-The copies keep the statements and leave the comments out, because a seed may name a test password in a comment. A seed that writes a password in clear text in a statement is not copied, and the line says what to do. When the old application keeps no script that creates its tables, the part waits, and its note says what to give. The day reset deletes the file, so the next start seeds it again. See [The data access](../modernization/rebuild.md#the-data-access).
+The copies keep the statements and leave the comments out, because a seed may name a test password in a comment. A seed that writes a password in clear text in a statement is not copied, and the line says what to do. When the old application keeps no script that creates its tables, the part waits, and its note says what to give. See [The data access](../modernization/rebuild.md#the-data-access).
+
+### The day reset
+
+With `sample-seed`, `init` writes the day reset, `scripts/reset-sample-seed.mjs`. Before every journey of a walk, it puts the sample database back to the seed. It works in place, through SQLite, while the API runs. It drops each table and makes it again from the copies, so the ids start again too. It never deletes, moves or replaces the file, because the API keeps its connections to it open. It needs Node.js 22.13 or later. When it has run, it says one line:
+
+<!-- described, not captured -->
+```output
+Sample database put back to the seed in place: api/Api/sample-seed.db (schema.sql and seed.sql).
+```
+
+An earlier `init` wrote a reset that deleted the file. CodeLead writes that one again by itself, at the next run. Before every walk, CodeLead also checks that the API still reads its data after the reset. See [The checks before a walk](../modernization/walk-and-parity.md#the-checks-before-a-walk).
 
 With `--identity keep`, the plan builds the real user directory as a part of its own, `user-directory`. It checks a password against the old user table, through the rebuild's data access. Its password check is ported from the old code, such as `PasswordHasher.Verify`, never invented. The sign-in's stand-in directory stays for Development and the tests. Until the part is accepted, a build for production signs nobody in. When CodeLead cannot read the old check to its source, there is no such part. The note on `sign-in:endpoint` then says what was read and what was not, and a person adds the real directory. See [The user directory](../modernization/rebuild.md#the-user-directory).
 
@@ -267,6 +278,7 @@ In the old application, `init` reads `docs/codelead/rebuild/system-model.json`, 
 | `.codelead/config.json`, `docs/codelead/repository-map.*`, `docs/codelead/board/` | CodeLead initialized. |
 | `.codelead/CONVENTIONS.md` | A conventions starter, to fill in. |
 | `.codelead/validation.json` | The declared gate, from the template's build and test scripts. |
+| `scripts/reset-sample-seed.mjs` | With `sample-seed`, the day reset. |
 | `docs/codelead/licence.json` | Copied from the old application, when it has one. |
 | `.codelead/evidence/ev-*.json` | The `rebuild-init` record. |
 | `.git/` | The rebuild's own git repository, with its first commit unless `--no-commit`. |
