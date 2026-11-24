@@ -79,7 +79,14 @@ The `database` answer gives the plan its part `data-access`. How the new API rea
 - `--data-access port`, the default when the old application is on Entity Framework 6. The rebuild ports the data access to EF Core inside the new API. The old application is not changed for it.
 - `--data-access same-library`. The new API references the old application's data library and reaches the data through it. The old application's Upgrade in place stage makes the library usable first.
 
-The manifest records it as `decisions.dataAccess`. To change it later, answer `dataAccess=port` or `dataAccess=same-library` with `codelead modernize answer`. The program then writes it into the manifest. With `sample-seed`, the API makes the sample database at start-up when it is missing. It runs the old application's own schema and seed scripts, such as `database/schema.sql` and `database/seed.sql`. When the old application keeps no script that creates its tables, the part waits, and its note says what to give. The day reset deletes the file, so the next start seeds it again. See [The data access](../modernization/rebuild.md#the-data-access).
+The manifest records it as `decisions.dataAccess`. To change it later, answer `dataAccess=port` or `dataAccess=same-library` with `codelead modernize answer`. The program then writes it into the manifest. With `sample-seed`, the API makes the sample database at start-up when it is missing. It runs the old application's own schema and seed scripts, such as `database/schema.sql` and `database/seed.sql`. `init` copies them into the rebuild first, so the new application never reads the old repository beside it. The copies go into the API project's folder `SampleSeed`, with a note, `copied.json`, that keeps where each came from and its hash. The line says so:
+
+<!-- described, not captured -->
+```output
+Sample database: the sample database's scripts copied into api/Api/SampleSeed: schema.sql (from the old application's database/schema.sql) and seed.sql (from the old application's database/seed.sql), the statements only (2 comment lines left out), with where each came from and its hash in copied.json.
+```
+
+The copies keep the statements and leave the comments out, because a seed may name a test password in a comment. A seed that writes a password in clear text in a statement is not copied, and the line says what to do. When the old application keeps no script that creates its tables, the part waits, and its note says what to give. The day reset deletes the file, so the next start seeds it again. See [The data access](../modernization/rebuild.md#the-data-access).
 
 With `--identity keep`, no part of the plan builds the directory that checks a password outside Development and the tests. The plan says so in a note on the part `sign-in:endpoint`, and a person adds the real directory. Until then, a build for production signs nobody in.
 

@@ -302,9 +302,18 @@ How the part works depends on the manifest's decision `dataAccess`. There are tw
 
 **`port`, the default for an old application on Entity Framework 6.** The rebuild ports the data access to EF Core inside the new API. The API references none of the old projects, and the old application is not changed for it. The part builds three things:
 
-- an EF Core context of the API's own, the port of the old one, such as `api/Api/Data/StoreContext.cs`. It holds an entity for each table that the plan's endpoints reach. Each entity is mapped to its real table with `ToTable`;
+- an EF Core context of the API's own, the port of the old one, such as `api/Api/Data/StoreContext.cs`. It holds an entity for each table that the plan's endpoints reach. Each entity is mapped to its real table with `ToTable`. The entities go in the folder `api/Api/Data`, one file each or beside the context, as the model writes them;
 - the EF Core provider's package, and the context's registration in `Program.cs`;
-- with `sample-seed`, the sample database, made at start-up from the old application's schema and seed scripts.
+- with `sample-seed`, the sample database, made at start-up from copies of the old application's schema and seed scripts.
+
+The copies live in the rebuild, in the API project's folder `SampleSeed`, so the new application builds without the old repository beside it. `codelead rebuild init` makes them. For a rebuild made before, CodeLead makes them when it composes `data-access`, and the part's landing commits them. A note beside them, `copied.json`, keeps where each came from and its hash. The copies keep the statements and leave the comments out. Some seeds write a password in clear text in a statement. Such a seed is not copied: the part waits, and its words say what a person must do. When the old script changes later, the plan says so:
+
+<!-- described, not captured -->
+```output
+The source's schema changed since the copy: the old application's database/schema.sql is not the file it was (copied as api/Api/SampleSeed/schema.sql at 2026-11-24T12:00:00.000Z). Copy it again: …
+```
+
+No request of the rebuild names a path outside it. The old application's files are named by their place there, such as `BasicStore.Web.Data/DAL/StoreContext.cs in the old application`.
 
 Its request shows the old context and entities, as an endpoint's request shows the old action. It also lists the places where the port is not mechanical:
 
