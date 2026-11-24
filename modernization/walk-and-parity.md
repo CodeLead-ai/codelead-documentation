@@ -46,6 +46,15 @@ When the servers run, the walk prints one line for each step. Each step names it
 
 The walk refuses to record a result that it cannot trust. It stops with exit code 2 when the server lends a development identity, for example through a request header such as `x-dev-user`. Serve the application without one. The report also records what was walked: the code's stamp and the journeys' content hash. Parity trusts a walk only for the code and the journeys that it walked.
 
+A walk shows one tree. So CodeLead stamps the code when the walk begins and again when it ends. When the two stamps differ, the walk judged no single tree, and the part is not walked. The words then name the files that differ, a few and the count of the rest. When the run profile's day reset changed one of them, they say that too:
+
+<!-- described, not captured -->
+```output
+The code changed while the walk ran (…): no single tree was walked, and parity will not treat this walk as current. What differs: api/Api/sample-seed.db (removed). The day reset (scripts/reset-sample-seed.mjs) removed api/Api/sample-seed.db, a tracked file: it should be ignored, not tracked. The way out: …
+```
+
+The sample database is the usual case. The API makes it at start-up, and the day reset deletes it before every journey. So it must never be tracked. See [The data access](rebuild.md#the-data-access).
+
 The passwords of the journeys' accounts come from `CODELEAD_WALK_PASSWORD_<USER>`, or from the file that `CODELEAD_WALK_CREDENTIALS` names. They never come from the journeys, and the walk never prints them. See [Passwords](../analyst/passwords.md).
 
 In a rebuild whose API holds a fake directory, CodeLead signs the walk's first account in itself before the walk. It sends the fields of the old sign-in form: the account, the password, and each hidden field, empty. When the API refuses it (HTTP 401 or 403), the walk is not run, and the line says `the API refused the walk's own account …`. Any other answer says nothing about the account, so the walk runs and its own sign-in step judges. An account may have no roles, and the fake directory must accept it so. When its code shows that it needs roles, the plan plans the sign-in's endpoint again, to be revised in place.

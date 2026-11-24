@@ -313,6 +313,15 @@ The copies live in the rebuild, in the API project's folder `SampleSeed`, so the
 The source's schema changed since the copy: the old application's database/schema.sql is not the file it was (copied as api/Api/SampleSeed/schema.sql at 2026-11-24T12:00:00.000Z). Copy it again: …
 ```
 
+The sample database file itself, such as `api/Api/sample-seed.db`, is never tracked. The API makes it at start-up, and the day reset deletes it before every journey. A tracked file that disappears while the walk runs changes the tree, and no walk can be made. So CodeLead writes its ignore lines into the rebuild's `.gitignore`, under a comment that says they are CodeLead's. It does so at `codelead rebuild init`, and at the start of every run or `--next`. When the file is tracked already, CodeLead takes it out of the index by its path, `git rm --cached -- <path>`. It commits that with the ignore lines, in a commit of its own. The file on disk stays, and the line says so:
+
+<!-- described, not captured -->
+```output
+Note: The sample database api/Api/sample-seed.db was tracked, and the day reset deletes it before every journey: CodeLead ignores it in .gitignore and took api/Api/sample-seed.db out of the index, in a commit of its own (…); the file on disk stays.
+```
+
+A part's landing commits what its patches changed or created, and CodeLead's own files, and nothing else. A file that the gate made, such as a test run's results, is left out of the commit. The line names it: `Left out of the commit: api/Api.Tests/TestResults, which the gate made (not the patch's): …`.
+
 No request of the rebuild names a path outside it. The old application's files are named by their place there, such as `BasicStore.Web.Data/DAL/StoreContext.cs in the old application`.
 
 Its request shows the old context and entities, as an endpoint's request shows the old action. It also lists the places where the port is not mechanical:
@@ -351,6 +360,16 @@ CodeLead also reads each rebuilt endpoint's code, with no model call. With `port
 Once `data-access` has landed, the plan plans such an endpoint again, to be revised in place. Its request opens with `(revised in place for its data: it was accepted on its contract and read no data)`. It quotes the stub's first line, and it asks for a test of a row that the seed holds. An empty answer then fails the test. When a revision whose request asked for the data still reads none, the part gets a note: a person's turn.
 
 With `port`, the revised endpoint's request says it reaches the same rows over the same database, through the rebuild's EF Core context. It no longer says "the same library calls".
+
+An endpoint's request also quotes what the old action uses and its quoted lines do not declare. Examples are a constant of its class, a static field, and another type's constant, such as `Order.Placed`. Each one comes with its declaration, its file and its line, at most six of them. A value that the old configuration gives is said as such, with what `Web.config` sets. For example:
+
+<!-- described, not captured -->
+```output
+LowStockBelow (BasicStore.Web/Controllers/HomeController.cs line 14):
+private const int LowStockBelow = 5;
+```
+
+A field that holds a dependency, such as the data context, is never quoted: the API has its own.
 
 A screen judged while its endpoint read no data is judged again by the run itself, with no model call. When its own steps fail then, it is planned again, as [when a part's steps change](#when-a-parts-steps-change).
 
