@@ -100,6 +100,8 @@ When an account is still the draft's placeholder, such as `walk-user-1@example.c
 
 The plan reads the new copy at its next turn. A part that a walk accepted stays accepted while that walk judged its own steps as the new copy writes them. When its own steps changed, the run judges it again by itself, with no model call. When they fail, the plan plans it again, to be revised in place. See [When a part's steps change](../modernization/rebuild.md#when-a-parts-steps-change).
 
+A newer draft can give a step an action that an earlier draft could not name. For example, the earlier draft wrote `orders.cancel-4` with no action, `Act on the link written as "#" + order.Id`. The newer draft clicks the first link to `/Orders/Details`. Run [`codelead model`](codelead-model.md) in the old application first, so that the draft is the newer one, then refresh. Until then, the plan judges no part on such a step. See [Steps a person completes](../reference/journeys-format.md#steps-a-person-completes).
+
 Without a password for each account, [`codelead rebuild run`](codelead-rebuild-run.md) refuses at its checks, with the line `The walk's passwords: …`.
 
 ### Where the difference is said

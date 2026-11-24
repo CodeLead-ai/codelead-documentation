@@ -61,6 +61,7 @@ A person can end the Rebuild stage with parts left: `codelead modernize answer r
 - **How many parts a walk of their own steps accepted**, of how many. Beside it: how many are accepted on what regresses, satisfied, or dropped by the plan.
 - **The parts accepted on what regresses**, listed apart. The plan gives them no step of their own, and says why.
 - **The parts that landed and that no walk judged**, in a table of their own. They are not finished.
+- **How many endpoints read the data**, when the old application reaches a database. An endpoint whose rebuilt code reads no data is not finished, whatever its walk said. The line reads, for example, `Data access: of 17 endpoints whose old action reads or writes the database, 0 read the data in the code; 17 are accepted on their contract and read no data yet …`. See [The data access](rebuild.md#the-data-access).
 - **A table of each other part that is not finished**: its state, and why, in the plan's own words. A state is, for example, `parked for a person`, `planned, waiting` or `planned and never taken`.
 - **The plan's blockers**, and its notes to a person.
 

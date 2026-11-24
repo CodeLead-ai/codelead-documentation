@@ -241,6 +241,28 @@ All of them are optional. A user's own values can hold no placeholder but `{stam
 
 The walk looks for a control in the page, then in each of its frames. A step's **own actions** are a click that is not optional, a fill, a select, a clickNth and a dragEach.
 
+### A link whose text is computed
+
+Some old views write a link's text as an expression, such as `@Html.ActionLink("#" + order.Id, "Details", new { id = order.Id })`. No name to click is known. The System Model's draft then clicks the first link that goes to the link's address, read from the old markup:
+
+```json
+{
+  "id": "orders.cancel-4",
+  "title": "Click the first link to `/Orders/Details` (its text is computed, so the walk finds it by its address): …",
+  "user": "user",
+  "do": [{ "clickNth": { "selector": "a[href*=\"/Orders/Details/\" i], a[href*=\"/Orders/Details?\" i], a[href$=\"/Orders/Details\" i]", "n": 0 } }],
+  "expect": [{ "path": "^/Orders/Details/[^/]+$" }]
+}
+```
+
+The selector matches the address followed by a segment, a query or nothing, case aside. So `/Orders/DetailsPrint/1` does not match. For a link written once per row, the first link is the first row's. The rebuild's walk reads the same step with the new screen's address, such as `/orders/details`, as it reads the step's `path`.
+
+### Steps a person completes
+
+Sometimes the draft can name nothing that the walk can find, such as a button whose text is computed. Then it writes no action, keeps the outcome, and opens the title with `For a person to complete:`. Write the step's action yourself, for example a `clickNth` with a selector of the new page.
+
+A rebuild's plan judges no part on a step with no action of its own that the draft marked so. An earlier draft titled such steps `Act on …`, and the plan reads them the same way. `codelead model` and then [`codelead rebuild journeys --refresh`](../cli/codelead-rebuild-journeys.md) draft them anew.
+
 ### Outcomes
 
 | Outcome | Shape | What must hold |

@@ -89,6 +89,7 @@ The sections appear in this order. A section of lanes that wait on other lanes a
 The numbers table has two more rows when the run had such a part:
 
 - `Accepted when judged again by the run (the page its step acts on accepted since)`: the count of `accepted-judged-again`.
+- `Present by the walk of the tree as it stands (nothing to change)`: the count of `present-by-walk`.
 - `Accepted on what regresses, its steps waiting on another part's page`: the count of `waits-on-page`.
 
 Two more rows count the accepted parts by what judged them, when the run accepted any:
@@ -188,6 +189,7 @@ The outcomes of a part:
 | `accepted-on-repair-rung` | The repair rung of the ladder made the walk accept it. |
 | `accepted-by-intervention` | The intervention rung made the walk accept it. |
 | `accepted-judged-again` | The run judged it again by itself, with no model call, and accepted it. Its walk had failed only on a step whose control is on another part's page, and that part was accepted since. |
+| `present-by-walk` | The model found nothing to change: the tree already held what the part asks for. The walk of the tree as it stands passed its own steps, so it is satisfied, with no landing. |
 | `landed-not-walked` | It landed, and no walk judged it. It is not finished. Its `words` say which steps of which part its own steps wait on. The run judges it again by itself once they pass. |
 | `waits-on-page` | It landed, and is accepted on what regresses. Its own steps wait on the page that another part builds. The run judges it again once that part is accepted. It is not an ask. |
 | `asked` | The ladder asked a person. |

@@ -200,6 +200,7 @@ Read a chain from its last record back along `follows`. The last record says how
 | `pins_database` | string | The database that a database pin's tests ran against, in words. Never a password. |
 | `set_aside` | list | On a landed pin increment: the tests that CodeLead set aside so that the rest could land. Each has `test`, `file`, `wholeFile` (when the whole file was removed), `failure`, `reason`, `fact` (when the test's name anchors one) and `text`, the test as it was. See [Pins](../modernization/pins.md#a-pin-that-cannot-run-in-the-test-process). |
 | `model_unreachable` | object | A model call that never got an answer: `call`, `role`, `provider` and `address`. |
+| `nothing_to_change` | object | A rebuild part's attempt that found nothing to change. Its patch check refused only an answer with no diff, or a patch that changes nothing. `no_op` and `no_diff` count them. `said` is the model's sentence that no change is needed, when it wrote one. The plan then judges the part by the walk of the tree as it stands. |
 | `conventions` | object | `conformance_warnings`, and `formatting`: the formatter that ran on apply, its `status` and its `files`. |
 | `checkpoint_commit` | string | The commit that holds the landing, when checkpoint commits are on. |
 | `checkpoint_branch` | string | The work branch of that commit, such as `codelead/…`. |

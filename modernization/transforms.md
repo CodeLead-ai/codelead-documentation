@@ -92,6 +92,8 @@ T1 converts each project in its scope to an SDK-style project file that targets 
 
 Use T1 on class libraries. A web project on System.Web, such as an MVC 5 project, has no current .NET target, so the program never applies T1 to it. T1 refuses a scope with no project: `T1 has no scope: name the projects with --scope.`
 
+On current .NET, a host has no `Web.config` to read a named connection from. So a library's Entity Framework 6 context may only read its connection by name, such as `: base("name=StoreContext")`. Then T1 asks one source change: one more public constructor that takes the connection. The old constructors stay as they are, so the old application and its pins make the context as before. The rebuilt API then gives the context its own connection. See [The data access](rebuild.md#the-data-access).
+
 ### T5: a seam around a static gateway
 
 T5 finds a class named like `*Data`, `*DB`, `*Gateway`, `*Repository` or `*Store` that the code calls statically. It adds an interface and a class that delegates to the gateway, and routes the callers through the interface. The request names each new file by its full path, beside the gateway's own file. When CodeLead cannot decide the path, the request names the types only. On the Basic Store sample, the controllers create their data context directly, so T5 has nothing to wrap:

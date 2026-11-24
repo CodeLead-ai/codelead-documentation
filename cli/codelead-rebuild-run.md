@@ -106,6 +106,20 @@ The run judges a part again by itself in these cases:
 
 When that record says that CodeLead's own sign-in check refused the walk's account, the next plan plans the sign-in's endpoint again. No person types `--judge-again`.
 
+- Its walk failed only on steps with no action of their own, which a person completes. See [Steps a person completes](../reference/journeys-format.md#steps-a-person-completes).
+
+A part accepted when the run judged it again is held to the tree it judged. A test that another part's landing changed before that acceptance never plans it again.
+
+Sometimes the model finds nothing to change: the tree already holds what the part asks for. The run then judges the part by the walk of the tree as it stands, with no model call, and composes it no more:
+
+<!-- described, not captured -->
+```output
+… products.create-post:screen: did not land: the model found nothing to change ("…already satisfies every requirement…"); the plan judges it by the walk of the tree as it stands.
+… products.create-post:screen: satisfied: present by the walk of <TIME>: its 1 own step passes (composed 1 time, and the model found nothing to change (…): what the walk observes is there) (7.6 min).
+```
+
+When its own steps do not pass, the part is parked after that one session, and the reason says what the walk says. See [Parked parts](../modernization/rebuild.md#parked-parts).
+
 ### When the run stops
 
 The run ends at the queue's end, at `--until`, at a cap, when `.codelead/STOP` appears, or on Ctrl+C. In every case, the part that is running finishes first. A second Ctrl+C stops at once.

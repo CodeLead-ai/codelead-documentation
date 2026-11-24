@@ -131,6 +131,7 @@ The plan warns with `journeys-draft-moved` when the copy stands otherwise than t
 The plan cuts the rebuild into **parts**. CodeLead computes it from the System Model, the feature map, the manifest and the journeys, with no model call. A part is one of these:
 
 - a **prerequisite**, such as `identity-seam`, the place where the new code reads who the user is;
+- the **data access**, `data-access`, the way the new API reaches the old database;
 - a part of the **shell**: its start-up, its menu, its real-time channel;
 - an **endpoint** of the new API, such as `clients.index:endpoint`;
 - a **screen** of the new web application, such as `clients.index:screen`.
@@ -204,6 +205,13 @@ Such a part is not finished, and the run counts it as work left. Once the stored
 
 When the plan cannot tell which page a step acts on, it warns with `step-page-unknown`. A title that names the control's place, or a `covers` list in the journey, settles it. See [Journeys format](../reference/journeys-format.md#steps).
 
+A step with no action of its own can never pass, when it expects to reach another page. The draft writes such a step only when it can name nothing that the walk can find. See [Steps a person completes](../reference/journeys-format.md#steps-a-person-completes). No part is judged on such a step:
+
+- The plan leaves it out of every part's own steps, and warns with `person-step`.
+- The part's `Steps` line says `for a person to complete (no action of its own, not judged): <STEP>`.
+- A part that waits behind such a step says so, and names the way out.
+- A landed part whose walk failed only on such a step is judged again by the run itself, with no model call.
+
 ### What the old shell shows
 
 An old layout often shows more than its controls. For example, it shows the signed-in name beside "Sign out": `<span>@User.Identity.Name</span>`. The System Model records where. The shell's menu part asks for it, beside the table of controls. On the Basic Store sample:
@@ -225,6 +233,23 @@ Its next request names the files the menu built, and the patch is shown them. Se
 When CodeLead cannot tell from the code, the menu gets a note for a person. An example is a name handed to another component.
 
 A step can fail only on that name. For example, the sign-in step lands at `/` and finds no name. The walk says which of a step's expectations failed. The sign-in screen cannot add the name, so it gets no repair round. It is accepted on what regresses, and it waits on the menu. Once the menu shows the name, the run judges the screen again by itself, with no model call. A step that fails on its address as well is repaired as before.
+
+### Where the sign-out goes
+
+The menu's request also says where its sign-out sends the user. CodeLead reads it from the old sign-out action's redirect, and translates it to this application's route. On the Basic Store sample, the old action ends with `return RedirectToAction("SignIn")`:
+
+<!-- described, not captured -->
+```output
+The sign-out: "Sign out" is a control that calls POST /api/account/sign-out through the API client (…), not a link to a page; once it has answered, the SPA goes to /account/sign-in, where the old sign-out sends the user (GET /Account/SignIn, its redirect at BasicStore.Web/Controllers/AccountController.cs:61).
+```
+
+The rule:
+
+- An old sign-out that redirects to the site's root goes to `/`.
+- An old sign-out whose redirect CodeLead cannot read goes to `/`. The request then says `the old sign-out's destination was not read`, and why.
+- A menu that landed before its request said this is read again, with no model call. When its sign-out goes elsewhere, the plan plans the menu again, to be revised in place.
+- A menu that lacks the signed-in name too gets one revision for both.
+- When CodeLead cannot tell from the code where the rebuilt sign-out goes, the menu gets a note for a person.
 
 ### When a part's steps change
 
@@ -266,6 +291,47 @@ The rule for what the patch is shown:
 - A file the part built and someone deleted since is not named.
 
 These sentences only describe where the work lives. The gates owe the patch none of these files, so a revision may leave one of them alone. On a revision, the menu's request no longer says it replaces the shell's navigation, and its tests are the part's own.
+
+### The data access
+
+An endpoint can answer the right shape over no data. For example, a list endpoint returns `new List<ClientDto>()`, and its contract test checks only the answer's shape. The walk then passes the step "click Clients" on an empty list.
+
+So the plan has a part `data-access` when two things hold. The manifest's `database` decision gives the new API a database. And the System Model says that old actions read or write it. The part builds three things:
+
+- the API's reference to the old application's data library, and the packages that open its database;
+- the registration of the library's context in `Program.cs`, with the database provider registered by code, because ASP.NET Core has no `Web.config`;
+- with `sample-seed`, the sample database, made at start-up from the old application's schema and seed scripts.
+
+Every endpoint whose old action reads or writes the database needs this part. An endpoint that reads no data, such as an empty form, does not need it.
+
+Sometimes the old application stands in the way. Its library may target the .NET Framework alone, such as `net48`. Or its context may read its connection only by name from `Web.config`. Then the part waits, and its note says what to run in the old application's folder:
+
+<!-- described, not captured -->
+```output
+The data access cannot be built as the old application stands: BasicStore.Web.Data targets net48 only, which an API on net10.0 cannot reference: in the old application's folder (../basic-store), codelead modernize run in-place runs T1 for the rebuild …
+```
+
+The Upgrade in place stage then runs [T1](transforms.md) on that library, under the old application's pins. See [the eight stages](the-eight-stages.md#4-upgrade-in-place).
+
+CodeLead also reads each rebuilt endpoint's code, with no model call. It looks for the context or a library type in the action, or in a member of the controller that the action calls. An endpoint that reaches neither is **accepted on its contract, and it reads no data yet**. The part's `Data` line in `rebuild-plan.md` says so:
+
+<!-- described, not captured -->
+```output
+- Data: the old action reads Clients; accepted on its contract, and it reads no data yet (api/Api/Controllers/ClientsController.cs:33)
+```
+
+Once `data-access` has landed, the plan plans such an endpoint again, to be revised in place. Its request opens with `(revised in place for its data: it was accepted on its contract and read no data)`. It quotes the stub's first line, and it asks for a test of a row that the seed holds. An empty answer then fails the test. When a revision whose request asked for the data still reads none, the part gets a note: a person's turn.
+
+A screen judged while its endpoint read no data is judged again by the run itself, with no model call. When its own steps fail then, it is planned again, as [when a part's steps change](#when-a-parts-steps-change).
+
+The plan says the count at its top, so that the accepted parts never overstate:
+
+<!-- described, not captured -->
+```output
+Data access: of 17 endpoints whose old action reads or writes the database, 0 read the data in the code; 17 are accepted on their contract and read no data yet (home.index:endpoint, clients.create-post:endpoint, clients.details:endpoint and 14 more); the part data-access is planned.
+```
+
+An endpoint that reads no data is never finished. The run takes it as work left, and the run summary, the stage and the audit pack say the same count.
 
 ### Lanes
 
@@ -341,11 +407,29 @@ Two more rules:
 - **A part that landed and is not accepted yet** is warned for, not refused. Its work is not proven yet, and a later part may be the one that fixes it.
 - **An accepted part whose endpoint, screen's route or tests are gone from the code** is accepted no more. This can happen after a person's own `/implement` in the rebuild: the check warns for it, and does not refuse it. The plan plans the part again, to be rebuilt. It names the part whose landing removed the work, when the commits tell. That other part keeps its own state, with a note. The run says it before it starts: `Note: <PART_ID> is accepted no more (<RECORD>): …; it is planned again, to be rebuilt.`
 
+What a part is held to is its **baseline**: the tree that its acceptance judged.
+
+- A part accepted at its own walk is held to its last checkpoint.
+- A part accepted when the run judged it again, on a tree that moved since its landing, is held to that tree. For example, another part's repair gave the Edit links of `clients.index:screen` their id, before the run accepted that screen. That changed test is what the screen is held to.
+- So a part is never accepted and planned again in the same breath, for a change that came before its acceptance.
+- A landing is named only when its own commit broke the work: it held at the commit before the landing, and not after it. When no landing of the rebuild did that, the plan says `a change made outside the rebuild's parts`.
+- Two parts that share a file cannot plan each other again in a loop. Each is held to the tree that accepted it, and the check refuses a later patch that breaks the other.
+
 ### Parked parts
 
 A parked part is a card on the rebuild's board, with the reason. It is your turn. Read the card, then fix the part by hand, or plan it again with `/modernize --transform T9 --reopen <PART_ID> --reason <WHY>`, and run again. See [`/modernize --transform T9`](../chat-commands/modernize.md#--transform-t9).
 
 A part is parked after 3 attempts that did not land, by default. It is parked at once when the patch check refused two attempts in a row with the same problems, on the same request. A third attempt would meet the same check. The reason then says `the patch check refused the same change twice: <problem>`. See [Run profile](../reference/run-profile.md#the-keys-of-run).
+
+Sometimes the tree already holds what a part asks for. An earlier part's repair built it, for example. The model then says so, and gives no diff, or a patch that changes nothing. CodeLead records that the attempt found **nothing to change**. The plan then judges the part by the stored walk of the tree as it stands, with no model call:
+
+- When the part's own steps pass, it is **present by the walk**. The run says `satisfied: present by the walk of <TIME>: …`, and composes it no more.
+- When they do not pass, the part is parked after that one attempt. The reason says what the walk says:
+
+<!-- described, not captured -->
+```output
+parked after 1 attempt that did not land (the last: ev-<ID>, the model found nothing to change ("…both files already satisfy every requirement…"), and the walk of the tree as it stands (<TIME>) does not pass its own step: products.create-post-5 fails (on /products/index, expected ^/products/create$ (clicked "Add the product"))): a later rule or a person reopens it
+```
 
 ### Reopen a part
 

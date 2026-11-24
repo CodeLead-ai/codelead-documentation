@@ -54,12 +54,17 @@ In a rebuild whose API holds a fake directory, CodeLead signs the walk's first a
 
 In the Rebuild stage, the walk judges each part that lands. The part is accepted when its own steps pass, no step regresses, and no new finding counts. A step has two ends: the page where its control is, and the page that it reaches. The step judges the screen that it reaches, once the page that holds its control exists. See [A step has two ends](rebuild.md#a-step-has-two-ends). When an earlier step fails, the walk cannot reach the part's own steps. Then no walk judges the part, and it is not finished. The run judges it again once that step passes. An accepted part stays accepted only while its own steps are the ones its walk judged. See [When a part's steps change](rebuild.md#when-a-parts-steps-change).
 
+A step can pass on empty data. For example, "click Clients, the address is the clients' list" passes when the list is empty. So an endpoint is not accepted on its contract alone when its old action reads or writes the database. CodeLead reads the endpoint's code too. An endpoint that reaches no data is accepted on its contract, and it reads no data yet. It is revised once the data access lands. The screens judged on its empty answer are judged again. See [The data access](rebuild.md#the-data-access).
+
 The judge reads some findings before it counts them:
 
 - **The signed-out state.** The caller-identity route, such as `GET /api/me`, tells the web application who is signed in. It answers 401 to a user who has not signed in yet in the journey. That is the signed-out state of the shell, not a fault. The judge shows it and does not count it: `Signed out, as expected (not counted): GET /api/me (identity-seam) answered 401 to a user not signed in yet, the shell's signed-out state, at <STEPS>.` A 401 after the user signed in still counts.
 - **A cross-origin block.** An origin is the scheme, the host and the port of an address. The API is up at another origin than the page's, and the browser gets no answer at all from it. The judge names this a cross-origin block: the API's CORS policy refuses the web application's origin, or the credentials that its calls send. A CORS policy is the API's rule for which origins may call it. The finding says so, in place of a wrong route.
 - **A page not accepted yet.** The step's control is on the page of a part that is not accepted yet. The finding says so, for example `nothing to click named "New client" on / (the page of home.index:screen, which is not accepted yet)`.
 - **What another part builds.** The step failed only on what another part builds, and that part does not build it yet. An example is the signed-in name that the old shell showed, which the shell's menu builds. The part judged gets no repair round, and waits on that part. See [What the old shell shows](rebuild.md#what-the-old-shell-shows).
+- **A step with no action of its own.** The draft could name nothing to act on, so no walk can pass the step. No part is judged on it, and a person completes it. See [Steps a person completes](../reference/journeys-format.md#steps-a-person-completes).
+
+The rebuild's walk reads the journeys' old addresses as the new ones. Some steps click the first link to an old address, because the link's text is computed. Such a step clicks the first link to the new screen's address. For example, `/Orders/Details` becomes `/orders/details`. See [A link whose text is computed](../reference/journeys-format.md#a-link-whose-text-is-computed).
 
 ### The old application's journeys
 
