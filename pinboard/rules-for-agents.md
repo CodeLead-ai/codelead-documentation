@@ -3,7 +3,7 @@ title: Rules for agents
 description: What an agent may and may not do on the board, each rule with the exact words of its refusal, and the rules that only the agents' guide states.
 kind: concept
 area: pinboard
-date: 2026-11-20
+date: 2026-11-23
 ---
 
 # Rules for agents
@@ -115,7 +115,7 @@ Refused: "robin" is not a participant of the board (sam, claude, codex, codelead
 
 ### No secrets
 
-A text that looks like a secret is refused. A secret is a key, a bearer token, or a connection-string password: `Password=…`, or a password inside an address such as `scheme://user:password@host`. This applies to every text of a card: the title, the description, the status, the tags, the fields, the attachments and each comment:
+A text that looks like a secret is refused. A secret is a key, a bearer token, or a connection-string password: `Password=…`, or a password inside an address such as `scheme://user:password@host`. Under `codelead board`, the guard uses the audit pack's rules, and they find more secrets. See [what the rules remove](../modernization/audit-pack.md#what-the-rules-remove). This applies to every text of a card: the title, the description, the status, the tags, the fields, the attachments and each comment:
 
 ```console
 codelead board reply 2 --as claude --text "Server=db;Password=s3cretpassw0rd;"

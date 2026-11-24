@@ -3,7 +3,7 @@ title: The audit pack
 description: What the audit pack of a modernization holds, who reads it, and how to check that nothing in it was changed.
 kind: concept
 area: modernization
-date: 2026-11-20
+date: 2026-11-23
 ---
 
 # The audit pack
@@ -108,13 +108,85 @@ Here the "before" commit is the repository's first commit, which was empty, beca
 
 ## Secrets
 
-CodeLead removes secrets from every text that it copies:
+CodeLead removes secrets from every text file that it copies into the pack. It writes `<redacted>` in the place of each secret. The rest of the line stays, so that a reader can still follow it. A text file is a file whose name or content says text, such as `.json`, `.md`, `.env` or `.ini`.
 
-- the repository's path and the home folder become placeholders;
-- passwords in connection strings and provider keys are removed;
-- the contents of each file that you name with `--secret-file <PATH>` are removed. You can name more than one file.
+### What the rules remove
 
-Read the sessions before you send the pack outside your team. A session holds the prompts and the model's answers, and they hold your code.
+The rules run in this order:
+
+| Kind of rule | What it removes |
+|---|---|
+| Secret files | The contents of each file that you name with `--secret-file <PATH>`, as one text. Name a file that holds one secret, such as a password file. You can name more than one file. |
+| Private keys | The lines of a private key, between its `BEGIN` and `END` lines. A certificate stays, because it is public. |
+| Known tokens | A token with a known shape, wherever it stands. For example: model provider keys, AWS access key ids (`AKIA…`), GitHub (`ghp_…`), GitLab (`glpat-…`), Slack (`xoxb-…`), Stripe (`sk_live_…`), Google (`AIza…`) and JSON Web Tokens. |
+| Authorization | The token after `Bearer`, and the encoded user and password after `Authorization: Basic`. |
+| Addresses | The password in `scheme://user:password@host`, and the `sig=` part of a shared access signature. |
+| Connection strings | The values of `Password`, `Pwd`, `AccountKey`, `SharedAccessKey`, `SharedAccessSignature` and `Client Secret`. The server, the database and the user stay. |
+| Keys and values | A value whose key names a secret: `password`, `pwd`, `secret`, `token`, `api_key`, `client_secret`, `access_key`, `private_key`, in any case. A longer key counts too, such as `DB_PASSWORD`, `SMTP_PASS` or `JWT_SECRET`. |
+| Command lines | The value after a flag such as `--password` or `--api-key`, after `sqlcmd -P`, after `mysql -p`, and the password in `curl -u user:password`. |
+| Paths | The repository's path and the home folder become `<repo>` and `<home>`. |
+
+The key and value rule reads environment files, `export` and `set` lines, INI and properties files, YAML, JSON, XML attributes, `<add key="…" value="…" />` and code with a quoted value. A key that ends in `KEY`, such as `LICENSE_KEY`, counts only when its value looks like a secret. Such a value has 12 characters or more, with two kinds of characters, such as letters and digits. So `PRIMARY_KEY=id` stays.
+
+In this example of an environment file, the values are fake:
+
+```text
+DB_HOST=db.example
+DB_PASSWORD=not-a-real-password
+export API_TOKEN=example-token-0000
+PRIMARY_KEY=id
+```
+
+```output
+DB_HOST=db.example
+DB_PASSWORD=<redacted>
+export API_TOKEN=<redacted>
+PRIMARY_KEY=id
+```
+
+In a `Web.config`, the password goes, and the rest of the connection string stays:
+
+```text
+<add name="Shop" connectionString="Server=db;Database=Shop;User ID=shop;Password=example-only" />
+<add key="SmtpPassword" value="example-only" />
+```
+
+```output
+<add name="Shop" connectionString="Server=db;Database=Shop;User ID=shop;Password=<redacted>" />
+<add key="SmtpPassword" value="<redacted>" />
+```
+
+In JSON and on a command line, the quotes and the other options stay:
+
+```text
+{"apiKey": "example-key-0000", "user": "shop", "max_tokens": 4096}
+mytool --password example-only --verbose
+```
+
+```output
+{"apiKey": "<redacted>", "user": "shop", "max_tokens": 4096}
+mytool --password <redacted> --verbose
+```
+
+### What stays
+
+The rules leave the text readable. These stay as they are:
+
+- the word "password" in a sentence, and a label such as `Password: stored as a hash`;
+- the name of a variable with no value, such as `ANTHROPIC_API_KEY`;
+- a placeholder, such as `${DB_PASSWORD}`, `<your password>` or `****`;
+- code that reads a secret, such as `password = request.form["password"]`, and a type, such as `password: string;`;
+- a commit hash, an id such as a GUID, a base64 test fixture, and a public key token;
+- a database key, such as `PRIMARY_KEY=id`, and a count, such as `"max_tokens": 4096`.
+
+### What the rules cannot promise
+
+A secret in a shape that no rule knows can pass. For example, a password in a sentence, a password after `-p` for most commands, or a value whose name says nothing. Name each secret file with `--secret-file`. Then read the pack before you send it outside your team.
+
+Read the sessions with care. A session holds the prompts and the model's answers, and they hold your code.
+
+> [!NOTE]
+> **For team leads:** the same rules guard each card that CodeLead writes on the board. They also guard your answers to CodeLead's questions in a session log.
 
 ## Details
 

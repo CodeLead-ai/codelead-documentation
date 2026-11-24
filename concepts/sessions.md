@@ -3,7 +3,7 @@ title: Sessions
 description: Learn what a CodeLead session is, what its log records, where the log lives, and how to pause, resume and export your work.
 kind: concept
 area: concepts
-date: 2026-11-20
+date: 2026-11-23
 ---
 
 # Sessions
@@ -65,7 +65,7 @@ An [`/implement`](../chat-commands/implement.md) writes its state at each step t
   - `implement/state.json` and `greenfield/`: the state of an `/implement` and of a new app's build.
 - **The events** include `session.started`, `session.parameters`, `user.input`, `command.started`, `command.parsed`, `codelead.output`, `model.request`, `model.response`, `model.error`, `validation.result`, `command.completed` and `session.ended`. `session.parameters` holds the providers, the models, the roles and the switches of the session. A build adds its own events, such as `increment.started`.
 - **Each model event** names the role, the provider, the model asked for and the model that answered.
-- **Secrets**. The log removes passwords from connection strings in your answers before it writes them.
+- **Secrets**. The log removes secrets from your answers to CodeLead's questions before it writes them. It uses the rules of the audit pack: passwords, keys and tokens, but not the paths. The other events are written as they are. The audit pack sanitizes them when it copies the session. See [The audit pack](../modernization/audit-pack.md#secrets).
 - **Switches**. `CODELEAD_SESSIONS_DIR` moves the folder. `CODELEAD_DISABLE_SESSION_LOGGING=1` writes no log. `CODELEAD_READ_ONLY=1` leaves `.gitignore` untouched.
 - **A new app**. In an empty folder, the session's folder is made after the scaffold, so that the scaffold sees an empty folder.
 - **Reading a log**. The Session Log Viewer opens an exported zip. The extension's **Session** tab shows the same events as cards. The editor protocol is [Session protocol](../reference/session-io-protocol.md).

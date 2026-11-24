@@ -13,7 +13,7 @@ date: 2026-11-24
 `codelead pkb store` runs the store of the [PKB service](codelead-pkb.md) on this machine. The store is MongoDB Community with its search process, mongot, in two Docker containers. `up` starts it, `down` stops it, and `status` says what runs.
 
 > [!IMPORTANT]
-> This is the store only. No command of this release reads the store or writes knowledge into it. The service, `sync` and `ask` come later.
+> [`codelead pkb sync`](codelead-pkb-sync.md) writes a project's knowledge into the store. Nothing reads it back yet: the service and `ask` come later.
 
 ## Name
 
@@ -71,25 +71,26 @@ You can run `up` again at any time. It keeps `pkb.json` and the passwords, and i
 
 ### The collections
 
-The store's database is `codelead_pkb` by default. It holds eight collections:
+The store's database is `codelead_pkb` by default. It holds nine collections:
 
 | Collection | What it holds |
 |---|---|
 | `projects` | The projects, each with its repositories. A project is private by default. |
 | `sources` | Where knowledge came from: a file, a report, a card. Each source has a hash, a version and a default trust level. |
 | `entries` | The knowledge entries, as in the encyclopedia: type, summary, body, trust level, history and version. |
-| `chunks` | Short pieces of text that a search finds. Each one names what it belongs to, and has that owner's trust level. |
+| `chunks` | Short pieces of text that a search finds. Each one names what it belongs to, and has that owner's trust level. A piece whose text changed is superseded: it stays, and a search never finds it. |
 | `evidence` | CodeLead's evidence records, as they were written. |
 | `questions` | The questions asked, each with who asked it and when. |
 | `answers` | Each answer to a question. An answer is never changed. It is only marked when its evidence changed. |
-| `disclosures` | A log of what was sent and where to, as ids and counts only. |
+| `disclosures` | A log of what was sent and where to, as ids, file hashes and counts only. |
+| `locks` | The project that a sync holds, so that only one sync of a project runs at a time. |
 
 ### The indexes
 
 - **Plain indexes** keep each entry and each question once per project. They also find a project's sources, chunks and answers quickly.
 - **`chunks_text`** is a search index on the words of each chunk.
 - **`chunks_embedding`** is a vector search index on the embedding of each chunk, with cosine similarity.
-- You can filter both search indexes by project, by what a chunk belongs to, and by trust level.
+- You can filter both search indexes by project, by what a chunk belongs to, and by trust level. Both leave out a superseded chunk.
 
 An embedding is a list of numbers that a model makes from a text. Texts with a similar meaning get similar numbers. The number of values comes from `embeddings.dimensions` in `pkb.json`, 768 by default. When you change it, the next `up` changes the vector index.
 
@@ -118,7 +119,7 @@ These options belong to each of `up`, `down` and `status`.
   The PKB store is up on 127.0.0.1:27415: MongoDB 8.3.17 with its search process mongot 1.70.6 (compose project codelead-pkb).
   Files in <home>/.codelead/pkb: pkb.json written, .env written, compose.yaml written, mongod.yml written, mongot.yml written. The passwords and the keyfile were made now, in .env (readable by you only).
   Replica set pkb: initiated now. Users: pkb-admin (root), pkb-service (the PKB's own: readWrite and dbAdmin on codelead_pkb), pkb-mongot (searchCoordinator); made now: pkb-admin, pkb-service, pkb-mongot.
-  Collections: 8 in codelead_pkb (made now: 8); plain indexes: 10 (made now: 10).
+  Collections: 9 in codelead_pkb (made now: 9); plain indexes: 10 (made now: 10).
   Indexes: 10 plain; search: chunks_text (search) PENDING; chunks_embedding (vectorSearch, 768 dimensions) PENDING.
   Connect: mongodb://pkb-service:<password>@127.0.0.1:27415/?authSource=admin&directConnection=true, database codelead_pkb (the password is PKB_SERVICE_PASSWORD in <home>/.codelead/pkb/.env).
   ```
@@ -147,7 +148,7 @@ These options belong to each of `up`, `down` and `status`.
   <!-- described, not captured -->
   ```output
   The PKB store in <home>/.codelead/pkb (compose project codelead-pkb, 127.0.0.1:27415): mongod running (healthy); mongot running.
-  Collections in codelead_pkb: projects 0, sources 0, entries 0, chunks 0, evidence 0, questions 0, answers 0, disclosures 0.
+  Collections in codelead_pkb: projects 0, sources 0, entries 0, chunks 0, evidence 0, questions 0, answers 0, disclosures 0, locks 0.
   Indexes: 10 plain; search: chunks_text (search) READY, queryable; chunks_embedding (vectorSearch, 768 dimensions) READY, queryable.
   ```
 
@@ -208,17 +209,18 @@ Docker keeps the data in two volumes, `<project>_mongod-data` and `<project>_mon
 
 ### The configuration
 
-`pkb.json` holds the whole configuration of the PKB service. This release reads only `store` and `embeddings.dimensions`. The other keys are for the service, which comes later. A key that the file leaves out takes its default.
+`pkb.json` holds the whole configuration of the PKB service. This release reads `store`, `embeddings.dimensions` and `projects`. The other keys are for the service, which comes later. A key that the file leaves out takes its default.
 
 | Key | Default | What it does |
 |---|---|---|
 | `store.uri` | `mongodb://pkb-service@127.0.0.1:27415/?authSource=admin&directConnection=true` | The store's address and port, without the password. The host must be `127.0.0.1` or `localhost`. |
-| `store.database` | `codelead_pkb` | The database of the eight collections. |
+| `store.database` | `codelead_pkb` | The database of the nine collections. |
 | `store.compose_project` | `codelead-pkb` | The name that Docker gives the containers and the volumes. |
 | `embeddings.dimensions` | `768` | The number of values in every embedding, and in the vector index. |
 | `bind`, `port` | `127.0.0.1`, `7415` | The service's own address. Not used yet. |
 | `chat`, `embeddings.baseUrl`, `embeddings.model`, `embeddings.remote` | local model servers, no model | The models of the service. Not used yet. |
-| `projects`, `privacy.allowRemoteModels`, `paused` | none, `false`, `false` | The projects and the rules of the service. Not used yet. |
+| `projects` | none | The projects, each with its repositories and their checkouts. [`codelead pkb sync`](codelead-pkb-sync.md#the-project-in-pkbjson) reads them. |
+| `privacy.allowRemoteModels`, `paused` | `false`, `false` | The rules of the service. Not used yet. |
 
 ## Details
 
@@ -231,6 +233,7 @@ Docker keeps the data in two volumes, `<project>_mongod-data` and `<project>_mon
 ## See also
 
 - [`codelead pkb`](codelead-pkb.md): the commands of the PKB service, and what does not exist yet.
+- [`codelead pkb sync`](codelead-pkb-sync.md): send a project's knowledge into the store.
 - [The knowledge base](../concepts/knowledge-base.md)
 - [`codelead doctor`](codelead-doctor.md): checks that Docker is installed and answers.
 - [Environment variables](../reference/environment-variables.md#folders)

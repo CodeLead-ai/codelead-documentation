@@ -103,7 +103,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 - **Patch**. A description of changes to files, as a diff, that nobody has applied yet. See [Requests, plans and patches](requests-plans-and-patches.md).
 - **Patch check, the**. CodeLead's own reading of a patch against your files, before the apply and with no model. See [The patch check](the-patch-check.md).
 - **Pin**. A test that records what the old code does today, so that a later change cannot break it unseen. See [Pins](../modernization/pins.md).
-- **PKB service**. The project knowledge base shared by a team: what several projects know, in one place, with every answer cited. Today only its store exists. See [`codelead pkb`](../cli/codelead-pkb.md).
+- **PKB service**. The project knowledge base shared by a team: what several projects know, in one place, with every answer cited. Today its store and its sync exist: [`codelead pkb sync`](../cli/codelead-pkb-sync.md) sends a project's knowledge into the store. See [`codelead pkb`](../cli/codelead-pkb.md).
 - **Plan (of a change)**. The preflight's result: the files to change, the non-goals and how to validate. The patch check holds the patch to it. See [Requests, plans and patches](requests-plans-and-patches.md).
 - **Plan (of a licence)**. Free or pro: which parts of CodeLead a folder can use. See [Licence and plans](licence-and-plans.md).
 - **Preflight**. The first step of a change: CodeLead chooses the files, and a model analyzes them and writes the plan. It can ask questions. See [Requests, plans and patches](requests-plans-and-patches.md).

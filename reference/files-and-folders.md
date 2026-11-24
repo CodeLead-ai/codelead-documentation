@@ -44,6 +44,7 @@ The first chat session adds `.codeleadsessions/` and its line in `.gitignore`. I
 | `.codelead/config.json` | `codelead init`, `codelead modernize source`, the extension's Settings | `codelead.config/1` | Yes | The settings. See [Configuration file](configuration.md). |
 | `.codelead/knowledge.json` | every run that learns a fact, and `init` | `codelead.knowledge/1` | Yes | The [knowledge base](../concepts/knowledge-base.md): the entries and their evidence. |
 | `.codelead/evidence/ev-<time>-<id>.json` | every run | `codelead.evidence/1` | Yes | One [evidence record](evidence-record-format.md) per run. |
+| `.codelead/disclosures.jsonl` | [`codelead pkb sync`](../cli/codelead-pkb-sync.md) | | Yes | One line for each sync: what left which folder for the PKB store, as file names, hashes and counts, never the text. |
 | `.codelead/project-index.json` | the project library | `codelead.project-index/1` | No | The index of the [project library](../concepts/project-library.md). CodeLead writes it again when the repository changes. |
 | `.codelead/validation.json` | you, and the pins and `rebuild init` when they add an entry | `codelead.validation/1` | Yes | The gate's commands. See [Validation file](validation-file.md). |
 | `.codelead/run.json` | you | `codelead.run/1` | Yes | How to start the application for a spec walk. See [Run file](run-file.md). |

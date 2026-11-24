@@ -332,6 +332,8 @@
       href: cli/codelead-pkb.md
     - name: "codelead pkb store"
       href: cli/codelead-pkb-store.md
+    - name: "codelead pkb sync"
+      href: cli/codelead-pkb-sync.md
 - name: Chat command reference
   items:
     - name: "Overview"
