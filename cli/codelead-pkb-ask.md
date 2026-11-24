@@ -102,6 +102,32 @@ Return only JSON: {"sentences": [{"text": "…", "sources": ["S1"]}], "notInKnow
 - A source's text stops at 2,400 characters. The whole prompt stops at 60,000 characters, about 15,000 tokens.
 - `--dry-run` prints the whole prompt, with its size, and calls no model.
 
+#### More pieces of one source
+
+A source can have many pieces. An evidence record, for example, has a piece with its request and a piece with its list of files. The search keeps each source once, by its best piece.
+
+When the budget has room left, the prompt also shows the source's other pieces that tell the question:
+
+- a piece that clears the floor;
+- a piece that holds one of the question's rare words;
+- for a question that asks why or what changed, an evidence record's request. The request often says why the change was made.
+
+These pieces come under the source's one number, in the source's own order. A line names each piece:
+
+```output
+[S3] evidence ev-20261107-100000-frost · implement, landed · 2026-11-07 · evidence-backed:
+(part: request, lines 2–5)
+Evidence record ev-20261107-100000-frost: implement · landed · 2026-11-07
+Request: Revise the frost alarm in place: it rang at 2 degrees and the crates froze, because the sensor sat by the door…
+(part: surface, lines 6–9)
+Files: src/alarm/FrostAlarm.ts, src/alarm/FrostAlarmSensor.ts.
+```
+
+- A source shows at most three more pieces. Each piece comes whole, or not at all.
+- The sources are chosen first. The pieces only take the room that the sources leave.
+- A note then says how many more pieces the model was given.
+- A citation of such a source names each piece that it showed, and its lines cover them all.
+
 ### The chat model
 
 `pkb.json` names the chat model in its `chat` section:

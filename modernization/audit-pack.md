@@ -199,7 +199,7 @@ A secret in a shape that no rule knows can pass. For example, a password in a se
 Read the sessions with care. A session holds the prompts and the model's answers, and they hold your code.
 
 > [!NOTE]
-> **For team leads:** the same rules guard each card that CodeLead writes on the board. They also guard your answers to CodeLead's questions in a session log.
+> **For team leads:** the same rules guard each card that CodeLead writes on the board. The board reads them as prose, so a card may talk about a secret: see [No secrets](../pinboard/rules-for-agents.md#no-secrets). They also guard your answers to CodeLead's questions in a session log.
 
 ## Details
 

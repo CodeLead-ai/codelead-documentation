@@ -3,7 +3,7 @@ title: Rules for agents
 description: What an agent may and may not do on the board, each rule with the exact words of its refusal, and the rules that only the agents' guide states.
 kind: concept
 area: pinboard
-date: 2026-11-23
+date: 2026-11-24
 ---
 
 # Rules for agents
@@ -115,7 +115,23 @@ Refused: "robin" is not a participant of the board (sam, claude, codex, codelead
 
 ### No secrets
 
-A text that looks like a secret is refused. A secret is a key, a bearer token, or a connection-string password: `Password=…`, or a password inside an address such as `scheme://user:password@host`. Under `codelead board`, the guard uses the audit pack's rules, and they find more secrets. See [what the rules remove](../modernization/audit-pack.md#what-the-rules-remove). This applies to every text of a card: the title, the description, the status, the tags, the fields, the attachments and each comment:
+A text that holds a secret is refused. A secret is a key, a bearer token, or a password with its value, such as a connection string's `Password=` and the password after it. Under `codelead board`, the guard uses the audit pack's rules, and they find more secrets. See [what the rules remove](../modernization/audit-pack.md#what-the-rules-remove). This applies to every text of a card: the title, the description, the status, the tags, the fields, the attachments and each comment.
+
+A card may still talk about a secret. The guard reads a card as prose, so these are not refused:
+
+- a key in a code span with no value, such as `` `PASSWORD=` ``;
+- a syntax with the word for a secret, or a placeholder, where the value goes;
+- what became of a secret, where it is kept, or what kind it is.
+
+For example, the board writes this text as it is:
+
+```text
+The scan missed `PASSWORD=` in capitals. Use `postgres://app:${DB_PASSWORD}@db`.
+- Token: expired
+- Secret: Vault
+```
+
+Only the board reads text this way. The audit pack, the session logs and the knowledge base keep the strict rules. A real value is still refused:
 
 ```console
 codelead board reply 2 --as claude --text "Server=db;Password=s3cretpassw0rd;"
@@ -212,7 +228,7 @@ The page always sends this time, so a change on the page never overwrites what a
 
 - **Exit codes.** `0`: done, or nothing to change. `1`: a rule of the board refused the write. Every refusal on this page exits with `1`. `2`: the command cannot run as written: no board, no such card, an unknown option, or a missing or malformed argument. See [Exit codes](cli/index.md#exit-codes).
 - **JSON.** With `--json`, a refusal is `{"refused": "<code>", "message": "<the words>"}`. The tag and the colour by an agent give the code `not-allowed`.
-- **CodeLead's own writes.** When CodeLead writes on a card, its texts go through the same guard with the audit pack's sanitizer. CodeLead writes a secret as `<redacted>`, a home path as `<home>/…` and a private name as `<name>`, so that its records are written rather than refused.
+- **CodeLead's own writes.** When CodeLead writes on a card, its texts go through the same guard, with the same rules read as prose. CodeLead writes a secret as `<redacted>`, a home path as `<home>/…` and a private name as `<name>`, so that its records are written rather than refused.
 - **One core.** The page's process, the commands and CodeLead call the same functions. A rule cannot hold on the page and fail on the command line.
 
 ## Related content
