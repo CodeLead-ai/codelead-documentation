@@ -194,7 +194,7 @@ See [The eight stages](../modernization/the-eight-stages.md) for what each one d
 |---|---|---|
 | `pending` | The stage has not run. | `codelead modernize next` runs it when its turn comes. |
 | `running` | The stage runs now. | Wait, or stop it with `codelead modernize stop`. |
-| `waiting` | The stage waits for you: the recordings, an answer, a reason for the extraction gate, a security decision. Your turn is not a failure. | Do what `problem.fix` says, then run `problem.retry`, or skip the stage. |
+| `waiting` | The stage waits for you: the recordings, an answer, a reason for the extraction gate, a security decision, the parts of a rebuild that the run cannot take on by itself. Your turn is not a failure. | Do what `problem.fix` says, then run `problem.retry`, or skip the stage. |
 | `done` | The stage did its job. | The program goes on. |
 | `failed` | The stage could not do its job. | Fix what `problem.reason` names, then run `problem.retry`, or skip the stage. |
 | `skipped` | The program went past the stage: you skipped it, or a stub stood in for it. | The program goes on. |
@@ -236,7 +236,7 @@ The problem of a stage that you stopped:
 }
 ```
 
-Other titles that you can meet: `<stage>: did not finish` (the process ended before the stage did), `An answer is needed`, `Answers are needed`, `The extraction gate needs your reasons`, and `<n> security findings are decisions for a person`.
+Other titles that you can meet: `<stage>: did not finish` (the process ended before the stage did), `An answer is needed`, `Answers are needed`, `The extraction gate needs your reasons`, `<n> security findings are decisions for a person`, `The rebuild waits for you` and `The rebuild is not finished`.
 
 ## The coverage of the pins
 
@@ -291,6 +291,7 @@ See [Pins](../modernization/pins.md) and [Pin levels file](pin-levels-file.md).
 | `pinsDatabase` | stored, once given | `done`, `env:<NAME>`, or the path of a copy of the database file | Where the database pins' own database is. `done` means that you wrote the connection in the pins' git-ignored connections file. Never a connection string. |
 | `security` | stored, once given | `fix-none`, `fix-all` or `decided` | What the In place stage does with the security findings whose fix changes who may do what. `decided` means that you waived or fixed each one yourself. |
 | `pins` | act | `enough` | Marks the Pin stage done as it stands, and you go on. |
+| `rebuild` | act | `enough` | Marks the Rebuild stage done with what is built, and you go on to the audit pack. |
 
 An answer that the program always writes is `null` until you give it. An optional one appears only once given.
 

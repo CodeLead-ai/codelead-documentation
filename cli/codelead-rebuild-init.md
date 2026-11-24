@@ -41,7 +41,7 @@ Then it makes the rebuild in ten steps:
 3. **Git**: the folder becomes a git repository.
 4. **The install**: `npm install`, unless `--no-install`.
 5. **The manifest**, `docs/codelead/rebuild/rebuild.json`. It names the old application, its feature map and its web project. It names the targets: the new API and the web application. It keeps the decisions: identity and database.
-6. **The run profile** in the manifest: how to start the API and the web application, the clock, the caps of an unattended run.
+6. **The run profile** in the manifest: how to start the API and the web application, the clock, the caps of an unattended run. For a sign-in with a cookie across two origins, it also holds a check of the API's CORS policy. That policy is the API's rule for which origins may call it. See [The two answers](#the-two-answers).
 7. **The journeys**, `docs/codelead/rebuild/journeys.json`: merged from the model's draft, the Analyst's recordings and the Explorer's stories.
 8. **CodeLead initialized** in the folder: the configuration, the repository map, a board, a conventions starter and the declared validation gate.
 9. **The plan**, with no model call, and a dry run of [`codelead rebuild run`](codelead-rebuild-run.md). The dry run asks the model server for its list of models, and nothing more. The `Plan:` line counts the parts that the plan drops because nothing live reaches them.
@@ -72,6 +72,10 @@ When the template's port of the API or the web is one of them, `init` takes the 
 
 - `--identity keep`: the new API keeps the accounts, with ASP.NET Core Identity over the old user tables. `--identity drop`: no sign-in, and the account features are dropped.
 - `--database <name>`: the name of the connection string that the new API reads, kept out of the repository. `--database sample-seed`: a sample database, reset before every journey.
+
+With `--identity keep`, no part of the plan builds the directory that checks a password outside Development and the tests. The plan says so in a note on the part `sign-in:endpoint`, and a person adds the real directory. Until then, a build for production signs nobody in.
+
+When the System Model reads a sign-in action in the old code, the rebuild signs users in with a cookie. With `--identity keep`, and the API and the web application at two origins, `init` writes a check into the run profile. An origin is the scheme, the host and the port of an address. The check is an `OPTIONS` request to the API's caller-identity route, such as `/api/me`, from the web application's origin. It expects `Access-Control-Allow-Origin` with that origin and `Access-Control-Allow-Credentials: true`. The `Run profile:` line names it. See [Run profile](../reference/run-profile.md#checks).
 
 ### Where the template comes from
 

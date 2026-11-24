@@ -59,7 +59,7 @@ It fails while a feature is missing or half landed. It fails while a pin has no 
 This gate is for the end of a rebuild, not for each part. It fails until the first clean walk.
 
 > [!TIP]
-> **For experienced users:** a feature is `landed`, `endpoint only`, `screen only`, `endpoint not read`, `screen not read`, `dropped by decision` or `missing`. "Not read" means that CodeLead could not read the API's inventory or the SPA's route table, so it cannot show that the part landed. A rebuild without a web target has nothing to wire or walk.
+> **For experienced users:** a feature is `landed`, `endpoint only`, `screen only`, `endpoint not read`, `screen not read`, `dropped by decision` or `missing`. "Not read" means that CodeLead could not read the API's inventory or the SPA's routes, so it cannot show that the part landed. CodeLead reads the route table of a React Router application, and the routes of a Next.js app router from its folders. It does not read the pages router of Next.js. A rebuild without a web target has nothing to wire or walk.
 
 The command is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, it is refused before anything runs, with exit code 2. See [Licence and plans](../concepts/licence-and-plans.md).
 
@@ -167,6 +167,8 @@ The first three examples ran against a small local site with three pages, on por
   ```
 
   Under the title, the report starts with `Generated <time> for the rebuild in this repository`. The report is committed with the rebuild, so neither the page nor its JSON record holds a path of this machine.
+
+  This report was captured before CodeLead read the routes of a Next.js app router, the web application of this template. Its `26 screen not read` and its `no React Router route table` come from that gap. CodeLead now reads the app router's routes from its folders, so the numbers of a new rebuild differ.
 
 - Check before any baseline was captured. CodeLead says what to run first:
 

@@ -372,10 +372,10 @@ Pin first: the declared gate (.codelead/validation.json) carries no characteriza
 /modernize --transform T9 --intervene <PART_ID> --reason <WHY>
 ```
 
-`T9` builds the rebuild, part by part, in the rebuild repository that [`--rebuild-init`](#--rebuild-init) made. A part is an endpoint of the new API or a screen of the new front end, for example `orders.close:endpoint`. Each part runs as an increment: preflight, patch, validation, a checkpoint commit, then the acceptance walk on its own steps. See [The rebuild](../modernization/rebuild.md) and [The walk and parity](../modernization/walk-and-parity.md).
+`T9` builds the rebuild, part by part, in the rebuild repository that [`--rebuild-init`](#--rebuild-init) made. A part is an endpoint of the new API or a screen of the new front end, for example `orders.close:endpoint`. Each part runs as an increment: preflight, patch, validation, a checkpoint commit, then the acceptance walk on its own steps. Before a patch lands, the patch check also refuses it when it breaks what an accepted part built. See [The rebuild](../modernization/rebuild.md#what-an-accepted-part-built-stays-built) and [The walk and parity](../modernization/walk-and-parity.md).
 
 - `--feature <ID>`: rebuilds one feature of the map: its endpoint, then its screen. `--part endpoint|screen` picks one.
-- `--next`: composes the part that the plan says comes next. `--scope <PREFIX>` limits it to some features.
+- `--next`: composes the part that the plan says comes next. `--scope <PREFIX>` limits it to some features. One case comes first: a landed part whose walk failed only on a page that another part builds. Once that part is accepted, `--next` judges the waiting part again by itself, with no model call, and composes nothing.
 - `--dry-run`: with `--next`, composes every planned part with no model call, and checks each quote and name against the code.
 - `--judge-again <PART_ID>`: judges a landed part's acceptance again on the same tree, with no model call, when the walker was wrong or changed.
 - `--reopen <PART_ID>`: plans a parked part again, with no model call.
@@ -461,7 +461,7 @@ Makes the rebuild repository beside the old application, after `codelead model`.
 - `--source <FOLDER>`: the old application. The default is this repository.
 - `--template <NAME|PATH>`: the template.
 - `--framework net10.0|net8.0`: the .NET version of the new API.
-- `--identity keep|drop`: keeps the old application's sign-in, or drops it.
+- `--identity keep|drop`: keeps the old application's sign-in, or drops it. With `keep`, no part of the plan builds the directory that checks a password outside Development and the tests. The plan says so in a note, and a person adds it.
 - `--database <CONNECTION_NAME>|sample-seed`: the connection of the old application to use, or sample rows.
 - `--no-install`: copies the template without installing its packages.
 - `--no-commit`: does not commit what was made. By default, CodeLead commits it with this machine's git user.
@@ -515,7 +515,7 @@ The modernization program in the chat. It is the same program as [`codelead mode
 - `--run <STAGE>`: runs one stage again: `read`, `recordings`, `pins`, `in-place`, `model`, `rebuild-init`, `rebuild` or `audit`.
 - `--as <ROLE>=<ACCOUNT>`, after `--run`: a role that the read stage's Explorer signs in as, and its account, as [`codelead modernize start --as`](../cli/codelead-modernize-start.md#sign-in-accounts-for-the-crawl) does. Repeat it for each role. The state file keeps the roles and the accounts, never a password, for every run of the stage. Each password is read when the stage runs, from `CODELEAD_WALK_PASSWORD_<ROLE>`, else from the file that `CODELEAD_WALK_CREDENTIALS` names. A missing password makes the stage wait, and its problem names the variable. A sign-in that the application refuses for every role, or no screen at all, makes the stage wait too.
 - `--continue`: the recordings are made; CodeLead marks them done and runs the next stages. It takes nothing after it.
-- `--answer <KEY>=<VALUE>`: records answers, and runs nothing. The same as [`codelead modernize answer`](../cli/codelead-modernize-answer.md), with the same eight keys: `rebuildFolder`, `template`, `framework`, `identity`, `database`, `pinsDatabase`, `security` and `pins`. `pinsDatabase=done` (or `env:<NAME>`) answers the pins' database question. `security=decided`, `fix-all` or `fix-none` answers the security findings that wait for a person. `pins=enough` ends the pins stage with the coverage as it stands, only while the stage waits or failed.
+- `--answer <KEY>=<VALUE>`: records answers, and runs nothing. The same as [`codelead modernize answer`](../cli/codelead-modernize-answer.md), with the same nine keys: `rebuildFolder`, `template`, `framework`, `identity`, `database`, `pinsDatabase`, `security`, `pins` and `rebuild`. `pinsDatabase=done` (or `env:<NAME>`) answers the pins' database question. `security=decided`, `fix-all` or `fix-none` answers the security findings that wait for a person. `pins=enough` ends the pins stage with the coverage as it stands, only while the stage waits or failed. `rebuild=enough` ends the rebuild stage with what is built, on the same condition.
 - `--skip <STAGE> --reason <WHY>`: goes past a stage that failed or waits for you, as [`codelead modernize skip`](../cli/codelead-modernize-skip.md) does. The reason is required. The recordings are never skipped.
 
 In unattended mode, `--run` and `--continue` ask you for the consent for each remote provider at their start, before the first model call. A no ends the command before any stage runs, with the outcome `stopped`. See [The modernization program](../modernization/the-program.md#approve-mode-and-unattended-mode).
@@ -546,8 +546,9 @@ The chat checks the keys before it asks the program:
 /modernize --answer colour=blue
 ```
 
+<!-- described, not captured -->
 ```output
-/modernize --answer takes <key>=<value> pairs, the keys rebuildFolder, template, framework, identity, database, pinsDatabase, security, pins; not one: colour=blue.
+/modernize --answer takes <key>=<value> pairs, the keys rebuildFolder, template, framework, identity, database, pinsDatabase, security, pins, rebuild; not one: colour=blue.
 ```
 
 A skip without its reason, and a skip of a stage that is skipped already:

@@ -32,6 +32,7 @@ Use `next` after you gave an answer with [`codelead modernize answer`](codelead-
 - It runs a **waiting** stage again, because a person can do what it waited for at any time.
 - It never runs the `recordings` stage. The recordings are a person's work: mark them done with [`codelead modernize continue`](codelead-modernize-continue.md).
 - It stops at a waiting `pins` stage, so that the transforms do not run on too few pins. Run the stage again with `codelead modernize run pins`, or accept the pins with `codelead modernize answer pins=enough`.
+- It stops at a waiting `rebuild` stage, so that the audit pack is not written over a rebuild with parts left. Act on what the stage's problem names, then run the stage again with `codelead modernize run rebuild`. Or go on with what is built: `codelead modernize answer rebuild=enough`.
 - It never runs a **failed** stage again. Fix the cause, then run the stage with [`codelead modernize run`](codelead-modernize-run.md). Or go past it with [`codelead modernize skip`](codelead-modernize-skip.md) and your reason.
 
 > [!NOTE]

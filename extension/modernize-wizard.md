@@ -83,7 +83,7 @@ See [Record a journey](../analyst/record-a-journey.md).
 "The program supplies the rebuild folder and template. Choose how the rebuilt application handles accounts and data."
 
 - **Rebuild folder** and **Template** are read only. The program fills them: `../<folder>-rebuild` and `dotnet-next-shadcn` by default.
-- **Identity**: **Keep** keeps the old application's accounts. **Drop** drops the sign-in.
+- **Identity**: **Keep** keeps the old application's accounts. **Drop** drops the sign-in. With **Keep**, no part of the rebuild's plan builds the directory that checks a password outside Development and the tests. The plan says so in a note, and a person adds it. See [The rebuild](../modernization/rebuild.md#the-manifest).
 - **Database**: the name of the connection string that the new API reads, or `sample-seed`.
 - **Save** runs `codelead modernize answer identity=<keep|drop> database=<name>`, then `codelead modernize next`.
 
@@ -159,7 +159,7 @@ The card has no **Retry** while the findings wait. Once one of the three answers
 ![The stage Transform in place, waiting for you. A muted line says 1 finding is closed by another transform or the rebuild: end-of-life-runtime. The card 2 security findings are decisions for a person gives the program's explanation. The findings S-003 and S-004 each show a waive line and a fix line, each with Copy and Open the chat. The buttons I decided each one, Fix them all and Leave them open follow, each with its help and its command. Stop and Skip this stage come last.](../media/extension/wizard-security-decisions.jpg)
 
 > [!TIP]
-> **For experienced users:** the waiting card of the Pin stage can say that facts still wait at a lower level. **Retry** runs the stage again. To accept the coverage, run `codelead modernize answer pins=enough` in the terminal. See [Pins](../modernization/pins.md).
+> **For experienced users:** the waiting card of the Pin stage can say that facts still wait at a lower level. **Retry** runs the stage again. To accept the coverage, run `codelead modernize answer pins=enough` in the terminal. See [Pins](../modernization/pins.md). The Build and verify stage can wait too, with the parts of the rebuild that wait for you. To go on with what is built, run `codelead modernize answer rebuild=enough` in the terminal. See [The eight stages](../modernization/the-eight-stages.md#7-rebuild).
 
 ## When a command is refused
 

@@ -147,6 +147,7 @@ Next:
 - **Re-anchoring.** A hunk whose context differs at its first or last line is placed where the rest matches, with a note that says where.
 - **A cut reply.** A patch whose reply was cut at the model's cap is refused whole, so that what arrived is never applied.
 - **The pins' database.** A database pin project that reads the application's own configuration or connection is refused. This is one of the few checks that protect data. See [Pins](../modernization/pins.md).
+- **A rebuild's accepted parts.** In a rebuild, the check also refuses a patch that breaks what an accepted part built. Such a patch removes an accepted endpoint, a screen's route or a test. Or it changes what such a test sends or asserts. Its words start with `accepted_parts:` and say the way out. A part that landed and is not accepted yet is a warning only. See [The rebuild](../modernization/rebuild.md#what-an-accepted-part-built-stays-built).
 - **Templates.** In a folder built from a template (`.codelead/template.json` exists), the design-token rule for new stylesheets stands down.
 - **Where the words go.** Into the session log, into the next patch prompt after a refusal, and into the evidence record's `patch_check` field.
 

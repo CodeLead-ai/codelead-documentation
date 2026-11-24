@@ -46,6 +46,7 @@ The [patch check](../concepts/the-patch-check.md) reads every patch before it to
 | `Unsafe path "<path>": generated, vendor, or build-output paths are not allowed, including dependency, cache, and session artifact paths.` | The patch edits `node_modules`, `dist`, `bin`, a session folder, and so on. | `/patch --retry`. |
 | `… a note, it does not block applying` | A note of the change surface: a file outside the files that the request is likely to change. | Read it. You can apply. |
 | `[conventions] <file>: <rule>` | A new line does not follow the repository's [conventions](../concepts/conventions.md). A note. | Apply, then fix the line, or `/patch --retry`. |
+| `accepted_parts: the patch breaks what the accepted part <part> built (<record>): <what it breaks>. <the way out>` | In a rebuild: the patch removes an endpoint, a screen's route or a test that an accepted part built, or changes what such a test sends or asserts. | Do what the way out says: add the change beside what the part built, and leave that as it is. `/implement` tells its retry the same words. See [The rebuild](../modernization/rebuild.md#what-an-accepted-part-built-stays-built). |
 
 When `/implement` gives up on a patch, it says:
 
@@ -213,12 +214,15 @@ The [program](../modernization/the-program.md) refuses with `Refused: … Nothin
 | `Refused: <stage> has not run (it is pending): a stage is skipped only when it failed or waits for you; …` | Only a stage that failed or waits can be skipped. | Run it first. |
 | `Refused: security=maybe: fix-none (…), fix-all (…) or decided (…). Nothing was recorded.` | An answer's value is not one that it takes. | Give one of the values. |
 | `Refused: pins=enough: Pin the contracts (pins) has not run (it is pending): pins=enough is taken only while the stage waits for you or failed; …` | `pins=enough` acts on the Pin stage, and only while it waits or failed. | Run the stage first: `codelead modernize run pins`. |
-| `Refused: <key>: not an answer the program takes (rebuildFolder=<folder>, …, pins=enough). Nothing was recorded.` | A key that the program does not take. | Use one of the eight keys. See [`codelead modernize answer`](../cli/codelead-modernize-answer.md). |
+| `Refused: rebuild=enough: Build and verify (rebuild) has not run (it is pending): rebuild=enough is taken only while the stage waits for you or failed; …` | `rebuild=enough` acts on the Rebuild stage, and only while it waits or failed. | Run the stage first: `codelead modernize run rebuild`. |
+| `Refused: <key>: not an answer the program takes (rebuildFolder=<folder>, …, pins=enough, rebuild=enough). Nothing was recorded.` | A key that the program does not take. | Use one of the nine keys. See [`codelead modernize answer`](../cli/codelead-modernize-answer.md). |
 | `Refused: <stage> is skipped already (by the person: <reason>): codelead modernize next goes on.` | The stage was skipped before. | `codelead modernize next`. See [`codelead modernize skip`](../cli/codelead-modernize-skip.md). |
 | `Record the journeys` (problem) | The Observe stage waits for your recordings. | Record with the Analyst, then `codelead modernize continue`. |
 | `An answer is needed` / `Answers are needed` (problem) | A stage needs an answer. | The problem's `fix` gives the line: `codelead modernize answer <key>=<value>`. |
 | `The extraction gate needs your reasons` (problem) | Findings of the extraction gate wait for a reason. | Record them in `extraction-dispositions.json`. See [Extraction dispositions and security waivers](dispositions-and-waivers.md). |
 | `<n> security findings are decisions for a person` (problem) | Fixing them changes who may do what. | Waive or fix each, then `codelead modernize answer security=decided`. |
+| `The rebuild waits for you` (problem) | The rebuild run ended with parts of the plan not accepted, and a person's turn stands between: a parked part, a part landed and not accepted, a part that the model ladder asked about, or a blocker of the plan. The reason names each, with its line. | Act on what the reason names in the rebuild, then `codelead modernize run rebuild`. Or go on with what is built: `codelead modernize answer rebuild=enough`. Or `codelead modernize skip rebuild --reason "<WHY>"`. |
+| `The rebuild is not finished` (problem) | The rebuild run stopped at a cap, with parts left that it can still take. Nothing in the plan asks a person. | `codelead modernize run rebuild` goes on from what is accepted. Or `codelead modernize answer rebuild=enough`. |
 | `<stage>: stopped` (problem) | You stopped the stage. | Run it again: what it finished is kept. |
 | `<stage>: did not finish` (problem) | The process ended before the stage did. | Run the stage again. |
 | `This clone is in use: <who>. One run per clone: …` | Another run holds the run lock. | Wait for it, or stop it. A lock with no heartbeat is taken over. |

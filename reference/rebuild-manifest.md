@@ -123,6 +123,8 @@ What the new application does, as a person decided it. The reasons why a finding
 
 `codelead rebuild init --identity drop` drops every account feature, with the reason `the rebuild has no sign-in (codelead rebuild init --identity drop)`.
 
+With `keep`, no part of the plan builds the directory that checks a password outside Development and the tests. The plan says so in a note on the part `sign-in:endpoint`, and a person adds the real directory.
+
 ### decisions.model
 
 Each key is one form that the plan prints: `reveal:<entry point>`, a key of the extraction gate's report, `unknown:<file>:<line>` or `route:<path>`. Each value:

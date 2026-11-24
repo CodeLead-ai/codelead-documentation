@@ -52,6 +52,12 @@ Lanes taken, in order: foundations, clients.
 
 - `clients.edit:screen` (ladder-ask, board, record `ev-20261120081530-t4n2kx`): the repair rung did not get it accepted.
 
+## Accepted parts whose contract does not hold
+
+A part its walk accepted whose endpoint, screen's route or tests are no longer in the code: accepted no more, planned again to be rebuilt by the next run. The part whose landing removed it is named.
+
+None.
+
 ## Cost per rung
 
 | Rung | Calls | Priced | Prompt tokens | Completion tokens | Cost |
@@ -80,6 +86,18 @@ Lanes taken, in order: foundations, clients.
 
 The sections appear in this order. A section of lanes that wait on other lanes appears only when there is such a wait. The licence's warnings, when the run had any, come first.
 
+The numbers table has two more rows when the run had such a part:
+
+- `Accepted when judged again by the run (the page its step acts on accepted since)`: the count of `accepted-judged-again`.
+- `Accepted on what regresses, its steps waiting on another part's page`: the count of `waits-on-page`.
+
+The section of accepted parts whose contract does not hold is always there, with `None.` when every accepted part holds. Each line names the part, the record that accepted it, and what is gone. For example:
+
+<!-- described, not captured -->
+```markdown
+- `clients.create-get:endpoint` (accepted by `<RECORD>`): its endpoint GET /api/clients/create is no longer in the code: the part clients.create-post:endpoint removed it in <RECORD> (checkpoint <COMMIT>).
+```
+
 ## The JSON summary
 
 | Key | Type | What it holds |
@@ -97,6 +115,7 @@ The sections appear in this order. A section of lanes that wait on other lanes a
 | `passedBy` | list | The lanes that `--lane all` passed by, because another clone's run claimed them: `lane`, `why`. |
 | `sync` | object | Whether the lanes' claims synced with the remote, its name, and why. |
 | `waits` | list | Parts that still wait on a part of another lane: `part`, and `on` with each part, lane and state. |
+| `contractsBroken` | list | Every part that an evidence record accepted and whose endpoint, screen's route or tests are no longer in the code, as the run's last plan read it: `part`, `record` (the record that accepted it), `words`, and `by`, the part whose landing removed it, when the commits tell. Empty when every accepted part holds. The plan plans each one again. |
 | `settings` | object | `ladder`, `repairsPerSession`, `cleanTree`, `env`, `reset`, `passwords`, `acceptance`: the run's settings, in words. Never a password. |
 | `totals` | object | The counts of the numbers table. |
 | `cost`, `costByRung` | object | The cost of all calls, and of each rung: `compose`, `repair`, `intervene`. |
@@ -108,7 +127,7 @@ The sections appear in this order. A section of lanes that wait on other lanes a
 
 ### totals
 
-`partsTaken`, `acceptedAtFirstWalk`, `acceptedAfterRepair`, `acceptedOnRepairRung`, `acceptedByIntervention`, `landedNotWalked`, `asks`, `unsettled`, `repairRounds`, `interventions`, `interventionsAccepted` and `sessions`. Each is a whole number.
+`partsTaken`, `acceptedAtFirstWalk`, `acceptedAfterRepair`, `acceptedOnRepairRung`, `acceptedByIntervention`, `landedNotWalked`, `asks`, `unsettled`, `repairRounds`, `interventions`, `interventionsAccepted` and `sessions`. Each is a whole number. Two more keys are there only when the count is more than 0: `acceptedJudgedAgain` and `waitsOnPages`.
 
 `asks` is the honest number of a run: every part that a person must look at.
 
@@ -141,7 +160,9 @@ The outcomes of a part:
 | `accepted-after-repair` | Repair rounds made the walk accept it. |
 | `accepted-on-repair-rung` | The repair rung of the ladder made the walk accept it. |
 | `accepted-by-intervention` | The intervention rung made the walk accept it. |
+| `accepted-judged-again` | The run judged it again by itself, with no model call, and accepted it. Its walk had failed only on a step whose control is on another part's page, and that part was accepted since. |
 | `landed-not-walked` | It landed, and no walk judged it. |
+| `waits-on-page` | It landed, and is accepted on what regresses. Its own steps wait on the page that another part builds. The run judges it again once that part is accepted. It is not an ask. |
 | `asked` | The ladder asked a person. |
 | `refused` | The composition was refused. The run passes the part by for the rest of the run. |
 | `repairs-left` | It landed, and its repair rounds were left when the session ended. |

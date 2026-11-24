@@ -138,6 +138,8 @@ Run profile: API npm run api:dev on http://localhost:5080, web npm run dev on ht
 
 The ports are the template's, unless the old application answers on one of them. Then `rebuild init` moves the port, and its `Ports:` line says so. With the program's address `http://localhost:5080/`, the API moves to 5081: `api.url` and `NEXT_PUBLIC_API_URL` both read `http://localhost:5081`. See [`codelead rebuild init`](../cli/codelead-rebuild-init.md#the-ports).
 
+When the rebuild signs users in with a cookie, the block can also hold a check of the API's CORS policy. See [checks](#checks).
+
 `docs/` is outside the code stamp: a change to the profile never makes a stored walk stale.
 
 ### The keys of run
@@ -150,7 +152,7 @@ The ports are the template's, unless the old application answers on one of them.
 | `checks` | list | No | What must answer besides the ready paths. |
 | `journeys` | string | No | The journeys file, relative to the root. The default is the walk's own. |
 | `acceptance.repairRounds` | whole number, 0 to 10 | No | The repair rounds that a walk may drive after it refused a part. |
-| `parking.attempts` | whole number, 1 to 20 | No | After how many attempts that did not land a part is parked. The default is 3. |
+| `parking.attempts` | whole number, 1 to 20 | No | After how many attempts that did not land a part is parked. The default is 3. A part is parked sooner when the patch check refused two attempts in a row with the same problems, on the same request. Its reason then says `the patch check refused the same change twice: <problem>`. |
 | `clock` | object | No | The server's time zone and, with consent, how CodeLead sets the clock. |
 | `reset` | object | No | What puts the data back before every journey. |
 | `models` | object | No | The model ladder. |
@@ -182,6 +184,7 @@ Each check runs once the server that it names is ready:
 | `url` | string | An address on the API's or the web server's port. |
 | `headers` | object | Optional request headers. |
 | `expect` | whole number, 100 to 599 | The status that it must answer. |
+| `expectHeaders` | object | Optional headers that the answer must carry, each with this value. The name is compared without case, and the value as written. |
 
 Example: the browser's preflight request to the API, which the web application's calls depend on:
 
@@ -190,6 +193,30 @@ Example: the browser's preflight request to the API, which the web application's
   { "name": "CORS preflight", "method": "OPTIONS", "url": "http://localhost:5080/api/products", "headers": { "Origin": "http://localhost:3000", "Access-Control-Request-Method": "GET" }, "expect": 204 }
 ]
 ```
+
+A status alone does not tell whether the API lets the web application send its session's cookie. `expectHeaders` does. `codelead rebuild init` writes such a check when three things hold:
+
+- the System Model reads a sign-in action in the old code, so the rebuild signs users in with a cookie;
+- the identity answer is `keep`;
+- the API and the web application answer at two origins. An origin is the scheme, the host and the port, so two ports are two origins.
+
+With the API moved to 5081, as [above](#the-rebuilds-run-profile), the check reads:
+
+<!-- described, not captured -->
+```json
+"checks": [
+  {
+    "name": "the SPA's origin may call the API with the session's cookie",
+    "method": "OPTIONS",
+    "url": "http://localhost:5081/api/me",
+    "headers": { "Origin": "http://localhost:3000", "Access-Control-Request-Method": "GET" },
+    "expect": 204,
+    "expectHeaders": { "Access-Control-Allow-Origin": "http://localhost:3000", "Access-Control-Allow-Credentials": "true" }
+  }
+]
+```
+
+A check whose answer lacks a header fails with its words, for example `answered HTTP 204 without Access-Control-Allow-Credentials: true`. The `Run profile:` line of `rebuild init` names the check: `the check "the SPA's origin may call the API with the session's cookie" (OPTIONS http://localhost:5081/api/me, before every walk)`.
 
 ### clock
 

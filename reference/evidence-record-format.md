@@ -118,7 +118,7 @@ A field that does not apply is left out. A reader passes over a field that it do
 |---|---|---|
 | `implement` | [`/implement`](../chat-commands/implement.md), [`codelead implement`](../cli/codelead-implement.md), a pin or an in-place transform | Yes |
 | `repair` | the [`/validate`](../chat-commands/validate.md) that follows a `/repair` | Yes |
-| `judge-again` | `/modernize --transform T9 --judge-again`: a landed part of a rebuild judged again on the same tree | No |
+| `judge-again` | `/modernize --transform T9 --judge-again`: a landed part of a rebuild judged again on the same tree. The rebuild's `--next` writes one too, by itself, for a part whose walk failed only on another part's page, accepted since. | No |
 | `unapply` | the end of a session with a rebuild part applied and its gate not passed: the patch taken out again | It takes a change out |
 | `reopen` | `/modernize --transform T9 --reopen <part> --reason <why>`: a parked part planned again | No |
 | `ask` | the model ladder of a rebuild run, when a part's repair rung failed too: a person's turn | No |
@@ -191,7 +191,7 @@ Read a chain from its last record back along `follows`. The last record says how
 | `cause_reading` | object | When the preflight has not found a bug's cause: `found` (`false`), `statement`, `reasons`, `questions`, `confidence`, and `forced` when `--force` sent the run on. |
 | `request_lint` | object | The [request lint](../chat-commands/lint.md) of the request: the files and tests named, the libraries assumed, the lines to add, and `linted_request` when the linted words differ. |
 | `retries_used` | whole number | The patch retries after the check refused a patch. `0` when the first patch passed. |
-| `patch_check` | object | `status`: `can_apply`, `cannot_apply`, `unsafe` or `invalid_patch`. `problems`: the blocking findings. `warning_count`: the notes. `layout_warnings` and `notes`: optional, at most 20 each. |
+| `patch_check` | object | `status`: `can_apply`, `cannot_apply`, `unsafe` or `invalid_patch`. `problems`: the blocking findings. `warning_count`: the notes. `layout_warnings` and `notes`: optional, at most 20 each. In a rebuild, `notes` also keeps the warnings and notes of the check of accepted parts, word for word. |
 | `placement_problems` | list of strings | The anchored blocks of the answer that CodeLead could not place in their files. |
 | `reply_cut` | object | A reply that was cut at its cap: each attempt with its reply and thinking tokens, its cap and its effort, and `second_attempt`, what CodeLead did next. |
 | `apply` | object | `status` (`applied`) and `files_changed`. |
@@ -228,7 +228,7 @@ Each repair round of `repair_rounds`:
 |---|---|---|
 | `rebuild_part` | an implement of a rebuild part | `id`, the part's id, and `composer`, the CodeLead build that composed it. |
 | `ladder` | every record of a session that the model ladder runs | `rung` (`compose`, `repair` or `intervene`), `provider`, `model`, `effort`, and `stops_after` on a reopen. |
-| `judged_again` | `judge-again` | `of`, the landing; `reason`, a person's words; `walker`; `target` (`plan`); `stepsChanged`; `note`; `against`. |
+| `judged_again` | `judge-again` | `of`, the landing; `reason`, a person's words, or the run's own when it judged again by itself; `walker`; `target` (`plan`); `stepsChanged`; `note`; `against`. |
 | `unapplied` | `unapply` | `decided` (`unattended` or `confirmed`), `repair_rounds`, `restored`, `removed`, `patches`, `checkpoint`, `not_restored`, `outside_surface`. |
 | `reopened` | `reopen` | `reason`, and `attempts`: the records of the attempts that parked the part. |
 | `asked` | `ask` | `of`, `on`, `reason`, `walk_words`, `files`, and `landed`: the board card or the plan line where the ask went. |

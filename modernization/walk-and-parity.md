@@ -47,6 +47,16 @@ The walk refuses to record a result that it cannot trust. It stops with exit cod
 
 The passwords of the journeys' accounts come from `CODELEAD_WALK_PASSWORD_<USER>`, or from the file that `CODELEAD_WALK_CREDENTIALS` names. They never come from the journeys, and the walk never prints them. See [Passwords](../analyst/passwords.md).
 
+### The walk of a rebuild's part
+
+In the Rebuild stage, the walk judges each part that lands. The part is accepted when its own steps pass, no step regresses, and no new finding counts. A step has two ends: the page where its control is, and the page that it reaches. The step judges the screen that it reaches, once the page that holds its control exists. See [A step has two ends](rebuild.md#a-step-has-two-ends).
+
+The judge reads some findings before it counts them:
+
+- **The signed-out state.** The caller-identity route, such as `GET /api/me`, tells the web application who is signed in. It answers 401 to a user who has not signed in yet in the journey. That is the signed-out state of the shell, not a fault. The judge shows it and does not count it: `Signed out, as expected (not counted): GET /api/me (identity-seam) answered 401 to a user not signed in yet, the shell's signed-out state, at <STEPS>.` A 401 after the user signed in still counts.
+- **A cross-origin block.** An origin is the scheme, the host and the port of an address. The API is up at another origin than the page's, and the browser gets no answer at all from it. The judge names this a cross-origin block: the API's CORS policy refuses the web application's origin, or the credentials that its calls send. A CORS policy is the API's rule for which origins may call it. The finding says so, in place of a wrong route.
+- **A page not accepted yet.** The step's control is on the page of a part that is not accepted yet. The finding says so, for example `nothing to click named "New client" on / (the page of home.index:screen, which is not accepted yet)`.
+
 ### The old application's journeys
 
 The journeys that you record in the Observe stage can also run on the old application. [`codelead analyst replay`](../analyst/reference/analyst-replay.md) walks a recording's `journeys.json` against the old application's address. A replay that passes on the old application shows that the journey itself is right, before the rebuild is measured against it.
@@ -74,7 +84,9 @@ The check fails on a route that changed, is missing or gave an error, unless the
 - the wiring of the new code: what a person cannot reach, what the code calls and nothing serves;
 - the last walk: a clean walk of the code as it is now, with the rebuild's own journeys.
 
-On the Basic Store sample's new rebuild, before any part landed, it says what is left:
+Parity checks the whole rebuild, at its end. Each part is also protected on the way. Before a patch lands, the patch check refuses one that breaks what an accepted part built: an endpoint, a screen's route or a test. See [What an accepted part built stays built](rebuild.md#what-an-accepted-part-built-stays-built).
+
+The screens are read in the web application's layout: the route table of a React Router application, or the folders of a Next.js app router. On the Basic Store sample's new rebuild, before any part landed, it says what is left:
 
 ```output
 **Routes:** 63 features — 0 landed, 0 endpoint only, 0 screen only, 0 endpoint not read, 26 screen not read, 0 dropped by decision, 37 missing.
@@ -82,6 +94,8 @@ On the Basic Store sample's new rebuild, before any part landed, it says what is
 **Walk:** none — the rebuild has never been walked (`codelead walk --base <url>`): nothing shows that a new user can do what the old application allowed.
 **Finished:** no — 5 blockers:
 ```
+
+This report was captured before CodeLead read the routes of a Next.js app router, the web application of the default template. Its `26 screen not read` comes from that gap. Today the numbers of a new rebuild differ.
 
 The rebuild is finished only when this report says `Finished: yes`. The report is `docs/codelead/parity/rebuild-parity.md`.
 

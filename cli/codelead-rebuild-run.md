@@ -36,6 +36,10 @@ The rebuild's plan is a queue of **parts**: an endpoint of the new API, a screen
 
 When a check fails, the **model ladder** decides what comes next. First a repair round, then an intervention by a stronger model, as the run profile allows. A part that the ladder gives up on is **parked** for a person, with the reason. The run continues with the next part.
 
+Before any patch lands, the patch check refuses a patch that breaks what an accepted part built: an endpoint, a screen's route or a test. The refusal tells the model how to add its change beside that work. See [The rebuild](../modernization/rebuild.md#what-an-accepted-part-built-stays-built).
+
+A part whose own step clicks a control on another part's page can land before that page is accepted. The part is then accepted on what regresses, and waits. Once the page's part is accepted, the run judges the waiting part again by itself, with no model call, before it composes anything else. See [A step has two ends](../modernization/rebuild.md#a-step-has-two-ends).
+
 > [!NOTE]
 > **New to this?** *Unattended* means that nobody answers questions during the run. CodeLead gives each question its recommended answer, yes or no, and records every answer in the evidence records. A person reads the result after the run.
 
@@ -51,6 +55,28 @@ A run claims a **lane** (an area of the plan, or the foundations), never a singl
 
 Without `--lane`, the run takes the foundations while they have work left, then the first lane that nobody claims. `--lane all` takes the foundations, then every lane in the plan's order.
 
+### What the run prints
+
+The run prints one line for each event, and each line starts with the time in UTC. A part starts, and each record of its session is said when it is written. A patch that failed its validation is said when the session goes on to repair it:
+
+<!-- described, not captured -->
+```output
+… shell:menu (the shell's menu: …), part 6 of 7: started on the compose rung.
+… shell:menu: the first patch failed its validation; repairing.
+… shell:menu: accepted after 1 repair round (… min, $0.15).
+```
+
+A failed repair round reads `<PART_ID>: repair round 1 failed its validation; repairing.` A patch that the session does not repair is said with its stop, such as `<PART_ID>: did not land: …`.
+
+Before the first part, the run prints its notes. An accepted part whose endpoint, screen's route or tests are gone from the code is one of them. The plan plans it again:
+
+<!-- described, not captured -->
+```output
+Note: <PART_ID> is accepted no more (<RECORD>): its endpoint <METHOD> <ROUTE> is no longer in the code: the part <OTHER_PART_ID> removed it in <RECORD> (checkpoint <COMMIT>); it is planned again, to be rebuilt.
+```
+
+A part that the run judges again by itself is said as `<PART_ID> (<TITLE>), part <N> of <M>: judged again by itself, with no model call (…).`
+
 ### When the run stops
 
 The run ends at the queue's end, at `--until`, at a cap, when `.codelead/STOP` appears, or on Ctrl+C. In every case, the part that is running finishes first. A second Ctrl+C stops at once.
@@ -58,6 +84,8 @@ The run ends at the queue's end, at `--until`, at a cap, when `.codelead/STOP` a
 ### Check first
 
 `--dry-run` checks the run profile and lists what would run. It checks three things: each role's model server answers with its list of models, the walk has its passwords, and the plan has no blocker. Nothing is run or written. Run it before every real run.
+
+The dry run prints the same notes as the run, such as `Note: <PART_ID> is accepted no more …`. Its `First:` line names the part that the run takes first. A part that waits to be judged again by itself comes first.
 
 > [!WARNING]
 > A real run calls models for each part. With a paid provider, set a cost cap: `--max-cost-usd`, or `run.unattended.maxCostUsd` in the manifest.
@@ -183,7 +211,7 @@ The run ends at the queue's end, at `--until`, at a cap, when `.codelead/STOP` a
 |---|---|
 | `docs/codelead/rebuild/rebuild.json` | Reads the manifest and the run profile. |
 | `docs/codelead/rebuild/rebuild-plan.json`, `.md` | Reads the plan, and writes the claims and the parts' states. |
-| `.codelead/rebuild-run-<stamp>.json`, `.md` | Writes the run summary: each part, its outcome, its cost. |
+| `.codelead/rebuild-run-<stamp>.json`, `.md` | Writes the run summary: each part, its outcome, its cost, and the accepted parts whose work no longer holds in the code. |
 | `.codelead/STOP` | Stops the run after the part that is running when this file appears. The run removes it. |
 | `.codelead/evidence/ev-*.json` | Each part's session writes its evidence records. |
 | `docs/codelead/parity/` | The walks write their reports here. |

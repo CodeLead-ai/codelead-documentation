@@ -69,7 +69,7 @@ Each stage has a status: `pending`, `running`, `waiting`, `done`, `failed` or `s
 | Stop | [`codelead modernize stop`](../cli/codelead-modernize-stop.md) | the **Stop** button | **Stop** |
 | Let CodeLead start the old application | [`codelead modernize source`](../cli/codelead-modernize-source.md) | `/modernize --source` | |
 
-`next` runs one stage after another until a stage waits for you, a stage fails, or every stage is done. It runs a waiting stage again, because you can do what it waited for at any time. Two stages are the exceptions: it never runs the recordings, and it stops at a waiting Pin stage. It never runs a failed stage again: fix the cause, then use `run`. Or go past the stage with `skip` and your reason.
+`next` runs one stage after another until a stage waits for you, a stage fails, or every stage is done. It runs a waiting stage again, because you can do what it waited for at any time. Three stages are the exceptions: it never runs the recordings, and it stops at a waiting Pin stage and at a waiting Rebuild stage. It never runs a failed stage again: fix the cause, then use `run`. Or go past the stage with `skip` and your reason.
 
 `status` is the place to come back to. Its last line says what to run now:
 
@@ -106,6 +106,8 @@ This status comes from a Mac, which has no Visual Studio's MSBuild. The Model st
 | Upgrade in place | The security findings whose fix changes who may do what (`9 security findings are decisions for a person`). | Waive each one with its reason, or fix it on purpose. | `codelead modernize answer security=decided`, then `codelead modernize run in-place` |
 | Model | Reasons for gate findings that are not the ASP.NET Identity template's. | Write each reason under its key in `extraction-dispositions.json`. | `codelead modernize next` |
 | Set up the rebuild | The answers `identity` and `database`. | Give them. | `codelead modernize answer identity=keep database=sample-seed`, then `next` |
+| Rebuild | A person's turn: parts of the plan that the run cannot take on by itself (`The rebuild waits for you`). The reason names each part with its line, such as a parked part's `--reopen` line. | Act on each part in the rebuild, or go on with what is built. | `codelead modernize run rebuild`, or `codelead modernize answer rebuild=enough` |
+| Rebuild | The run stopped at its caps with parts left (`The rebuild is not finished`). | Run the stage again, or go on with what is built. | `codelead modernize run rebuild`, or `codelead modernize answer rebuild=enough` |
 
 [Waive a security finding](../how-to/waive-a-security-finding.md) says how to decide each security finding.
 
@@ -131,14 +133,15 @@ See [Pins](pins.md#the-pin-stage-of-the-program).
 | `pinsDatabase` | `done`, `env:<NAME>`, or the path of a copy of the database file. | None: asked for a database on a server |
 | `security` | `fix-none`, `fix-all` or `decided`: what Upgrade in place does with the findings whose fix changes who may do what. | None: asked when such findings exist |
 | `pins` | `enough`: the Pin stage ends with the coverage as it stands. | Taken only while the Pin stage waits or failed |
+| `rebuild` | `enough`: the Rebuild stage ends with what is built, and the program goes on to the audit pack. | Taken only while the Rebuild stage waits or failed |
 
-The first seven keys are **stored answers**. The program keeps them in the state file, and you can give one at any time, whatever stage waits. `pins=enough` is an **act** on the Pin stage, and the state file does not keep it. At any other time, it is refused:
+The first seven keys are **stored answers**. The program keeps them in the state file, and you can give one at any time, whatever stage waits. `pins=enough` and `rebuild=enough` are **acts** on their stages, and the state file does not keep them. At any other time, an act is refused:
 
 ```output
 Refused: pins=enough: Pin the contracts (pins) has not run (it is pending): pins=enough is taken only while the stage waits for you or failed; run it first (codelead modernize run pins), then answer again if you choose. Nothing was recorded.
 ```
 
-A key that the program does not take is refused, with the list of all eight. A connection string is never an answer: it holds a password, and a command line is kept in history.
+A key that the program does not take is refused, with the list of all nine. A connection string is never an answer: it holds a password, and a command line is kept in history.
 
 ## Approve mode and unattended mode
 
@@ -166,7 +169,7 @@ The Pin stage can ask one more question. The pins take their facts from the [nar
 > [!WARNING]
 > **Unattended means this:** CodeLead lands changes without asking you. It stops only at a refusal, a failure, or a step that is hard to undo. It spends money on the models, up to the caps. By default, the Pin stage runs up to 24 increments. The rebuild stops at 12 parts, 20 US dollars or 480 minutes. Read the dossier and the options before you choose it.
 
-The Rebuild stage is unattended in both modes: [`codelead rebuild run`](../cli/codelead-rebuild-run.md) answers its own questions, under its caps. Some things only you can give, so they wait in both modes. They are the recordings, the answers, the reasons of the extraction gate, the pins' database, and the security decisions.
+The Rebuild stage is unattended in both modes: [`codelead rebuild run`](../cli/codelead-rebuild-run.md) answers its own questions, under its caps. Some things only you can give, so they wait in both modes. They are the recordings, the answers, the reasons of the extraction gate, the pins' database, and the security decisions. The rebuild's parts that the run cannot take on by itself wait for you too, such as a parked part.
 
 ## One program at a time
 

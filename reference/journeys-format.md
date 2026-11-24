@@ -172,7 +172,7 @@ All of them are optional. A user's own values can hold no placeholder but `{stam
 | `do` | list of actions | Yes | The actions, in order. An empty list for a step that only looks. |
 | `expect` | list of outcomes | Yes | What must hold once the actions are done. At least one. |
 | `requires` | list of step ids | No | The steps that must have passed first, each before this one. The default is the previous step of the same journey. `[]` means none. |
-| `covers` | list of part ids | No | The parts of a rebuild's plan that the step judges, such as `orders.create:screen`. The plan reads it. The walk does not. |
+| `covers` | list of part ids | No | The parts of a rebuild's plan that the step judges, such as `orders.create:screen`. The plan reads it. The walk does not. Without it, the plan reads both ends of the step: the page where its control is, and the page that it reaches. |
 | `note` | string | No | A person's words beside the step, at most 4000 characters. The walk prints it in its report, and judges nothing by it. |
 
 ### Actions
@@ -237,6 +237,8 @@ A read that the application refuses, redirects or holds open on purpose. Without
 
 The report lists these entries and does not count them.
 
+In a rebuild, the acceptance judge also sets this refusal aside by itself, with no entry. The caller-identity route answers 401 to a user who has not signed in yet in the journey. That is the shell's signed-out state. The judge shows it as `Signed out, as expected (not counted): …`. A 401 of that route after the user signed in still counts. See [The walk of a rebuild's part](../modernization/walk-and-parity.md#the-walk-of-a-rebuilds-part).
+
 ## The rules that the walk checks
 
 The walk checks the whole file before it opens a browser. It refuses a file that breaks a rule, and walks nothing. The words of some refusals:
@@ -256,6 +258,8 @@ The walk checks the whole file before it opens a browser. It refuses a file that
 ## What a walk reports
 
 Each step ends `pass`, `fail` or `blocked`. A step that did not reach a judgement is blocked, for example because a step that it requires failed. The walk writes its report, `codelead.walk/1`, as `.walk.json` and `.walk.md` beside the spec, or in `docs/codelead/parity/` for a rebuild. See [The walk and parity](../modernization/walk-and-parity.md).
+
+In a rebuild, some requests get no answer at all from the API, at another origin than the page's. The judge names such a finding a cross-origin block. The API's CORS policy refused the web application's origin, or the credentials that its calls send.
 
 ## See also
 

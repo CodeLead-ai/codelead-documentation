@@ -109,7 +109,7 @@ Run the same line again, for example [`/modernize --pin`](../chat-commands/moder
 1. Run [`codelead modernize status`](../cli/codelead-modernize-status.md). Its last line, `Next:`, names the line to run.
 2. Run that line:
    - A stage that you stopped ended `failed`, "stopped by the person". Run it again: [`codelead modernize run`](../cli/codelead-modernize-run.md) `<stage>`. What it finished before the stop is kept.
-   - A stage that waits for you: give what it waits for, then run [`codelead modernize next`](../cli/codelead-modernize-next.md). `next` runs a waiting stage again, and never a failed one. A waiting Pin stage is the exception: run `codelead modernize run pins`, as its `Next:` line says.
+   - A stage that waits for you: give what it waits for, then run [`codelead modernize next`](../cli/codelead-modernize-next.md). `next` runs a waiting stage again, and never a failed one. A waiting Pin stage and a waiting Rebuild stage are the exceptions: run `codelead modernize run pins` or `codelead modernize run rebuild`, as the `Next:` line says.
    - The recordings stage waits until you say that the recordings are made: [`codelead modernize continue`](../cli/codelead-modernize-continue.md).
 3. When a stage must stay behind, go past it with your reason: [`codelead modernize skip`](../cli/codelead-modernize-skip.md) `<stage> --reason <why>`. The stage ends `skipped`, by the person, and `next` goes on.
 

@@ -13,8 +13,8 @@ A rebuild is a new application, made in its own folder beside the old one, that 
 **In short**
 - You know when to rebuild and when to upgrade in place.
 - You know what `codelead rebuild init` makes: the template, the manifest, the run profile, the journeys and the plan.
-- You know how the plan cuts the work into parts and lanes.
-- You know what the unattended run does, where it stops, and what a parked part is.
+- You know how the plan cuts the work into parts and lanes, and how a step's two ends order the parts.
+- You know what the unattended run does, where it stops, and what a parked part is. You know why a later part cannot undo an accepted one.
 
 ## When to rebuild, and when to upgrade in place
 
@@ -66,6 +66,14 @@ Read the new lines:
 
 - `Ports:` the new API and the old application run side by side during the walk. The old application answers on 5080, so CodeLead moved the API from the template's 5080 to 5081. It reads the old ports from the program's address, the run profile, the project file and the launch settings.
 - `Commit:` CodeLead committed what it made, with this machine's git user. The Rebuild stage then starts on a clean tree. `--no-commit` leaves the commit to you. When git has no user, the line says `Commit: not made: no git user is configured …`.
+- `Run profile:` how CodeLead starts the new API and web application. An origin is the scheme, the host and the port of an address, so `http://localhost:5081` and `http://localhost:3000` are two origins. When the System Model reads a sign-in action in the old code, the rebuild signs users in with a cookie. With `--identity keep` and two origins, `init` writes one more check into the run profile. The check asks whether the API lets the web application's origin call it with the session's cookie. In that case, the line names the check before the caps, for example:
+
+  <!-- described, not captured -->
+  ```output
+  Run profile: API npm run api:dev on http://localhost:5081, web npm run dev on http://localhost:3000; clock America/Los_Angeles; parking after 3 attempts; day reset node scripts/reset-sample-seed.mjs; the check "the SPA's origin may call the API with the session's cookie" (OPTIONS http://localhost:5081/api/me, before every walk); unattended caps 12 parts, $20, 480 minutes.
+  ```
+
+  See [Run profile](../reference/run-profile.md#checks).
 
 This run had no model server, so the dry run is refused. With a model server that answers, the dry run passes. The last line then says `Ready: run codelead rebuild run in ../basic-store-rebuild.` With `--no-commit`, or when the commit was not made, it says `Ready: commit the folder, then run codelead rebuild run in …`.
 
@@ -97,6 +105,9 @@ The default template is `dotnet-next-shadcn`: an ASP.NET Core API with its tests
 
 See [Rebuild manifest](../reference/rebuild-manifest.md).
 
+> [!IMPORTANT]
+> With `identity` keep, no part of the plan builds the directory that checks a password outside Development and the tests. The sign-in part registers a stand-in directory for Development and the tests only, so a build for production signs nobody in. The plan says so in a note on the part `sign-in:endpoint`, under **Notes on parts** in `rebuild-plan.md`. A person adds the real directory.
+
 ### The run profile
 
 The manifest's `run` block is the **run profile**. It says how CodeLead starts the new API and the new web application, where each one answers, and which page says that it is ready. It also holds the clock's time zone, the day reset that puts the database back before each journey, and the caps of an unattended run. See [Run profile](../reference/run-profile.md).
@@ -120,7 +131,19 @@ The plan cuts the rebuild into **parts**. CodeLead computes it from the System M
 - an **endpoint** of the new API, such as `clients.index:endpoint`;
 - a **screen** of the new web application, such as `clients.index:screen`.
 
-Each part has its needs: the parts that must land before it. Each part is `planned`, `dropped`, `accepted` or `parked`. A **blocker** is a reason that stops the whole plan, such as a finding of the extraction gate that nobody explained. Nothing is composed while a blocker is open.
+Each part has its needs: the parts that must land before it. Each part has a state:
+
+| State | What it means |
+|---|---|
+| `planned` | To compose. A part whose accepted work is no longer in the code is `planned` again. |
+| `accepted` | It landed, and its walk accepted it. |
+| `landed`, `landed-not-accepted` | It landed, and its walk did not accept it. `landed` still has repair rounds. |
+| `satisfied` | It is in the code already, and its own steps pass in the walk. It is not composed again. |
+| `not-walked` | It landed, and no walk could judge it. What needs it goes on, with a warning. |
+| `parked` | Its attempts did not land. It waits for a person. |
+| `dropped` | The old application does not need it. |
+
+A **blocker** is a reason that stops the whole plan, such as a finding of the extraction gate that nobody explained. Nothing is composed while a blocker is open.
 
 The plan drops what the old application does not need:
 
@@ -145,6 +168,23 @@ Lanes: foundations (4 parts) then 5 lanes: clients (14 parts, chain 4), orders (
 
 On this sample, 12 of the 80 parts are dropped. Two are parts of the shell with nothing to rebuild: the old layout's start-up calls no entry point, and the layout opens no real-time channel. The other 10 belong to seven Manage pages of the ASP.NET Identity template, such as `manage.add-phone-number-get`, that nothing live reaches.
 
+### How a screen is made
+
+A screen part asks for a page of the new web application. CodeLead reads the web application's layout from its packages and folders, and asks for the screen in that layout:
+
+- **A Next.js app router**, as in the default template: the screen is the page file of its route's folder. The screen at `/clients/create` is `web/src/app/clients/create/page.tsx`, with its test beside it, such as `page.test.tsx`. No router file changes, because the folder is the route. A route parameter such as `{id}` becomes a folder `[id]`.
+- **A React Router application**: the screen is a component in the existing pages folder. Its route is registered where the other pages are registered.
+
+The rest of the rebuild reads the same layout. For example, [parity](walk-and-parity.md#parity-of-a-rebuild) reads an app router's routes from its folders. It reads a React Router application's routes from its route table.
+
+### A step has two ends
+
+A step of a journey often clicks a control on one page and reaches another page. For example, a step clicks the link "New client" on the home page, and reaches the screen at `/clients/create`. The plan reads both ends. The step judges the screen that it reaches, once the page that holds its control exists. So the plan builds the page with the control first: the screen at `/clients/create` needs the home screen. The home screen's request asks for the link "New client" to `/clients/create`, even before that screen exists.
+
+Sometimes a screen lands, and the page with its control is not accepted yet. Its own step cannot pass, and nothing else fails. Then the part is **accepted on what regresses**: the walk found no regression and no new finding, and only that step waits. The parts that need it wait too. Once the page's part is accepted, the run judges the waiting part again by itself, with no model call.
+
+When the plan cannot tell which page a step acts on, it warns with `step-page-unknown`. A title that names the control's place, or a `covers` list in the journey, settles it. See [Journeys format](../reference/journeys-format.md#steps).
+
 ### Lanes
 
 The parts are grouped in **lanes**: first the **foundations**, then one lane for each area of the application. A lane's **chain** is its longest line of parts that wait on each other. The **critical path** is the longest chain of the whole plan.
@@ -168,7 +208,7 @@ Before a real run, check the plan in two ways. Neither calls a model.
 1. **Compose**: a session asks the model for the part's code, as [`/implement`](../chat-commands/implement.md) does.
 2. **Validate**: the gate of the rebuild builds the API and the web application, and runs their tests.
 3. **Walk**: [the walk](walk-and-parity.md) follows the part's steps of the journeys on the running application.
-4. **Judge**: the part is accepted, repaired, or parked.
+4. **Judge**: the part is accepted, repaired, or parked. A part whose own step waits on another part's page is accepted on what regresses, as [above](#a-step-has-two-ends).
 
 When a check fails, the **model ladder** decides what comes next. First repair rounds on the compose model. Then the part moves to a stronger repair model. Then an intervention: an agent on a frontier model takes the part over once, within limits of turns, minutes and dollars. When that fails too, the part is **parked** for a person, and the run continues with the next part. See [Use a stronger model for repairs](../how-to/use-a-stronger-model-for-repairs.md).
 
@@ -177,9 +217,42 @@ The run stops at the end of the plan, at a cap, when the file `.codelead/STOP` a
 > [!WARNING]
 > The run calls models for every part, and answers `Apply this patch?` itself. With a paid provider, every part costs money. The caps of a new rebuild are 12 parts, 20 US dollars and 480 minutes, with 8 repair rounds for each session. In an earlier rebuild of another application, one part cost about 0.55 US dollars to compose and accept.
 
+### What an accepted part built stays built
+
+A later part must never undo an accepted part. Before any patch lands, the patch check checks it against every accepted part of the plan. It refuses a patch that:
+
+- removes an endpoint that an accepted part built;
+- removes the page or the route of an accepted screen;
+- removes a test that an accepted part added, or changes what the test sends or asserts.
+
+The refusal says what the patch breaks, and how to add the change beside it. The model gets these words for its next patch. This holds for every patch: the first one, its retries, every repair round and the intervention.
+
+For example, the part `clients.create-get:endpoint` builds `GET /api/clients/create`, and its walk accepts it. Later, the part `clients.create-post:endpoint` builds `POST /api/clients/create`, at the same path. Its request already says how:
+
+<!-- described, not captured -->
+```output
+The API already answers GET /api/clients/create (the part clients.create-get:endpoint, in ClientsController): add the POST as a second action beside it; that action and its tests stay as they are.
+```
+
+A patch that replaces the GET action with the POST action is refused before it lands:
+
+<!-- described, not captured -->
+```output
+accepted_parts: the patch breaks what the accepted part clients.create-get:endpoint built (ev-…): it removes GET /api/clients/create (after it, no action of the API answers it; …/ClientsController.cs declared it at line …, the action Create()); it changes what 2 tests the part added in …/ClientsCreateGetContractTests.cs send (…: GET /api/clients/create becomes POST /api/clients/create). POST /api/clients/create is another endpoint than GET /api/clients/create, which the part clients.create-get:endpoint built and its tests prove: add a second action and a new test file; leave Create() and ClientsCreateGetContractTests.cs as they are.
+```
+
+A patch that adds the POST as a second action, with a test file of its own, passes. The GET action and its tests stay as they were.
+
+Two more rules:
+
+- **A part that landed and is not accepted yet** is warned for, not refused. Its work is not proven yet, and a later part may be the one that fixes it.
+- **An accepted part whose endpoint, screen's route or tests are gone from the code** is accepted no more. This can happen after a person's own `/implement` in the rebuild: the check warns for it, and does not refuse it. The plan plans the part again, to be rebuilt. It names the part whose landing removed the work, when the commits tell. That other part keeps its own state, with a note. The run says it before it starts: `Note: <PART_ID> is accepted no more (<RECORD>): …; it is planned again, to be rebuilt.`
+
 ### Parked parts
 
 A parked part is a card on the rebuild's board, with the reason. It is your turn. Read the card, then fix the part by hand, or plan it again with `/modernize --transform T9 --reopen <PART_ID> --reason <WHY>`, and run again. See [`/modernize --transform T9`](../chat-commands/modernize.md#--transform-t9).
+
+A part is parked after 3 attempts that did not land, by default. It is parked at once when the patch check refused two attempts in a row with the same problems, on the same request. A third attempt would meet the same check. The reason then says `the patch check refused the same change twice: <problem>`. See [Run profile](../reference/run-profile.md#the-keys-of-run).
 
 ## Details
 
@@ -189,7 +262,9 @@ A parked part is a card on the rebuild's board, with the reason. It is your turn
 - **The plan's files**: `docs/codelead/rebuild/rebuild-plan.json` and `rebuild-plan.md`, written by `rebuild init` and by `/modernize --rebuild-plan`.
 - **The caps**: `run.unattended` in the manifest (`maxParts`, `maxCostUsd`, `maxMinutes`, `repairsPerSession`), or `--max-parts`, `--max-cost-usd` and `--max-minutes` for one run.
 - **The ladder**: `run.models` in the manifest (`compose`, `repair`, `intervene`, `escalate`). With no `models` block, the ladder is off.
-- **The run summary**: `.codelead/rebuild-run-<stamp>.md` and `.json`: each part, its outcome and its cost. See [Rebuild run summary](../reference/rebuild-run-summary.md).
+- **The run summary**: `.codelead/rebuild-run-<stamp>.md` and `.json`: each part, its outcome and its cost, and the accepted parts whose work no longer holds in the code. See [Rebuild run summary](../reference/rebuild-run-summary.md).
+- **Planned again**: the plan's warning `contract-broken` names an accepted part whose work is gone from the code. The warning `contract-changed` names the identity seam when a cookie session across two origins needs a CORS policy that the seam's code lacks. A CORS policy is the API's rule for which origins may call it. The plan then revises the seam in place, once. When the revision landed and the code still lacks the policy, it is a person's turn.
+- **What the check of accepted parts reads**: the plan, the evidence records and git, with no model call. It reads tests written in C# (xUnit, NUnit and MSTest) and in TypeScript or JavaScript (`it` and `test`). A changed test file in another language is a warning. The check never runs outside a rebuild.
 - **The report**: `codelead rebuild-report` writes `.codelead/rebuild-report.html`, which the wizard shows.
 - **Evidence**: `rebuild init` writes one record, `rebuild-init`. Each part's session writes its own.
 

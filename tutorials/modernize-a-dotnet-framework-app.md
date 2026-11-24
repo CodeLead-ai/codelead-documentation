@@ -370,7 +370,7 @@ Stage 6 of 8 is **Set up the rebuild**. The rebuild is a new application in its 
 
 ## Rebuild the application
 
-Stage 7 of 8, **Rebuild**, builds the new application part by part, unattended, then walks it and checks parity. It needs no answer from you. See [The walk and parity](../modernization/walk-and-parity.md).
+Stage 7 of 8, **Rebuild**, builds the new application part by part, unattended, then walks it and checks parity. It needs no answer from you while it runs. See [The walk and parity](../modernization/walk-and-parity.md).
 
 1. Start the stage. In the wizard, the program goes on from the previous stage by itself. In a terminal, run `codelead modernize run rebuild`. The stage prints one line for each event, starting with:
 
@@ -381,7 +381,7 @@ Stage 7 of 8, **Rebuild**, builds the new application part by part, unattended, 
    ```
 
 2. Follow the progress on the report. In the wizard, the step **Rebuild** shows it. In a browser, open `../basic-store-rebuild/.codelead/rebuild-report.html`.
-3. When the stage ends, read its line. It names the parts taken, the parts parked for a person, and whether the walk and parity passed.
+3. When the stage ends, read its line. It names the parts taken, the parts parked for a person, and whether the walk and parity passed. The stage ends **done** only when every part of the plan is finished. Otherwise it shows **waiting**, and its problem names each part that waits for you, with its line.
 4. Open the rebuild's board, and read each parked part's card. Each card says why CodeLead stopped on that part.
 
 **What you have now**: a new API and web application in `basic-store-rebuild`, the walk's report in `docs/codelead/parity/walk.md`, and the parity report in `docs/codelead/parity/rebuild-parity.md`.
@@ -396,7 +396,7 @@ Stage 7 of 8, **Rebuild**, builds the new application part by part, unattended, 
 
 Stage 8 of 8, **Hand over**, writes the audit pack: every landing with its proof, in one folder. See [The audit pack](../modernization/audit-pack.md).
 
-1. In the wizard, the program runs this stage last, by itself. In a terminal, run `codelead modernize run audit`. You see output similar to the following:
+1. In the wizard, the program runs this stage last, by itself, once the Rebuild stage is done. While the Rebuild stage waits, you can go on with what is built: run `codelead modernize answer rebuild=enough`. In a terminal, run `codelead modernize run audit`. You see output similar to the following:
 
    <!-- described, not captured -->
    ```output

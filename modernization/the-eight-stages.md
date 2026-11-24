@@ -122,9 +122,13 @@ The eight names above are the names of the stages. The program's files and comma
 
 - **Why it exists**: the new application is built in small parts. Each part is checked against the old behaviour before the next one starts.
 - **What CodeLead does**: it runs [`codelead rebuild run`](../cli/codelead-rebuild-run.md) on every lane (an area of the plan), under the caps of the run profile. For each part, a model writes the code, the gate builds and tests it, and the walk tries it. A part that CodeLead cannot finish is parked: left for a person, with the reason. The run then continues. Then CodeLead starts the new application and runs [the walk](walk-and-parity.md), parity and the report.
-- **What you do**: nothing while it runs. After it, you read the parked parts. Each one is a card on the rebuild's board.
+- **What you do**: nothing while it runs. After it, you act on what the stage waits for, such as a parked part. Each parked part is a card on the rebuild's board.
 - **What it produces**: the new application's code, in the rebuild folder. Also the run summary `.codelead/rebuild-run-<stamp>.md`, the reports `docs/codelead/parity/walk.md` and `docs/codelead/parity/rebuild-parity.md`, and the page `.codelead/rebuild-report.html`.
-- **How you know it worked**: the stage ends `done` and says what the run did. It names the parts taken and the parts parked, and whether the walk and parity passed. A part that is parked, or a walk that fails, does not fail the stage. The report says what is left.
+- **How you know it worked**: the stage's line says what the run did. It names the parts taken and the parts parked, and whether the walk and parity passed. Then CodeLead reads the plan again. The stage ends `done` only when every part of the plan is finished, for example accepted or dropped. Otherwise it ends `waiting`, with one of two problems:
+  - `The rebuild waits for you`: a person's turn stands between. The reason names each turn with its line. For example, a parked part comes with its `/modernize --transform T9 --reopen <PART_ID> --reason "<why>"` line.
+  - `The rebuild is not finished`: the run stopped at its caps, and nothing in the plan asks a person. Run the stage again.
+
+  A walk that fails does not fail the stage. To go on with what is built, answer `codelead modernize answer rebuild=enough`. The program's evidence record of the answer keeps what the stage waited for. Or go past the stage with `codelead modernize skip rebuild --reason "<WHY>"`.
 - **The command and the chat line**: `codelead modernize run rebuild`, or `/modernize --run rebuild`.
 
 > [!WARNING]
@@ -143,7 +147,7 @@ The eight names above are the names of the stages. The program's files and comma
 
 - Each stage that ends writes an evidence record, `modernize · <stage>`, with the outcome success, failure or asked.
 - A stage has one of six statuses: `pending`, `running`, `waiting`, `done`, `failed` or `skipped`. A failed stage always carries a problem: its title, its reason, the way out and the command that runs it again.
-- [`codelead modernize next`](../cli/codelead-modernize-next.md) runs a waiting stage again. It never runs the recordings or a failed stage, and it stops at a waiting Pin stage.
+- [`codelead modernize next`](../cli/codelead-modernize-next.md) runs a waiting stage again. It never runs the recordings or a failed stage, and it stops at a waiting Pin stage or a waiting Rebuild stage.
 - [`codelead modernize skip`](../cli/codelead-modernize-skip.md) `<STAGE> --reason <WHY>` goes past a stage that failed or waits. The stage ends `skipped`, with your reason.
 - The stages that call models are Pin, Upgrade in place and Rebuild. Read calls none, unless you narrate the code by hand.
 
