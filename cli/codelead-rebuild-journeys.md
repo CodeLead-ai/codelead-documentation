@@ -48,7 +48,11 @@ The comparison reads the copy's drafted journeys, the journeys whose `source.kin
 - the draft's journeys that the copy does not hold;
 - whether the draft signs its users in another way than the copy, such as `given/explicit` against `registered`.
 
+Each user's account is left out of the comparison too: in `users`, and wherever a step quotes it, such as in a title. The account is yours. A test account in place of the draft's placeholder is no difference.
+
 The exit code is 0 in both cases. Read the words, not the exit code.
+
+When the copy signs in as accounts that the walk is given, the lines of [the walk's passwords](#the-walks-passwords) follow, as after a refresh.
 
 ### With --refresh: what is kept and what is replaced
 
@@ -58,6 +62,8 @@ The exit code is 0 in both cases. Read the words, not the exit code.
 - a drafted journey that a person marked: one with a step that has a `note` or a `covers` list.
 
 It **replaces** every other drafted journey with the draft's journey of the same id. It **adds** the draft's journeys that the copy does not hold. It **removes** the drafted journeys that the draft no longer writes. The users and the identity of the kept journeys stay. The draft's users and identity come with the draft's journeys.
+
+What you wrote in a user that the copy holds too is kept, such as a test account in place of the placeholder. The command says so on a line such as `Kept: the account of user user.` The draft's steps that quote the placeholder then quote your account. A placeholder that the draft wrote is not kept as yours.
 
 The command then prints what it did: the journeys replaced, added, removed and kept, each by id. When the draft's journey is the same as a kept journey, CodeLead keeps the kept one. A draft's journey that the walk's check refuses in the new file is left out, on a `Left out:` line with the reason.
 
@@ -74,11 +80,23 @@ The command then prints what it did: the journeys replaced, added, removed and k
 
 The words say why. A refused refresh has the exit code 1.
 
+### The walk's passwords
+
+When the journeys sign in as accounts that the walk is given, the command ends with what you must do before a walk. It prints one line for each user:
+
+- the variable that holds the user's password for the walk, such as `CODELEAD_WALK_PASSWORD_USER`, and whether it is `set` or `not set`;
+- when a file of passwords is named, whether it holds a password for the account. The file is the one that `CODELEAD_WALK_CREDENTIALS` names, else `run.unattended.credentials` of the run profile.
+
+The lines never show a password or the file's path. Journeys that register their users print none of these lines.
+
+When an account is still the draft's placeholder, such as `walk-user-1@example.com`, one more line says so. A walk of the old application needs a real test account there. A walk of the rebuild can keep the placeholder when the rebuilt API holds a fake directory for Development. The walk gives its accounts to that directory. The line says whether the API's code holds one.
+
 ### After the refresh
 
 1. Read the changes: `git diff docs/codelead/rebuild/journeys.json`.
-2. When the draft signs in accounts that the walk is given, replace each placeholder account with a test account that the rebuilt API signs in. Give its password in `CODELEAD_WALK_PASSWORD_<USER>`, or in the walk's credentials file. See [Passwords](../analyst/passwords.md).
-3. Commit the file before the next run.
+2. Read the command's last lines, and do what they say. Set each password variable that is `not set`, or name a file of passwords outside the repository in `run.unattended.credentials`. See [Passwords](../analyst/passwords.md).
+3. For a walk of the old application, write a real test account in place of each placeholder. The next refresh keeps it.
+4. Commit the file before the next run.
 
 The plan reads the new copy at its next turn. A part that a walk accepted before keeps its acceptance, and the plan reads its steps anew.
 
@@ -131,6 +149,9 @@ The examples come from CodeLead's tests. In them, the rebuild was made before th
   Removed (drafted no more): none.
   Kept as they were: none.
   The file is the repository's: git diff shows what changed; commit it before the next run. The plan reads it at its next turn; a part accepted by a walk of the journeys before keeps its acceptance, and its steps are read anew.
+  The walk signs in as the accounts the journeys give, each with its password, which is never written in the journeys:
+  - user (walk-user-1@example.com): CODELEAD_WALK_PASSWORD_USER is not set, and no file of passwords is named (CODELEAD_WALK_CREDENTIALS, or run.unattended.credentials of the run profile).
+  The account of user, walk-user-1@example.com, is the draft's placeholder. A walk of the old application needs a real test account there: write it in users.user.account of docs/codelead/rebuild/journeys.json. A walk of this rebuild can keep it when the rebuilt API holds a fake directory for Development, which the walk gives its accounts to: none is in the API's code yet (the sign-in's endpoint builds it).
   ```
 
   The copy now signs its users in as the draft does: `identity` is `{ "mode": "given", "credentials": "explicit" }`, and the one user is `user`, with the placeholder account `walk-user-1@example.com`. The journey's second step types `{user.account}` and `{user.password}`, then clicks **Sign in**.
@@ -144,7 +165,31 @@ The examples come from CodeLead's tests. In them, the rebuild was made before th
   <!-- described, not captured -->
   ```output
   The journeys copy docs/codelead/rebuild/journeys.json stands as the System Model's draft ../old/docs/codelead/rebuild/journeys.draft.json writes it.
+  The walk signs in as the accounts the journeys give, each with its password, which is never written in the journeys:
+  - user (walk-user-1@example.com): CODELEAD_WALK_PASSWORD_USER is not set, and no file of passwords is named (CODELEAD_WALK_CREDENTIALS, or run.unattended.credentials of the run profile).
+  The account of user, walk-user-1@example.com, is the draft's placeholder. A walk of the old application needs a real test account there: write it in users.user.account of docs/codelead/rebuild/journeys.json. A walk of this rebuild can keep it when the rebuilt API holds a fake directory for Development, which the walk gives its accounts to: none is in the API's code yet (the sign-in's endpoint builds it).
   ```
+
+- Refresh a copy where you wrote a test account in place of the placeholder. The refresh keeps the account, and says so:
+
+  ```console
+  codelead rebuild journeys --refresh
+  ```
+
+  <!-- described, not captured -->
+  ```output
+  Written: docs/codelead/rebuild/journeys.json, from the System Model's draft ../old/docs/codelead/rebuild/journeys.draft.json.
+  Replaced with the draft's: orders.edit-post.
+  Added from the draft: none.
+  Removed (drafted no more): none.
+  Kept as they were: none.
+  Kept: the account of user user.
+  The file is the repository's: git diff shows what changed; commit it before the next run. The plan reads it at its next turn; a part accepted by a walk of the journeys before keeps its acceptance, and its steps are read anew.
+  The walk signs in as the accounts the journeys give, each with its password, which is never written in the journeys:
+  - user (desk-tester@example.org): CODELEAD_WALK_PASSWORD_USER is set.
+  ```
+
+  The account is a test account now, so no line names a placeholder. The password is never shown.
 
 - Refresh a copy where a person wrote a `note` on a step of the drafted journey. The journey is kept, so its users sign in as before, and the draft signs them in another way. Nothing is written, and the exit code is 1:
 

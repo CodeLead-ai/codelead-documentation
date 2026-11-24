@@ -147,7 +147,7 @@ What to do:
 2. In the rebuild's folder, run [`codelead rebuild journeys --refresh`](../cli/codelead-rebuild-journeys.md). The rebuild's copy of the journeys then takes the new draft.
 3. Review the copy with `git diff`, and commit it.
 
-An accepted part stays accepted. To compose it again from the new model, reopen it with `/modernize --transform T9 --reopen <PART_ID> --reason "<WHY>"`.
+An accepted part stays accepted. To compose it again from the new model, reopen it with `/modernize --transform T9 --reopen <PART_ID> --reason "<WHY>"`. The plan then plans it again, and its next composition revises its work in place. See [Reopen a part](rebuild.md#reopen-a-part).
 
 ## Details
 

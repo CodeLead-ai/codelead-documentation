@@ -109,6 +109,7 @@ A window gives a budget of `contextTokens × 3.5 − 24,000` characters, and nev
 | `CODELEAD_DOCS_DIR` | `docs/codelead` | The project's documents: the repository map, the catalog and the project log. |
 | `CODELEAD_LOCKS_DIR` | `<home>/.codelead/locks` | The machine's locks of walk databases. |
 | `CODELEAD_TEMPLATES_DIR` | none | A folder of templates by name, for `codelead rebuild init --template <name>`. |
+| `CODELEAD_PKB_HOME` | `<home>/.codelead/pkb` | The folder of the PKB store: `pkb.json`, the env file with its passwords, and its compose file. `--dir` of [`codelead pkb store`](../cli/codelead-pkb-store.md) comes first. |
 
 A relative path is read from the project's folder. See [Files and folders](files-and-folders.md).
 

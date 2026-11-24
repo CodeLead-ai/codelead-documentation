@@ -120,7 +120,7 @@ A field that does not apply is left out. A reader passes over a field that it do
 | `repair` | the [`/validate`](../chat-commands/validate.md) that follows a `/repair` | Yes |
 | `judge-again` | `/modernize --transform T9 --judge-again`: a landed part of a rebuild judged again on the same tree. The rebuild's `--next` writes one too, by itself, for a part whose walk failed only on another part's page, accepted since. | No |
 | `unapply` | the end of a session with a rebuild part applied and its gate not passed: the patch taken out again | It takes a change out |
-| `reopen` | `/modernize --transform T9 --reopen <part> --reason <why>`: a parked part planned again | No |
+| `reopen` | `/modernize --transform T9 --reopen <part> --reason <why>`: a part planned again, a parked one or one that holds work already | No |
 | `ask` | the model ladder of a rebuild run, when a part's repair rung failed too: a person's turn | No |
 | `intervene` | `/modernize --transform T9 --intervene <part>`: an agent loop on a strong model took a part over | When it lands |
 | `map` | `codelead init`, [`codelead map`](../cli/codelead-map.md), [`/map`](../chat-commands/map.md), the end of a build | No |
@@ -138,7 +138,7 @@ The `map`, `rebuild-init` and `modernize` records are not increments. [`/pr`](..
 | `stopped` | The run ended before a landing. `stop_reason` says why. |
 | `cause_not_found` | The preflight said that it has not found the cause of a bug. No patch was made. `cause_reading` says why. |
 | `not-landed` | A rebuild part whose gate had not passed when its session ended. The patch was taken out (`command: "unapply"`), or an intervention did not land. |
-| `reopened` | A parked rebuild part, planned again (`command: "reopen"`). |
+| `reopened` | A rebuild part planned again (`command: "reopen"`): a parked part, or a part that holds work already. |
 | `asked` | A rebuild part, or a stage of the program, that waits for a person. |
 | `success` | A repository read, a rebuild made and ready to run, or a stage of the program that is done or skipped. |
 | `failure` | A rebuild made and not ready to run, or a stage of the program that failed. `stop_reason` says why. |
@@ -230,7 +230,7 @@ Each repair round of `repair_rounds`:
 | `ladder` | every record of a session that the model ladder runs | `rung` (`compose`, `repair` or `intervene`), `provider`, `model`, `effort`, and `stops_after` on a reopen. |
 | `judged_again` | `judge-again` | `of`, the landing; `reason`, a person's words, or the run's own when it judged again by itself; `walker`; `target` (`plan`); `stepsChanged`; `note`; `against`. |
 | `unapplied` | `unapply` | `decided` (`unattended` or `confirmed`), `repair_rounds`, `restored`, `removed`, `patches`, `checkpoint`, `not_restored`, `outside_surface`. |
-| `reopened` | `reopen` | `reason`, and `attempts`: the records of the attempts that parked the part. |
+| `reopened` | `reopen` | `reason`, and `attempts`: the records of the attempts that parked the part. For a part that held work already, `attempts` is empty, `from` is the state the plan read it in, such as `accepted`, and `of` is the record that set that state. |
 | `asked` | `ask` | `of`, `on`, `reason`, `walk_words`, `files`, and `landed`: the board card or the plan line where the ask went. |
 | `intervened` | `intervene` | The model and its effort, the turns, the tool calls, the walks, the usage and cost, the limits, the minutes, why it `stopped`, and the `gate` and its words. |
 | `rebuild_init` | `rebuild-init` | `source`, `template`, `answers` (`framework`, `identity`, `database`), `installed`, the `journeys` counts by source, the `plan` (`parts`, `planned`, `dropped`, `blockers`) and the `files` written. |

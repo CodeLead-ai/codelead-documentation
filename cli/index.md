@@ -98,6 +98,10 @@ To see the help of any command, add `--help`: `codelead doctor --help`.
 - [`codelead board`](codelead-board.md): Pinboard, the board between you and your coding agents.
 - [`codelead analyst`](codelead-analyst.md): the CodeLead Analyst, which records and explores a running web application.
 
+### The shared knowledge base
+
+- [`codelead pkb`](codelead-pkb.md): the commands of the PKB service, the shared project knowledge base. Today only its store exists: [`codelead pkb store`](codelead-pkb-store.md) starts, stops and checks it.
+
 ## Options that every command shares
 
 - **`-h|--help`**
@@ -127,7 +131,7 @@ Every command ends with an exit code. A script reads it to know what happened.
 |---|---|
 | `0` | The command did what it was asked. A check found nothing to fix. |
 | `1` | The command ran and found a failure: a check failed, a gate did not pass, a step failed. An error that is not a refusal is also `1`, and so is a wrong option for most commands. |
-| `2` | The command refused before it did anything: a file is missing, an answer or a configuration is refused. For [`lint`](codelead-lint.md), [`walk`](codelead-walk.md), [`model`](codelead-model.md) and [`modernize`](codelead-modernize.md), a wrong or missing option is `2` too. The words say why and what to do. |
+| `2` | The command refused before it did anything: a file is missing, an answer or a configuration is refused. For [`lint`](codelead-lint.md), [`walk`](codelead-walk.md), [`model`](codelead-model.md), [`modernize`](codelead-modernize.md) and [`pkb`](codelead-pkb.md), a wrong or missing option is `2` too. The words say why and what to do. |
 | `130` | You pressed Ctrl+C during a long run ([`implement`](codelead-implement.md), [`rebuild run`](codelead-rebuild-run.md)). |
 
 Each command page lists its own codes, because some commands use them differently. See [Exit codes](../reference/exit-codes.md) for the full table and [Messages and what to do](../reference/messages.md) for the words that CodeLead prints.

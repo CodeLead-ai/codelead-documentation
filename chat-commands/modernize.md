@@ -109,7 +109,7 @@ Each option belongs to one action. The action's section below says more.
 | `--next` | `--transform T9` | Composes the plan's next part. |
 | `--dry-run` | `--transform T9 --next` | Composes every planned part with no model call, and checks it. |
 | `--judge-again <PART_ID>` | `--transform T9` | Judges a landed part's acceptance again. |
-| `--reopen <PART_ID>` | `--transform T9` | Plans a parked part again. |
+| `--reopen <PART_ID>` | `--transform T9` | Plans a part again: a parked part, or a part that already holds work. |
 | `--intervene <PART_ID>` | `--transform T9` | Runs the intervention rung on one part. |
 | `--reason <WHY>` | `--waive`, `--skip`, `--judge-again`, `--reopen`, `--intervene` | Why. It is required with each of them. |
 | `--waive <FINDING>` | | Records a "no" to a security finding. |
@@ -378,7 +378,7 @@ Pin first: the declared gate (.codelead/validation.json) carries no characteriza
 - `--next`: composes the part that the plan says comes next. `--scope <PREFIX>` limits it to some features. One case comes first: a landed part whose walk failed only on a page that another part builds. Once that part is accepted, `--next` judges the waiting part again by itself, with no model call, and composes nothing.
 - `--dry-run`: with `--next`, composes every planned part with no model call, and checks each quote and name against the code.
 - `--judge-again <PART_ID>`: judges a landed part's acceptance again on the same tree, with no model call, when the walker was wrong or changed.
-- `--reopen <PART_ID>`: plans a parked part again, with no model call.
+- `--reopen <PART_ID>`: plans a part again, with no model call. The part can be parked. It can also hold work already: accepted, landed and not accepted, or satisfied. Nothing in the tree changes. The next `--next` that reaches the part composes it again, and it revises in place what the part built. See [Reopen a part](../modernization/rebuild.md#reopen-a-part).
 - `--intervene <PART_ID>`: runs the model ladder's intervention rung on a part that was not accepted or is parked. An agent works with CodeLead's own tools, within limits of turns, minutes and dollars. The gate then judges the tree; when it does not accept, CodeLead puts the tree back.
 
 `--reason <WHY>` is required with `--judge-again`, `--reopen` and `--intervene`: the evidence record says why. `--again` does not go with `T9`.

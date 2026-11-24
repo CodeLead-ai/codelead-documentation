@@ -139,7 +139,7 @@ Each part has its needs: the parts that must land before it. Each part has a sta
 
 | State | What it means |
 |---|---|
-| `planned` | To compose. A part whose accepted work is no longer in the code is `planned` again. |
+| `planned` | To compose. A part whose accepted work is no longer in the code is `planned` again. So is a part that a person [reopened](#reopen-a-part). |
 | `accepted` | It landed, and its walk accepted it. |
 | `landed`, `landed-not-accepted` | It landed, and its walk did not accept it. `landed` still has repair rounds. |
 | `satisfied` | It is in the code already, and its own steps pass in the walk. It is not composed again. |
@@ -264,6 +264,36 @@ A parked part is a card on the rebuild's board, with the reason. It is your turn
 
 A part is parked after 3 attempts that did not land, by default. It is parked at once when the patch check refused two attempts in a row with the same problems, on the same request. A third attempt would meet the same check. The reason then says `the patch check refused the same change twice: <problem>`. See [Run profile](../reference/run-profile.md#the-keys-of-run).
 
+### Reopen a part
+
+Sometimes you want a part composed again, although it holds work already. For example, its request was composed from an older reading of the System Model, and the plan warns with `composed-older-reading`. Reopen the part, with your reason:
+
+```console
+/modernize --transform T9 --reopen sign-in:screen --reason "the model read again: ReturnUrl is a hidden field"
+```
+
+<!-- described, not captured -->
+```output
+Rebuild (T9) reopen: sign-in:screen (screen): /account/sign-in
+It is accepted (accepted by its walk (ev-<ID>)). Reason: the model read again: ReturnUrl is a hidden field
+Evidence record (reopened): <YOUR_REBUILD>/.codelead/evidence/ev-<ID>.json
+Nothing in the tree was changed: what sign-in:screen built stands as it is, and its next composition revises it in place. The parts that need it keep their states.
+Part sign-in:screen: planned (planned again by a person (2026-11-24): the model read again: ReturnUrl is a hidden field; accepted before (ev-<ID>)). Next part: sign-in:screen (/account/sign-in). It is the same part: a person reopened it, and the next --next composes it again, revising in place what it built.
+```
+
+What happens then:
+
+- You can reopen a part that holds work: accepted, landed and not accepted, landed and not walked, or satisfied. A part that is accepted on what regresses counts too.
+- A parked part is reopened as before. Its attempts are counted again from zero.
+- A planned part has nothing to reopen, and neither has a dropped part. CodeLead refuses both, says why, and writes nothing.
+- The reopen writes one evidence record. It calls no model, and it changes nothing in the tree.
+- The plan reads the part as planned again, until it lands again. `rebuild-plan.md` lists it under `Reopened by a person`.
+- The next composition revises in place what the part built. Its request quotes your reason once, as a reason and not as an instruction.
+- The parts that need it keep their states. Their need reads `met before, reopened since`, and nothing else is planned again.
+- The check of accepted parts still protects what the part built, until its revision lands. Its own revision can change its own code and tests.
+- The old landing is not judged again: `--judge-again` refuses it. The walk of the next landing judges the part anew.
+- [`codelead rebuild run`](../cli/codelead-rebuild-run.md) takes the part like any planned part. The run summary lists it under `Reopened by a person`.
+
 ## Details
 
 - **Folders**: the rebuild is `../<folder>-rebuild` by default, the `rebuildFolder` answer of the program. It is a git repository of its own, with CodeLead initialized in it. Its first commit is the scaffold, `CodeLead: the rebuild's scaffold from <template>`, unless you give `--no-commit`.
@@ -272,7 +302,7 @@ A part is parked after 3 attempts that did not land, by default. It is parked at
 - **The plan's files**: `docs/codelead/rebuild/rebuild-plan.json` and `rebuild-plan.md`, written by `rebuild init` and by `/modernize --rebuild-plan`.
 - **The caps**: `run.unattended` in the manifest (`maxParts`, `maxCostUsd`, `maxMinutes`, `repairsPerSession`), or `--max-parts`, `--max-cost-usd` and `--max-minutes` for one run.
 - **The ladder**: `run.models` in the manifest (`compose`, `repair`, `intervene`, `escalate`). With no `models` block, the ladder is off.
-- **The run summary**: `.codelead/rebuild-run-<stamp>.md` and `.json`: each part, its outcome and its cost, and the accepted parts whose work no longer holds in the code. See [Rebuild run summary](../reference/rebuild-run-summary.md).
+- **The run summary**: `.codelead/rebuild-run-<stamp>.md` and `.json`: each part, its outcome and its cost, and the accepted parts whose work no longer holds in the code. It also lists the parts that a person reopened. See [Rebuild run summary](../reference/rebuild-run-summary.md).
 - **Planned again**: the plan's warning `contract-broken` names an accepted part whose work is gone from the code. The warning `contract-changed` names the identity seam when a cookie session across two origins needs a CORS policy that the seam's code lacks. A CORS policy is the API's rule for which origins may call it. The plan then revises the seam in place, once. When the revision landed and the code still lacks the policy, it is a person's turn.
 - **What the check of accepted parts reads**: the plan, the evidence records and git, with no model call. It reads tests written in C# (xUnit, NUnit and MSTest) and in TypeScript or JavaScript (`it` and `test`). A changed test file in another language is a warning. The check never runs outside a rebuild.
 - **The report**: `codelead rebuild-report` writes `.codelead/rebuild-report.html`, which the wizard shows.

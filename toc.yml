@@ -328,6 +328,10 @@
       href: cli/codelead-modernize-skip.md
     - name: "codelead modernize source"
       href: cli/codelead-modernize-source.md
+    - name: "codelead pkb"
+      href: cli/codelead-pkb.md
+    - name: "codelead pkb store"
+      href: cli/codelead-pkb-store.md
 - name: Chat command reference
   items:
     - name: "Overview"

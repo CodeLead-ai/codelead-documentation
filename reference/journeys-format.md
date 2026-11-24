@@ -173,7 +173,7 @@ A sign-in form sends no such challenge. So on a site that signs users in with it
 - The first step is the visitor's: it opens `/` and expects the sign-in page. Its address carries the return address `/` in `returnUrl`, written `%2f` or `%2F`. The pattern takes both.
 - The second step signs in. It expects the page where the old sign-in sent the account: here `/`, the address that the visitor came from.
 - The feature's own steps follow, as the signed-in user.
-- The account `walk-user-1@example.com` is a placeholder. For a walk of the old application, replace it with a test account that the application signs in. For a walk of a rebuild, you can keep it when the API holds a fake directory for Development. CodeLead gives that API the walk's accounts when it starts it. In both cases, give the password in `CODELEAD_WALK_PASSWORD_USER`.
+- The account `walk-user-1@example.com` is a placeholder. For a walk of the old application, replace it with a test account that the application signs in. For a walk of a rebuild, you can keep it when the API holds a fake directory for Development. CodeLead gives that API the walk's accounts when it starts it. In both cases, give the password in `CODELEAD_WALK_PASSWORD_USER`. The account is yours: the plan's comparison with the draft leaves it out, and [`codelead rebuild journeys --refresh`](../cli/codelead-rebuild-journeys.md) keeps it.
 
 ## clock
 

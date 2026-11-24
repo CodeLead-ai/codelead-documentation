@@ -98,6 +98,19 @@ The section of accepted parts whose contract does not hold is always there, with
 - `clients.create-get:endpoint` (accepted by `<RECORD>`): its endpoint GET /api/clients/create is no longer in the code: the part clients.create-post:endpoint removed it in <RECORD> (checkpoint <COMMIT>).
 ```
 
+A section `Reopened by a person` follows it when a person [reopened a part](../modernization/rebuild.md#reopen-a-part) to have it composed again. It lists each such part at the run's start or end: the reopen record and its date, the state before, and the person's reason. It ends with where the part stands now. For example:
+
+<!-- described, not captured -->
+```markdown
+## Reopened by a person
+
+A part a person reopened to have it composed again. It held work of its own, which stood in the tree until its revision landed. The run takes it like any planned part, and the parts that need it keep their states.
+
+- `sign-in:screen` (`<RECORD>`, 2026-11-24; accepted before, `<RECORD>`): the model read again: ReturnUrl is a hidden field. Now: accepted (accepted by its walk (<RECORD>)).
+```
+
+The run also says it before it starts, in a line such as `Note: sign-in:screen was reopened by a person (<RECORD>): planned again by a person (…): …; the run composes it again like any planned part, revising in place what it built.`
+
 ## The JSON summary
 
 | Key | Type | What it holds |
@@ -116,6 +129,7 @@ The section of accepted parts whose contract does not hold is always there, with
 | `sync` | object | Whether the lanes' claims synced with the remote, its name, and why. |
 | `waits` | list | Parts that still wait on a part of another lane: `part`, and `on` with each part, lane and state. |
 | `contractsBroken` | list | Every part that an evidence record accepted and whose endpoint, screen's route or tests are no longer in the code, as the run's last plan read it: `part`, `record` (the record that accepted it), `words`, and `by`, the part whose landing removed it, when the commits tell. Empty when every accepted part holds. The plan plans each one again. |
+| `reopened` | list | Every part that a person reopened, as the run's first plan and its last read them: `part`, `record` (the reopen), `at`, `reason`, `from` (the state before), `landing`, and `now`, where the part stands when the run ends. Present only when there is one. |
 | `settings` | object | `ladder`, `repairsPerSession`, `cleanTree`, `env`, `reset`, `passwords`, `acceptance`: the run's settings, in words. Never a password. |
 | `totals` | object | The counts of the numbers table. |
 | `cost`, `costByRung` | object | The cost of all calls, and of each rung: `compose`, `repair`, `intervene`. |
