@@ -204,6 +204,26 @@ Such a part is not finished, and the run counts it as work left. Once the stored
 
 When the plan cannot tell which page a step acts on, it warns with `step-page-unknown`. A title that names the control's place, or a `covers` list in the journey, settles it. See [Journeys format](../reference/journeys-format.md#steps).
 
+### What the old shell shows
+
+An old layout often shows more than its controls. For example, it shows the signed-in name beside "Sign out": `<span>@User.Identity.Name</span>`. The System Model records where. The shell's menu part asks for it, beside the table of controls. On the Basic Store sample:
+
+<!-- described, not captured -->
+```output
+What the old shell shows of the session: the signed-in user's name (`User.Identity.Name`, BasicStore.Web/Views/Shared/_Layout.cshtml:22), shown when signed in. Render it in the menu as text while someone is signed in, and no name for a visitor: read it from the field userName of the answer of GET /api/me, the API's caller-identity seam (the part identity-seam), through the API client. The walk's sign-in steps look for that name on the page.
+```
+
+A menu can land before its request asked for the name. CodeLead then reads the rebuilt shell's files, with no model call. When no file shows the name, the plan plans the menu again, to be revised in place:
+
+<!-- described, not captured -->
+```output
+accepted (ev-<ID>) before its request asked it to show the signed-in name the old shell shows (`User.Identity.Name` at BasicStore.Web/Views/Shared/_Layout.cshtml:22): no file of the shell renders the name's field (userName) as text: the menu shows no signed-in name: planned again, to be revised in place
+```
+
+When CodeLead cannot tell from the code, the menu gets a note for a person. An example is a name handed to another component.
+
+A step can fail only on that name. For example, the sign-in step lands at `/` and finds no name. The walk says which of a step's expectations failed. The sign-in screen cannot add the name, so it gets no repair round. It is accepted on what regresses, and it waits on the menu. Once the menu shows the name, the run judges the screen again by itself, with no model call. A step that fails on its address as well is repaired as before.
+
 ### When a part's steps change
 
 A part stays accepted only while the walk that accepted it judged its own steps as the journeys write them now. A later stored walk of the tree, in which those steps pass, counts too. The steps can change in two ways:
@@ -253,6 +273,8 @@ Acceptance (walk r0): no step of the journeys covers this request; nothing that 
 The run then says `accepted on what regresses (no step of its own yet)`, and never `accepted at the first walk`. The run summary counts the two kinds of acceptance apart.
 
 When a check fails, the **model ladder** decides what comes next. First repair rounds on the compose model. Then the part moves to a stronger repair model. Then an intervention: an agent on a frontier model takes the part over once, within limits of turns, minutes and dollars. When that fails too, the part is **parked** for a person, and the run continues with the next part. See [Use a stronger model for repairs](../how-to/use-a-stronger-model-for-repairs.md).
+
+Sometimes nothing planned has its needs met, and the planned parts wait on a part that landed and was not accepted. Then the run judges that part again by itself first. It makes no model call and offers no repair round. The judgement's record says what keeps the part. For example, CodeLead's own sign-in check refuses the walk's account. The next plan reads that record and plans the sign-in's endpoint again, with no person. The run does this once for each landing.
 
 The run stops at the end of the plan, at a cap, when the file `.codelead/STOP` appears, or on Ctrl+C. The part that is running finishes first.
 

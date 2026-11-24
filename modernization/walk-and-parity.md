@@ -26,6 +26,7 @@ Tests check the code from the inside. A person uses the application from the out
 - It starts at the application's first screen, and reaches every page by clicking. It never jumps to an address.
 - It prepares nothing by hand. A new user registers through the screens. For a journey with a given account, the walk signs in as that account.
 - After each step, it checks what the step expects, and marks the step **pass** or **fail**.
+- When only the step's expectations failed it, the report says which ones, by their place in the step. For example, `"unmet": [1]` is the step's second expectation.
 - A step after a failed step is **blocked**: it could not be tried.
 
 The walk needs the application running at the address that you give with `--base`. In the Rebuild stage, CodeLead starts the rebuild's API and web application from the run profile, walks them, and stops them after. When you walk by hand, start them yourself first.
@@ -58,6 +59,7 @@ The judge reads some findings before it counts them:
 - **The signed-out state.** The caller-identity route, such as `GET /api/me`, tells the web application who is signed in. It answers 401 to a user who has not signed in yet in the journey. That is the signed-out state of the shell, not a fault. The judge shows it and does not count it: `Signed out, as expected (not counted): GET /api/me (identity-seam) answered 401 to a user not signed in yet, the shell's signed-out state, at <STEPS>.` A 401 after the user signed in still counts.
 - **A cross-origin block.** An origin is the scheme, the host and the port of an address. The API is up at another origin than the page's, and the browser gets no answer at all from it. The judge names this a cross-origin block: the API's CORS policy refuses the web application's origin, or the credentials that its calls send. A CORS policy is the API's rule for which origins may call it. The finding says so, in place of a wrong route.
 - **A page not accepted yet.** The step's control is on the page of a part that is not accepted yet. The finding says so, for example `nothing to click named "New client" on / (the page of home.index:screen, which is not accepted yet)`.
+- **What another part builds.** The step failed only on what another part builds, and that part does not build it yet. An example is the signed-in name that the old shell showed, which the shell's menu builds. The part judged gets no repair round, and waits on that part. See [What the old shell shows](rebuild.md#what-the-old-shell-shows).
 
 ### The old application's journeys
 

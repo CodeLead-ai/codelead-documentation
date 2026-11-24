@@ -93,6 +93,19 @@ Note: <PART_ID> is accepted before, its steps changed since (<RECORD>): the run 
 
 A part that the run judges again by itself is said as `<PART_ID> (<TITLE>), part <N> of <M>: judged again by itself, with no model call (…).` The run never makes the same judgement twice. When the plan asks for it again, the part is passed by for the rest of the run, and listed for a person.
 
+The run judges a part again by itself in these cases:
+
+- The page of its step's control, or what its step looks for, is built since. For example, the shell's menu now shows the signed-in name.
+- Its own steps changed since the walk that accepted it, or no walk could reach them before.
+- Nothing planned has its needs met, and planned parts wait on it. It landed and was not accepted. The judgement offers no repair round, and its record says what keeps the part:
+
+<!-- described, not captured -->
+```output
+… <PART_ID> (<TITLE>), part 3 of 9: judged again by itself, with no model call (nothing planned has its needs met, and 1 part waits on it (<OTHER_PART_ID>), landed (<RECORD>) and not accepted: judged again by the run itself, with no repair round, to learn what keeps it, the tree as it stands).
+```
+
+When that record says that CodeLead's own sign-in check refused the walk's account, the next plan plans the sign-in's endpoint again. No person types `--judge-again`.
+
 ### When the run stops
 
 The run ends at the queue's end, at `--until`, at a cap, when `.codelead/STOP` appears, or on Ctrl+C. In every case, the part that is running finishes first. A second Ctrl+C stops at once.
