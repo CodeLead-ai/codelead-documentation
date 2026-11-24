@@ -54,6 +54,29 @@ All three need Docker: Docker Desktop or Colima, with the compose plugin. Each o
 
 You can run `up` again at any time. It keeps `pkb.json` and the passwords, and it changes nothing that is set up already.
 
+### When a container cannot start
+
+When Docker is quit while the store runs, it can leave a stopped container behind that never starts again. Docker then says, for example, `RWLayer of container … is unexpectedly nil`. A container holds none of the store's data: the data is in the two volumes.
+
+So when mongod or mongot does not start, `up` looks at the store's own containers:
+
+1. It looks for a container of that service, in the store's compose project, that is stopped (`created`, `exited` or `dead`).
+2. It removes that one container by its id, with `docker rm`. It never removes a volume, a running container, or a container of another project.
+3. It starts the service once more, and says what it removed:
+
+   <!-- described, not captured -->
+   ```output
+   mongod could not start from its stopped container (Docker said: Error response from daemon: RWLayer of container 3f2a9c1b7d4e… is unexpectedly nil). That container (3f2a9c1b7d4e) was removed and a new one started; the store's data is in its volumes, which were not touched.
+   ```
+
+When the service still does not start, or no stopped container is there, `up` stops with Docker's words and a second line with the way out:
+
+<!-- described, not captured -->
+```output
+docker compose could not start mongod: Error response from daemon: Mounts denied
+Its stopped container (3f2a9c1b7d4e) was removed first (Docker had said: Error response from daemon: RWLayer of container 3f2a9c1b7d4e… is unexpectedly nil), and a new one does not start either. If Docker was quit or restarted while the store ran, quit Docker Desktop fully, start it again, then run codelead pkb store up again. The store's data is in the volumes codelead-pkb_mongod-data and codelead-pkb_mongot-data, never in a container.
+```
+
 ### Security
 
 - The store's port is published on `127.0.0.1` only. Another computer cannot reach it.
@@ -190,7 +213,7 @@ These options belong to each of `up`, `down` and `status`.
 | Code | Meaning |
 |---|---|
 | `0` | Done. For `status`: the store answers, and both search indexes answer. |
-| `1` | The command ran and failed, and the words say why. For `status`: no store is set up in the folder, mongod does not run, or the search indexes do not answer yet. |
+| `1` | The command ran and failed, and the words say why and the way out. For `status`: no store is set up in the folder, mongod does not run, or the search indexes do not answer yet. |
 | `2` | Refused before anything ran: Docker is missing or does not answer, `store.uri` is not on `127.0.0.1`, the port is taken, `pkb.json` is not JSON, or an option is wrong. |
 
 ## Files
@@ -209,7 +232,7 @@ Docker keeps the data in two volumes, `<project>_mongod-data` and `<project>_mon
 
 ### The configuration
 
-`pkb.json` holds the whole configuration of the PKB service. This release reads `store`, `embeddings.dimensions` and `projects`. The other keys are for the service, which comes later. A key that the file leaves out takes its default.
+`pkb.json` holds the whole configuration of the PKB service. This release reads `store`, `embeddings`, `projects`, `privacy` and `paused`. The other keys are for the service, which comes later. A key that the file leaves out takes its default.
 
 | Key | Default | What it does |
 |---|---|---|
@@ -217,10 +240,12 @@ Docker keeps the data in two volumes, `<project>_mongod-data` and `<project>_mon
 | `store.database` | `codelead_pkb` | The database of the nine collections. |
 | `store.compose_project` | `codelead-pkb` | The name that Docker gives the containers and the volumes. |
 | `embeddings.dimensions` | `768` | The number of values in every embedding, and in the vector index. |
+| `embeddings.baseUrl`, `embeddings.model`, `embeddings.remote` | `http://localhost:1234/v1`, no model, `false` | The embeddings server of [`codelead pkb embed`](codelead-pkb-embed.md#the-embeddings-server) and [`codelead pkb search`](codelead-pkb-search.md). |
+| `embeddings.documentPrefix`, `embeddings.queryPrefix` | empty, empty | The text put before each stored text and each question when they are embedded. See [the task prefixes](codelead-pkb-embed.md#the-task-prefixes). |
 | `bind`, `port` | `127.0.0.1`, `7415` | The service's own address. Not used yet. |
-| `chat`, `embeddings.baseUrl`, `embeddings.model`, `embeddings.remote` | local model servers, no model | The models of the service. Not used yet. |
+| `chat` | a local model server, no model | The chat model of the service. Not used yet. |
 | `projects` | none | The projects, each with its repositories and their checkouts. [`codelead pkb sync`](codelead-pkb-sync.md#the-project-in-pkbjson) reads them. |
-| `privacy.allowRemoteModels`, `paused` | `false`, `false` | The rules of the service. Not used yet. |
+| `privacy.allowRemoteModels`, `paused` | `false`, `false` | Whether texts may go to a remote model, and whether every model call waits. `embed` and `search` follow them. |
 
 ## Details
 

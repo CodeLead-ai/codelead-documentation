@@ -3,7 +3,7 @@ title: Files and folders
 description: Every file and folder that CodeLead writes in a project and in your home folder, which command writes it, its format, and whether it belongs in git.
 kind: reference
 area: reference
-date: 2026-11-20
+date: 2026-11-24
 ---
 
 # Files and folders
@@ -185,7 +185,7 @@ The lines that `init` adds to `.gitignore`:
 |---|---|---|
 | `<home>/.codelead/accepted.json` | the first run of a packaged release | That you accepted the evaluation terms on this machine. `codelead doctor` and `codelead licence` run without it. |
 | `<home>/.codelead/locks/walk-<key>.lock` | a rebuild run, `codelead implement` | One run per walk database on this machine. `CODELEAD_LOCKS_DIR` moves the folder. |
-| `<home>/.codelead/pkb/` | [`codelead pkb store up`](../cli/codelead-pkb-store.md) | The PKB store: `pkb.json`, the env file `.env` with its passwords (readable by you only), `compose.yaml`, `mongod.yml` and `mongot.yml`. `pkb.json` also names the embeddings server ([`codelead pkb embed`](../cli/codelead-pkb-embed.md#the-embeddings-server)). `CODELEAD_PKB_HOME` moves the folder. |
+| `<home>/.codelead/pkb/` | [`codelead pkb store up`](../cli/codelead-pkb-store.md) | The PKB store: `pkb.json`, the env file `.env` with its passwords (readable by you only), `compose.yaml`, `mongod.yml` and `mongot.yml`. `pkb.json` also names the embeddings server ([`codelead pkb embed`](../cli/codelead-pkb-embed.md#the-embeddings-server)) and its two task prefixes, `embeddings.documentPrefix` and `embeddings.queryPrefix` ([the task prefixes](../cli/codelead-pkb-embed.md#the-task-prefixes)). `CODELEAD_PKB_HOME` moves the folder. |
 
 CodeLead writes nothing else outside the project. Docker keeps the PKB store's data in its own volumes. The walk's passwords file, when you use one, is a file that you make and name with `CODELEAD_WALK_CREDENTIALS`. Keep it outside every repository.
 

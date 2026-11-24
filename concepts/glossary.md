@@ -3,7 +3,7 @@ title: Glossary
 description: Every term of CodeLead in one or two plain sentences, in alphabetical order, each with a link to the page that explains it.
 kind: concept
 area: concepts
-date: 2026-11-20
+date: 2026-11-24
 ---
 
 # Glossary
@@ -142,11 +142,12 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 - **Stop**. A run that ends before its job is done. A stop always says why and what you can do next. See [Results and stops](results-and-stops.md).
 - **Stop file**. A file whose presence asks an unattended run to stop after its current part, for example `.codelead/STOP`. See [Unattended runs and the run lock](unattended-runs.md).
 - **Strategy**. How much the preflight does, from no questions to a deep analysis: `auto`, `fast`, `clarify`, `architect` or `deep`. See [Strategies](strategies.md).
-- **Structural route**. The PKB search's way into the code. A question that asks where, which file or how do I takes it, and so does a name in the code. See [`codelead pkb search`](../cli/codelead-pkb-search.md#the-structural-route).
+- **Structural route**. The PKB search's way into the code. A question that asks where, which file or how do I takes it, and so does a name in the code. For a named type it also reads where the type is declared and what implements it. See [`codelead pkb search`](../cli/codelead-pkb-search.md#the-structural-route).
 - **System Model**. What CodeLead reads from an old application's sources: its entry points, its rules and its data, with no model call. See [The System Model](../modernization/system-model.md).
 
 ## T
 
+- **Task prefix**. A short label that some embedding models expect before each text, such as `search_query: ` before a question. The PKB service sets them in `pkb.json`. See [The task prefixes](../cli/codelead-pkb-embed.md#the-task-prefixes).
 - **Template**. A starting folder for a new app: an `npm create` package, a folder, a git repository, or a name in the configuration. See [Tutorial: start a new app from a template](../tutorials/start-from-a-template.md).
 - **Template manifest**. The file `codelead-template.json` in which a template says what it is: its stack, its scripts, where pages go. See [Template manifest](../reference/template-manifest.md).
 - **Transform**. A change of a known kind that CodeLead applies to old code, for example moving the data access into its own library. See [Transforms](../modernization/transforms.md).

@@ -28,7 +28,7 @@ codelead pkb embed -h|--help
 
 ## Description
 
-`embed` reads every current piece of the project that has no embedding by the model that `pkb.json` names. It sends their texts to the embeddings server, and stores the numbers with each piece.
+`embed` reads every current piece of the project that has no embedding by the model that `pkb.json` names, with its prefixes. It sends their texts to the embeddings server, and stores the numbers with each piece.
 
 - A text that has an embedding already, in another piece, takes that embedding. It is not sent again.
 - Each embedding must have the length that `embeddings.dimensions` says. When the length is wrong, `embed` writes nothing and says the fix.
@@ -49,11 +49,38 @@ codelead pkb embed -h|--help
 | `model` | The embedding model to ask for. | empty: nothing is embedded |
 | `dimensions` | How many numbers the model gives for each text. | `768` |
 | `remote` | `true` when the server is outside your machines. | `false` |
+| `documentPrefix` | Text put before each piece's text when it is embedded. | empty |
+| `queryPrefix` | Text put before each question when it is embedded. | empty |
 
 A model of 768 numbers fits the default. Examples are `nomic-embed-text` v1.5, `bge-base-en-v1.5` and `all-mpnet-base-v2`. A model with another length needs another `dimensions`. Set it, then run [`codelead pkb store up`](codelead-pkb-store.md) to make the vector index again at that size.
 
 > [!IMPORTANT]
-> One store holds one model's embeddings. When you change `model`, every piece is embedded again.
+> One store holds one set of embeddings for each piece. When you change `model` or a prefix, every piece is embedded again.
+
+### The task prefixes
+
+Some embedding models learned with a short label before each text. The label says what the text is for. The `nomic-embed-text` family is one of them. It expects `search_document: ` before each stored text and `search_query: ` before each question. Such a model finds better matches when it gets its labels.
+
+Set the pair in the `embeddings` section of `pkb.json`. Keep the space after each colon:
+
+```json
+"embeddings": {
+  "baseUrl": "http://localhost:1234/v1",
+  "model": "text-embedding-nomic-embed-text-v1.5",
+  "dimensions": 768,
+  "documentPrefix": "search_document: ",
+  "queryPrefix": "search_query: "
+}
+```
+
+Then run `codelead pkb embed`. What happens:
+
+- The store keeps each piece's numbers under a key: the model's name, and the two prefixes when they are set. For example: `text-embedding-nomic-embed-text-v1.5 [prefixes "search_document: " "search_query: "]`.
+- A new pair of prefixes is a new key. So every piece waits again, and `embed` embeds it again.
+- A search makes the question's numbers with the query prefix. It compares them only with pieces of the same key. Until `embed` runs, the search answers by words and says why.
+- With both prefixes empty, the key is the model's name alone. Embeddings made before the prefixes existed keep it.
+
+Other model families use other labels, or none. Read the model's own page before you set them.
 
 ### Privacy
 
@@ -76,7 +103,7 @@ The texts of the pieces leave the store only for the embeddings server.
 
 - **`--dry-run`**
 
-  Reads the project into a store in memory, as `codelead pkb sync --dry-run` reads it. It counts what would be sent, and sends and writes nothing.
+  Counts what would be sent, and sends and writes nothing. When the store answers and holds the project, it counts the pieces that the store holds. Otherwise it reads the project into a store in memory, as `codelead pkb sync --dry-run` reads it. Its first line says which it counted, and why.
 
 - **`--confirm-remote`**
 
@@ -92,18 +119,32 @@ The texts of the pieces leave the store only for the embeddings server.
 
 ## Examples
 
-These examples use the sample project `orchard` of [`codelead pkb search`](codelead-pkb-search.md#examples).
+These examples use the sample project `orchard` of [`codelead pkb search`](codelead-pkb-search.md#examples). Its `pkb.json` sets the two prefixes of the nomic family.
 
-- See what would be sent, without a store and without sending anything:
+- See what would be sent, with no store set up and without sending anything:
 
   ```console
   codelead pkb embed --dry-run
   ```
 
   ```output
-  Dry run: the project read into a store in memory, as codelead pkb sync --dry-run reads it.
-  9 chunks wait for an embedding by text-embedding-nomic-embed-text-v1.5 at http://localhost:1234/v1: 6 of the project orchard, 3 of the project codelead-shared.
-  9 texts (3,576 characters) would be sent in 2 requests; 0 chunks would take the embedding of a known text. Nothing was sent or written.
+  Dry run: the PKB store is not set up; counted in the project read into a store in memory, as codelead pkb sync --dry-run reads it.
+  12 chunks wait for an embedding by text-embedding-nomic-embed-text-v1.5 at http://localhost:1234/v1 with the prefixes "search_document: " and "search_query: ": 9 of the project orchard, 3 of the project codelead-shared.
+  12 texts (4,440 characters) would be sent in 2 requests; 0 chunks would take the embedding of a known text. Nothing was sent or written.
+  ```
+
+  The characters count the prefix of each text: with no prefixes, the same run counts 4,236.
+
+- See what would be sent when the store runs. The dry run then counts the pieces that the store holds:
+
+  ```console
+  codelead pkb embed --dry-run
+  ```
+
+  <!-- described, not captured -->
+  ```output
+  Dry run: counted in the PKB store (database codelead_pkb), as it holds the project now.
+  …
   ```
 
 - Run it when `pkb.json` names no model. Nothing is sent, and the exit code is `2`:
@@ -113,8 +154,8 @@ These examples use the sample project `orchard` of [`codelead pkb search`](codel
   ```
 
   ```output
-  Dry run: the project read into a store in memory, as codelead pkb sync --dry-run reads it.
-  9 chunks wait for their embeddings: pkb.json names no embeddings model (embeddings.model).
+  Dry run: the PKB store is not set up; counted in the project read into a store in memory, as codelead pkb sync --dry-run reads it.
+  12 chunks wait for their embeddings: pkb.json names no embeddings model (embeddings.model).
   Name one in pkb.json (an embedding model the embeddings server has loaded, of embeddings.dimensions numbers), then run codelead pkb embed.
   Nothing was sent.
   ```
@@ -126,8 +167,8 @@ These examples use the sample project `orchard` of [`codelead pkb search`](codel
   ```
 
   ```output
-  Dry run: the project read into a store in memory, as codelead pkb sync --dry-run reads it.
-  9 chunks wait for their embeddings: pkb.json says paused: no model is called while a scoring run owns the model server.
+  Dry run: the PKB store is not set up; counted in the project read into a store in memory, as codelead pkb sync --dry-run reads it.
+  12 chunks wait for their embeddings: pkb.json says paused: no model is called while a scoring run owns the model server.
   When the run ends, set "paused": false in pkb.json, then run codelead pkb embed.
   Nothing was sent.
   ```
@@ -140,9 +181,9 @@ These examples use the sample project `orchard` of [`codelead pkb search`](codel
 
   <!-- described, not captured -->
   ```output
-  6 chunks of the project orchard embedded by text-embedding-nomic-embed-text-v1.5 at http://localhost:1234/v1 (768 numbers each); none waits.
-  3 chunks of the project codelead-shared embedded by text-embedding-nomic-embed-text-v1.5 at http://localhost:1234/v1 (768 numbers each); none waits.
-  Sent: 9 texts in 2 requests.
+  9 chunks of the project orchard embedded by text-embedding-nomic-embed-text-v1.5 at http://localhost:1234/v1 with the prefixes "search_document: " and "search_query: " (768 numbers each); none waits.
+  3 chunks of the project codelead-shared embedded by text-embedding-nomic-embed-text-v1.5 at http://localhost:1234/v1 with the prefixes "search_document: " and "search_query: " (768 numbers each); none waits.
+  Sent: 12 texts in 2 requests.
   ```
 
 - Run it again. Every piece has its embedding, so nothing is sent:
@@ -153,7 +194,7 @@ These examples use the sample project `orchard` of [`codelead pkb search`](codel
 
   <!-- described, not captured -->
   ```output
-  Every chunk of the project orchard and of codelead-shared has its embedding by text-embedding-nomic-embed-text-v1.5 (9 chunks).
+  Every chunk of the project orchard and of codelead-shared has its embedding by text-embedding-nomic-embed-text-v1.5 with the prefixes "search_document: " and "search_query: " (12 chunks).
   ```
 
 - Run it when the store is not set up:
@@ -179,7 +220,7 @@ These examples use the sample project `orchard` of [`codelead pkb search`](codel
 
 | File | What `embed` does with it |
 |---|---|
-| `<home>/.codelead/pkb/pkb.json` | Reads the project, and the `embeddings`, `privacy` and `paused` settings. |
+| `<home>/.codelead/pkb/pkb.json` | Reads the project, and the `embeddings` (with its two prefixes), `privacy` and `paused` settings. |
 | `<home>/.codelead/pkb/.env` | Reads the store's password. |
 | `.codelead/disclosures.jsonl`, in each repository of the project | Adds one line for each send to a remote server. A server on your machines adds none. |
 
