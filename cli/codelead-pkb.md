@@ -1,6 +1,6 @@
 ---
 title: codelead pkb
-description: The commands of the PKB service, the shared project knowledge base. Today its store, its sync, its embeddings, its search, and Ask with its stored questions.
+description: The commands of the PKB service, the shared project knowledge base. Its store, its sync, its search, Ask, and the service with its clients.
 kind: reference
 area: cli
 date: 2026-11-24
@@ -10,7 +10,7 @@ date: 2026-11-24
 
 **Applies to:** CodeLead 0.1 and later
 
-`codelead pkb` holds the commands of the **PKB service**. PKB means project knowledge base. The service keeps what a project knows, for a team and its coding agents, and every answer names its sources. Today the command has eight subcommands:
+`codelead pkb` holds the commands of the **PKB service**. PKB means project knowledge base. The service keeps what a project knows, for a team and its coding agents, and every answer names its sources. The command has fifteen subcommands:
 
 - [`store`](codelead-pkb-store.md) runs the service's database on this machine.
 - [`sync`](codelead-pkb-sync.md) sends a project's knowledge into it.
@@ -20,13 +20,18 @@ date: 2026-11-24
 - [`asks`](codelead-pkb-asks.md) lists the stored questions, each with its answers and the marks that say the evidence changed.
 - [`reask`](codelead-pkb-reask.md) asks a stored question again.
 - [`promote`](codelead-pkb-promote.md) makes an answer an entry, by a person's act.
+- [`serve`](codelead-pkb-serve.md) runs the service, so that people and agents use one address.
+- [`status`](codelead-pkb-status.md) says what runs: the service, the store, the model servers and the projects.
+- [`entries`](codelead-pkb-entries.md) lists a project's entries with their trust, or shows one entry in full.
+- [`confirm`](codelead-pkb-confirm.md) and [`downgrade`](codelead-pkb-downgrade.md) change an entry's trust, by a person's act with a name and a reason.
+- [`export`](codelead-pkb-export.md) writes a project into a folder of files, and [`import`](codelead-pkb-import.md) rebuilds it from them.
 
 > [!IMPORTANT]
-> The PKB service itself does not run as a service yet: these commands use the store directly. Only `ask` and `reask` call a chat model, and only when something the search found clears the floor. `embed`, the end of `sync`, `search`, `ask` and `reask` call an embeddings model.
+> A command goes through the service when `CODELEAD_PKB_URL` or `pkb.url` in `.codelead/config.json` names one. Otherwise it uses the store directly, as before. Only `ask` and `reask` call a chat model, and only when something the search found clears the floor. `embed`, the end of `sync`, `search`, `ask` and `reask` call an embeddings model.
 
 ## Name
 
-`codelead pkb` - The commands of the PKB service. Today: its store (`codelead pkb store`), its sync (`codelead pkb sync`), its embeddings (`codelead pkb embed`), its search (`codelead pkb search`), and Ask with its stored questions (`codelead pkb ask`, `asks`, `reask` and `promote`).
+`codelead pkb` - The commands of the PKB service: its store, its sync, its search, Ask with its stored questions, and the service with its clients.
 
 ## Synopsis
 
@@ -41,6 +46,13 @@ codelead pkb ask "<QUESTION>" [--project <ID>] [--dir <FOLDER>] [--by <NAME>] [-
 codelead pkb asks [<QUESTION_ID>] [--project <ID>] [--dir <FOLDER>] [--json]
 codelead pkb reask <QUESTION_ID> [--dir <FOLDER>] [--by <NAME>] [--dry-run] [--confirm-remote] [--json]
 codelead pkb promote <ANSWER_ID> --by <NAME> [--dir <FOLDER>] [--json]
+codelead pkb serve [--dir <FOLDER>] [--memory] [--static <FOLDER>] [--json]
+codelead pkb status [--dir <FOLDER>] [--json]
+codelead pkb entries [<ENTRY_ID>] [--project <ID>] [--type <TYPE>] [--trust <LEVEL>] [--stale] [--query <WORDS>] [--dir <FOLDER>] [--json]
+codelead pkb confirm <ENTRY_ID> --by <NAME> --reason "<WORDS>" [--dir <FOLDER>] [--json]
+codelead pkb downgrade <ENTRY_ID> --by <NAME> --reason "<WORDS>" [--dir <FOLDER>] [--json]
+codelead pkb export --out <FOLDER> [--project <ID>] [--dir <FOLDER>] [--json]
+codelead pkb import <FOLDER> [--dir <FOLDER>] [--json]
 codelead pkb -h|--help
 ```
 
@@ -58,6 +70,23 @@ Each project already keeps its own [knowledge base](../concepts/knowledge-base.m
 | [`asks`](codelead-pkb-asks.md) | Lists the stored questions with their dated answers. An answer whose evidence changed carries a mark. |
 | [`reask`](codelead-pkb-reask.md) | Asks a stored question again. The new answer is stored beside the earlier ones. |
 | [`promote`](codelead-pkb-promote.md) | Makes an answer a confirmed entry, with the answer as its source and the person's name in its history. |
+| [`serve`](codelead-pkb-serve.md) | Runs the service on `127.0.0.1:7415`, with its routes and its stream of events. It refuses every write from another site. |
+| [`status`](codelead-pkb-status.md) | Says what runs: the service, the store with its search process, the chat and embeddings servers, `paused`, the projects. |
+| [`entries`](codelead-pkb-entries.md) | Lists a project's entries with their trust and version, or shows one with its history and the answers that cite it. |
+| [`confirm`](codelead-pkb-confirm.md) | Confirms an entry, by a person with a name and a reason. The answers that cited its older version are marked. |
+| [`downgrade`](codelead-pkb-downgrade.md) | Downgrades an entry, by a person with a name and a reason. The answers that cited its older version are marked. |
+| [`export`](codelead-pkb-export.md) | Writes a project into a folder: a markdown file per entry and per question, the JSON files and a manifest. |
+| [`import`](codelead-pkb-import.md) | Rebuilds a project from its export, into a store that holds nothing of it. |
+
+### The service and its clients
+
+[`codelead pkb serve`](codelead-pkb-serve.md) runs the service. Then name it in the environment or in the workspace's configuration:
+
+```console
+export CODELEAD_PKB_URL=http://127.0.0.1:7415
+```
+
+Each command then sends its request to the service, and prints what it prints without the service. An agent adds `--json` to read the result. `--dir` keeps a command on the store of that folder. When the service named does not answer, the command says so, and never tries another store. See [How the commands find the service](codelead-pkb-serve.md#how-the-commands-find-the-service).
 
 ### What exists today
 
@@ -69,13 +98,16 @@ Each project already keeps its own [knowledge base](../concepts/knowledge-base.m
 - The search, with its reasons and its rule for "not in the knowledge base".
 - Answers with citations, from a chat model on your machines. The service drops every sentence that cites nothing.
 - Stored questions with their dated answers, the marks when the evidence changed, the re-ask and the promotion of an answer to an entry.
+- The service, its routes and its stream of events. See the [PKB service API](../reference/pkb-service-api.md).
+- A person's confirm and downgrade of an entry, and the export and import of a project.
 
 ### What does not exist yet
 
-- The service and its address (`codelead pkb serve`), and its web page.
-- Adding documents and exporting a project (`codelead pkb add`, `codelead pkb export`).
+- The web page of the service. `codelead pkb serve --static <FOLDER>` serves a built page, when there is one.
+- Adding documents (`codelead pkb add`).
+- Accounts and roles. Each person who reaches the service can read every project.
 
-These commands are not in this release. When you type one, CodeLead answers `error: unknown command` and ends with exit code `2`.
+`codelead pkb add` is not in this release. When you type it, CodeLead answers `error: unknown command` and ends with exit code `2`.
 
 > [!NOTE]
 > **New to this?** A store is a database program that keeps documents on disk. You start it once, and it runs in the background until you stop it. CodeLead runs it in Docker, so you install no database yourself.
@@ -86,7 +118,7 @@ These commands are not in this release. When you type one, CodeLead answers `err
 
   Prints the help and ends.
 
-The subcommands of `store` take `--dir <FOLDER>` and `--json`. See [`codelead pkb store`](codelead-pkb-store.md#options). The options of the others are on their pages: [`sync`](codelead-pkb-sync.md#options), [`embed`](codelead-pkb-embed.md#options), [`search`](codelead-pkb-search.md#options), [`ask`](codelead-pkb-ask.md#options), [`asks`](codelead-pkb-asks.md#options), [`reask`](codelead-pkb-reask.md#options) and [`promote`](codelead-pkb-promote.md#options).
+The subcommands of `store` take `--dir <FOLDER>` and `--json`. See [`codelead pkb store`](codelead-pkb-store.md#options). The options of the others are on their pages: [`sync`](codelead-pkb-sync.md#options), [`embed`](codelead-pkb-embed.md#options), [`search`](codelead-pkb-search.md#options), [`ask`](codelead-pkb-ask.md#options), [`asks`](codelead-pkb-asks.md#options), [`reask`](codelead-pkb-reask.md#options), [`promote`](codelead-pkb-promote.md#options), [`serve`](codelead-pkb-serve.md#options), [`status`](codelead-pkb-status.md#options), [`entries`](codelead-pkb-entries.md#options), [`confirm`](codelead-pkb-confirm.md#options), [`downgrade`](codelead-pkb-downgrade.md#options), [`export`](codelead-pkb-export.md#options) and [`import`](codelead-pkb-import.md#options).
 
 ## Examples
 
@@ -101,52 +133,86 @@ The subcommands of `store` take `--dir <FOLDER>` and `--json`. See [`codelead pk
 
   The project knowledge base (PKB) service: its store (codelead pkb store up,
   down, status), its sync, its embeddings and its search (codelead pkb sync,
-  embed, search), and Ask with its stored questions (codelead pkb ask, asks,
-  reask, promote); the service comes later
+  embed, search), Ask with its stored questions (codelead pkb ask, asks, reask,
+  promote), and the service with its clients (codelead pkb serve, status,
+  entries, confirm, downgrade, export, import)
 
   Options:
-    -h, --help                     display help for command
+    -h, --help                      display help for command
 
   Commands:
-    store                          The PKB's store: MongoDB Community with its
-                                   search process (mongot), from one compose file
-                                   in ~/.codelead/pkb/ (or --dir, or
-                                   CODELEAD_PKB_HOME), on 127.0.0.1 only
-    sync [options]                 Send a project's knowledge into the PKB store:
-                                   read from the repositories pkb.json names,
-                                   scanned for secrets, paths of this machine and
-                                   private names, with a log of what left which
-                                   folder
-    embed [options]                Make the embeddings of a project's chunks that
-                                   have none by the embeddings model pkb.json
-                                   names, from its embeddings endpoint; a text
-                                   embedded already is not embedded again
-    search [options] [question]    Search a project's knowledge for a question:
-                                   words, meaning and, for a where, which file or
-                                   how do I question or a named identifier, the
-                                   code; each hit with its reasons. No chat model
-                                   is called
-    ask [options] [question]       Ask a project's knowledge a question: each
-                                   sentence of the answer cites its sources, with
-                                   its trust; the chat model of pkb.json writes
-                                   it, and the service drops what cites nothing.
-                                   Nothing found is "not in the knowledge base",
-                                   with no model call. The question and its
-                                   answer are stored
-    asks [options] [question id]   List a project's stored questions, each with
-                                   its dated answers and their marks (the
-                                   evidence an answer rested on changed); with a
-                                   question's id, that question with every answer
-                                   in full
-    reask [options] [question id]  Ask a stored question again: what the
-                                   knowledge base holds now, and the code as it
-                                   is now; the new answer is stored beside the
-                                   earlier ones, which stay as they were
-    promote [options] [answer id]  Make a stored answer an entry of the project's
-                                   knowledge, by a person's act: confirmed, the
-                                   answer as its source, the person's name in its
-                                   history
-    help [command]                 display help for command
+    store                           The PKB's store: MongoDB Community with its
+                                    search process (mongot), from one compose
+                                    file in ~/.codelead/pkb/ (or --dir, or
+                                    CODELEAD_PKB_HOME), on 127.0.0.1 only
+    sync [options]                  Send a project's knowledge into the PKB
+                                    store: read from the repositories pkb.json
+                                    names, scanned for secrets, paths of this
+                                    machine and private names, with a log of what
+                                    left which folder
+    embed [options]                 Make the embeddings of a project's chunks
+                                    that have none by the embeddings model
+                                    pkb.json names, from its embeddings endpoint;
+                                    a text embedded already is not embedded again
+    search [options] [question]     Search a project's knowledge for a question:
+                                    words, meaning and, for a where, which file
+                                    or how do I question or a named identifier,
+                                    the code; each hit with its reasons. No chat
+                                    model is called
+    ask [options] [question]        Ask a project's knowledge a question: each
+                                    sentence of the answer cites its sources,
+                                    with its trust; the chat model of pkb.json
+                                    writes it, and the service drops what cites
+                                    nothing. Nothing found is "not in the
+                                    knowledge base", with no model call. The
+                                    question and its answer are stored
+    asks [options] [question id]    List a project's stored questions, each with
+                                    its dated answers and their marks (the
+                                    evidence an answer rested on changed); with a
+                                    question's id, that question with every
+                                    answer in full
+    reask [options] [question id]   Ask a stored question again: what the
+                                    knowledge base holds now, and the code as it
+                                    is now; the new answer is stored beside the
+                                    earlier ones, which stay as they were
+    promote [options] [answer id]   Make a stored answer an entry of the
+                                    project's knowledge, by a person's act:
+                                    confirmed, the answer as its source, the
+                                    person's name in its history
+    serve [options]                 Run the PKB service: an HTTP server on
+                                    pkb.json's bind and port (127.0.0.1:7415 by
+                                    default), its routes over the store, and
+                                    server-sent events; a write from another site
+                                    is refused, and a bind on the network needs
+                                    the shared key
+    status [options]                Say what runs: the PKB service when one is
+                                    named, the store with its search process, the
+                                    chat and embeddings endpoints, paused, and
+                                    the projects with their counts
+    entries [options] [entry id]    List a project's entries with their trust,
+                                    type and version (the ledger), filtered by
+                                    type, trust, stale or words; with an entry's
+                                    id, that entry with its history and the
+                                    stored answers that cite it
+    confirm [options] [entry id]    Confirm an entry, by a person's act with a
+                                    name and a reason; the stored answers that
+                                    cited its older version are marked. A person
+                                    never makes an entry evidence-backed
+    downgrade [options] [entry id]  Downgrade an entry, by a person's act with a
+                                    name and a reason; the stored answers that
+                                    cited its older version are marked
+    export [options]                Write a project's knowledge into a folder: a
+                                    markdown file per entry and per question with
+                                    its answers, entries.json, questions.json,
+                                    sources.json, evidence.json, chunks.json,
+                                    project.json, and manifest.json with each
+                                    file's SHA-256
+    import [options] [folder]       Rebuild a project from the folder of its
+                                    export, into a store that holds nothing of
+                                    it: each file checked against the manifest
+                                    and scanned first; the chunks wait for their
+                                    embeddings
+    help [command]                  display help for command
   ```
 
 - Start the store on this machine. Docker must run first:
@@ -191,13 +257,23 @@ The subcommands of `store` take `--dir <FOLDER>` and `--json`. See [`codelead pk
   No store is set up in <home>/.codelead/pkb: codelead pkb store up sets one up.
   ```
 
+- Run the service, and let an agent ask through it with `--json`:
+
+  ```console
+  codelead pkb serve
+  export CODELEAD_PKB_URL=http://127.0.0.1:7415
+  codelead pkb ask "Why are the old invoice numbers kept?" --by agent-1 --json
+  ```
+
+  See [`codelead pkb serve`](codelead-pkb-serve.md#examples) for the service's words, and [`codelead pkb status`](codelead-pkb-status.md#examples) for what runs.
+
 ## Exit codes
 
-The codes of [`store`](codelead-pkb-store.md#exit-codes), [`sync`](codelead-pkb-sync.md#exit-codes), [`embed`](codelead-pkb-embed.md#exit-codes), [`search`](codelead-pkb-search.md#exit-codes), [`ask`](codelead-pkb-ask.md#exit-codes), [`asks`](codelead-pkb-asks.md#exit-codes), [`reask`](codelead-pkb-reask.md#exit-codes) and [`promote`](codelead-pkb-promote.md#exit-codes). `codelead pkb` without a subcommand prints its help and ends with `2`.
+The codes of [`store`](codelead-pkb-store.md#exit-codes), [`sync`](codelead-pkb-sync.md#exit-codes), [`embed`](codelead-pkb-embed.md#exit-codes), [`search`](codelead-pkb-search.md#exit-codes), [`ask`](codelead-pkb-ask.md#exit-codes), [`asks`](codelead-pkb-asks.md#exit-codes), [`reask`](codelead-pkb-reask.md#exit-codes), [`promote`](codelead-pkb-promote.md#exit-codes), [`serve`](codelead-pkb-serve.md#exit-codes), [`status`](codelead-pkb-status.md#exit-codes), [`entries`](codelead-pkb-entries.md#exit-codes), [`confirm`](codelead-pkb-confirm.md#exit-codes), [`downgrade`](codelead-pkb-downgrade.md#exit-codes), [`export`](codelead-pkb-export.md#exit-codes) and [`import`](codelead-pkb-import.md#exit-codes). Through the service, a command ends with the code it ends with in this process. A service named that does not answer is `2`, and `1` for `status`. `codelead pkb` without a subcommand prints its help and ends with `2`.
 
 ## Files
 
-`codelead pkb store` writes its files in one folder, `<home>/.codelead/pkb/` by default. See [Files](codelead-pkb-store.md#files). The other subcommands read `pkb.json` there. `codelead pkb sync` adds a line to `.codelead/disclosures.jsonl` in each repository that it reads, when something left. See [Files](codelead-pkb-sync.md#files). `embed`, `search` and `ask` add one for each send to a remote model.
+`codelead pkb store` writes its files in one folder, `<home>/.codelead/pkb/` by default. See [Files](codelead-pkb-store.md#files). The other subcommands read `pkb.json` there. The shared key of the service, when you set one, lives in the `.env` file of that folder. `codelead pkb sync` adds a line to `.codelead/disclosures.jsonl` in each repository that it reads, when something left. See [Files](codelead-pkb-sync.md#files). `embed`, `search` and `ask` add one for each send to a remote model. The `pkb` key of a workspace's `.codelead/config.json` names the service that the commands go through.
 
 ## See also
 
@@ -207,6 +283,10 @@ The codes of [`store`](codelead-pkb-store.md#exit-codes), [`sync`](codelead-pkb-
 - [`codelead pkb search`](codelead-pkb-search.md): search a project for a question, each hit with its reasons.
 - [`codelead pkb ask`](codelead-pkb-ask.md): answer a question, each sentence with its sources.
 - [`codelead pkb asks`](codelead-pkb-asks.md), [`codelead pkb reask`](codelead-pkb-reask.md) and [`codelead pkb promote`](codelead-pkb-promote.md): the stored questions, asking one again, and making an answer an entry.
+- [`codelead pkb serve`](codelead-pkb-serve.md) and [`codelead pkb status`](codelead-pkb-status.md): run the service, and see what runs.
+- [`codelead pkb entries`](codelead-pkb-entries.md), [`codelead pkb confirm`](codelead-pkb-confirm.md) and [`codelead pkb downgrade`](codelead-pkb-downgrade.md): the ledger, and a person's act on an entry.
+- [`codelead pkb export`](codelead-pkb-export.md) and [`codelead pkb import`](codelead-pkb-import.md): a project as files, and back.
+- [PKB service API](../reference/pkb-service-api.md): the routes, the stream and the guards.
 - [The knowledge base](../concepts/knowledge-base.md): what each project knows today, in its own folder.
 - [Evidence records](../concepts/evidence-records.md)
 - [`codelead board`](codelead-board.md): the board is a separate tool. The PKB holds what a project knows, the board what the team is doing.

@@ -147,6 +147,7 @@ The `defaultApiKey` values `lm-studio` and `local` are placeholders that a local
 | [`callBudgets`](#callbudgets) | object | No | How long a model call may think. |
 | [`greenfield`](#greenfield) | object | No | The switches and templates of new apps. |
 | [`modernization`](#modernization) | object | No | The old application's run profile, the pins and the repair rounds. |
+| `pkb` | object | No | The PKB service that the `codelead pkb` commands go through: `url`, such as `"http://127.0.0.1:7415"`, and `project`, the project they ask. A key in it is refused: the key goes in `CODELEAD_PKB_KEY`. See [How the commands find the service](../cli/codelead-pkb-serve.md#how-the-commands-find-the-service). |
 
 A key that the schema does not name is left out when CodeLead reads the file.
 

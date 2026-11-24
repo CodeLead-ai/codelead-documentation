@@ -53,6 +53,7 @@ These pages hold the exact facts behind the rest of the documentation. They list
 ## Protocols
 
 - [Session protocol](session-io-protocol.md): `codelead.session-io/1`, the JSON lines between CodeLead and an editor such as the extension.
+- [PKB service API](pkb-service-api.md): the routes of `codelead pkb serve`, its stream of events and its guards.
 
 ## Codes and messages
 

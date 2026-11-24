@@ -81,6 +81,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 ## L
 
 - **Landing**. A change that was applied and whose validation passed. A landing is a finished change. See [How CodeLead works](how-codelead-works.md).
+- **Ledger (of the PKB)**. The list of a project's entries in the PKB service, each with its trust, type and version. See [`codelead pkb entries`](../cli/codelead-pkb-entries.md).
 - **Licence**. A signed file, `docs/codelead/licence.json`, that names the holder, the project, the seats, the term and the plan. See [Licence and plans](licence-and-plans.md).
 
 ## M
@@ -107,7 +108,8 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 - **Patch**. A description of changes to files, as a diff, that nobody has applied yet. See [Requests, plans and patches](requests-plans-and-patches.md).
 - **Patch check, the**. CodeLead's own reading of a patch against your files, before the apply and with no model. See [The patch check](the-patch-check.md).
 - **Pin**. A test that records what the old code does today, so that a later change cannot break it unseen. See [Pins](../modernization/pins.md).
-- **PKB service**. The project knowledge base shared by a team: what several projects know, in one place, with every answer cited. Today its store, its sync, its search and its answers exist. [`codelead pkb sync`](../cli/codelead-pkb-sync.md) sends a project's knowledge into the store, and [`codelead pkb ask`](../cli/codelead-pkb-ask.md) answers from it. See [`codelead pkb`](../cli/codelead-pkb.md).
+- **PKB service**. The project knowledge base shared by a team: what several projects know, in one place, with every answer cited. [`codelead pkb serve`](../cli/codelead-pkb-serve.md) runs it on `127.0.0.1:7415`, and the other `codelead pkb` commands go through it. [`codelead pkb sync`](../cli/codelead-pkb-sync.md) sends a project's knowledge into its store, and [`codelead pkb ask`](../cli/codelead-pkb-ask.md) answers from it. See [`codelead pkb`](../cli/codelead-pkb.md).
+- **PKB export**. A folder that holds a project of the PKB service as files. It has a markdown file per entry and per question, the JSON files and a manifest of their hashes. See [`codelead pkb export`](../cli/codelead-pkb-export.md).
 - **Promote (an answer)**. A person's act that makes a stored answer of the PKB service an entry. The entry is confirmed, with the answer as its source and the person's name in its history. See [`codelead pkb promote`](../cli/codelead-pkb-promote.md).
 - **Plan (of a change)**. The preflight's result: the files to change, the non-goals and how to validate. The patch check holds the patch to it. See [Requests, plans and patches](requests-plans-and-patches.md).
 - **Plan (of a licence)**. Free or pro: which parts of CodeLead a folder can use. See [Licence and plans](licence-and-plans.md).
@@ -139,6 +141,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 - **Seat**. One person who may use CodeLead on a licensed project. Seats come in blocks of 10. See [Licence and plans](licence-and-plans.md).
 - **Seed data**. Sample rows for an empty database, so that an application's screens have something to show. See [The behaviour register and seed data](register-and-seed.md).
 - **Session**. One conversation with CodeLead about one repository, in the terminal or in the extension's chat. See [Sessions](sessions.md).
+- **Shared key**. A secret that each client sends to the PKB service when the service listens on the team's network. It lives in the PKB folder's `.env` file, and in `CODELEAD_PKB_KEY` on each client. See [The shared key](../cli/codelead-pkb-serve.md#the-shared-key).
 - **Session log**. The record of a session in `.codeleadsessions/<session id>/`: what you typed, each model call and each result. See [Sessions](sessions.md).
 - **Skeleton**. The first increment of a new app: a shell that builds and runs, with no features yet. See [`/build-incremental`](../chat-commands/build-incremental.md).
 - **Spec**. A file that describes, in plain words, the steps of a journey and what each step must show. See [`codelead spec`](../cli/codelead-spec.md).

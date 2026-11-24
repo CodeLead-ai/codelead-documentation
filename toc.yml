@@ -346,6 +346,20 @@
       href: cli/codelead-pkb-reask.md
     - name: "codelead pkb promote"
       href: cli/codelead-pkb-promote.md
+    - name: "codelead pkb serve"
+      href: cli/codelead-pkb-serve.md
+    - name: "codelead pkb status"
+      href: cli/codelead-pkb-status.md
+    - name: "codelead pkb entries"
+      href: cli/codelead-pkb-entries.md
+    - name: "codelead pkb confirm"
+      href: cli/codelead-pkb-confirm.md
+    - name: "codelead pkb downgrade"
+      href: cli/codelead-pkb-downgrade.md
+    - name: "codelead pkb export"
+      href: cli/codelead-pkb-export.md
+    - name: "codelead pkb import"
+      href: cli/codelead-pkb-import.md
 - name: Chat command reference
   items:
     - name: "Overview"
@@ -444,6 +458,8 @@
       href: reference/dispositions-and-waivers.md
     - name: "Session protocol"
       href: reference/session-io-protocol.md
+    - name: "PKB service API"
+      href: reference/pkb-service-api.md
     - name: "Template manifest"
       href: reference/template-manifest.md
     - name: "Messages and what to do"

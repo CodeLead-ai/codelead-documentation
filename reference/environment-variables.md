@@ -111,6 +111,15 @@ A window gives a budget of `contextTokens × 3.5 − 24,000` characters, and nev
 | `CODELEAD_TEMPLATES_DIR` | none | A folder of templates by name, for `codelead rebuild init --template <name>`. |
 | `CODELEAD_PKB_HOME` | `<home>/.codelead/pkb` | The folder of the PKB store: `pkb.json`, the env file with its passwords, and its compose file. `--dir` of [`codelead pkb store`](../cli/codelead-pkb-store.md), [`sync`](../cli/codelead-pkb-sync.md), [`embed`](../cli/codelead-pkb-embed.md), [`search`](../cli/codelead-pkb-search.md), [`ask`](../cli/codelead-pkb-ask.md), [`asks`](../cli/codelead-pkb-asks.md), [`reask`](../cli/codelead-pkb-reask.md) and [`promote`](../cli/codelead-pkb-promote.md) comes first. |
 
+## The PKB service
+
+| Variable | Default | What it does |
+|---|---|---|
+| `CODELEAD_PKB_URL` | none | The PKB service that the `codelead pkb` commands go through, such as `http://127.0.0.1:7415`. It comes before `pkb.url` of `.codelead/config.json`. `--dir` on a command keeps it on the store of that folder. See [How the commands find the service](../cli/codelead-pkb-serve.md#how-the-commands-find-the-service). |
+| `CODELEAD_PKB_KEY` | none | The shared key that each request to the service sends, when the service has one. Set it in the environment, or in the workspace's `.env` file. Never in `config.json`. See [The shared key](../cli/codelead-pkb-serve.md#the-shared-key). |
+
+The service's own key is `PKB_SHARED_KEY` in the PKB folder's `.env` file, not in the environment.
+
 A relative path is read from the project's folder. See [Files and folders](files-and-folders.md).
 
 ## Sessions and logs
