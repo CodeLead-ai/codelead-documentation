@@ -21,7 +21,8 @@ date: 2026-11-20
 ```console
 codelead rebuild init --out <FOLDER> [--source <FOLDER>] [--template <NAME|PATH>]
                       [--framework <TFM>] [--identity keep|drop]
-                      [--database <CONNECTION_NAME>|sample-seed] [--no-install] [--no-commit] [--json]
+                      [--database <CONNECTION_NAME>|sample-seed] [--data-access port|same-library]
+                      [--no-install] [--no-commit] [--json]
 codelead rebuild init -h|--help
 ```
 
@@ -40,7 +41,7 @@ Then it makes the rebuild in ten steps:
 2. **The ports**: the API and the web application get ports that the old application does not answer on. The `Ports:` line says which, and why.
 3. **Git**: the folder becomes a git repository.
 4. **The install**: `npm install`, unless `--no-install`.
-5. **The manifest**, `docs/codelead/rebuild/rebuild.json`. It names the old application, its feature map and its web project. It names the targets: the new API and the web application. It keeps the decisions: identity and database.
+5. **The manifest**, `docs/codelead/rebuild/rebuild.json`. It names the old application, its feature map and its web project. It names the targets: the new API and the web application. It keeps the decisions: identity, database and, when the API has a database, the data access.
 6. **The run profile** in the manifest: how to start the API and the web application, the clock, the caps of an unattended run. For a sign-in with a cookie across two origins, it also holds a check of the API's CORS policy. That policy is the API's rule for which origins may call it. See [The two answers](#the-two-answers).
 7. **The journeys**, `docs/codelead/rebuild/journeys.json`: merged from the model's draft, the Analyst's recordings and the Explorer's stories. `init` makes this copy once. See [The journeys copy](#the-journeys-copy).
 8. **CodeLead initialized** in the folder: the configuration, the repository map, a board, a conventions starter and the declared validation gate.
@@ -73,7 +74,12 @@ When the template's port of the API or the web is one of them, `init` takes the 
 - `--identity keep`: the new API keeps the accounts, with ASP.NET Core Identity over the old user tables. `--identity drop`: no sign-in, and the account features are dropped.
 - `--database <name>`: the name of the connection string that the new API reads, kept out of the repository. `--database sample-seed`: a sample database, reset before every journey.
 
-The `database` answer gives the plan its part `data-access`: the new API reaches that database through the old application's data library. With `sample-seed`, the API makes the sample database at start-up when it is missing. It runs the old application's own schema and seed scripts, such as `database/schema.sql` and `database/seed.sql`. When the old application keeps no script that creates its tables, the part waits, and its note says what to give. The day reset deletes the file, so the next start seeds it again. See [The data access](../modernization/rebuild.md#the-data-access).
+The `database` answer gives the plan its part `data-access`. How the new API reaches that database is a decision of its own, `--data-access`:
+
+- `--data-access port`, the default when the old application is on Entity Framework 6. The rebuild ports the data access to EF Core inside the new API. The old application is not changed for it.
+- `--data-access same-library`. The new API references the old application's data library and reaches the data through it. The old application's Upgrade in place stage makes the library usable first.
+
+The manifest records it as `decisions.dataAccess`. To change it later, answer `dataAccess=port` or `dataAccess=same-library` with `codelead modernize answer`. The program then writes it into the manifest. With `sample-seed`, the API makes the sample database at start-up when it is missing. It runs the old application's own schema and seed scripts, such as `database/schema.sql` and `database/seed.sql`. When the old application keeps no script that creates its tables, the part waits, and its note says what to give. The day reset deletes the file, so the next start seeds it again. See [The data access](../modernization/rebuild.md#the-data-access).
 
 With `--identity keep`, no part of the plan builds the directory that checks a password outside Development and the tests. The plan says so in a note on the part `sign-in:endpoint`, and a person adds the real directory. Until then, a build for production signs nobody in.
 

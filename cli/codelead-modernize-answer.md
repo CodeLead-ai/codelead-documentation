@@ -38,6 +38,7 @@ The program takes nine keys, from one table:
 | `database` | stored | A connection string's name, or `sample-seed` | None | When the old application reaches a database. |
 | `pinsDatabase` | stored | `done`, `env:<NAME>`, or the path of a copy of the database file | None | When the database pins need a database on a server. |
 | `security` | stored | `fix-none`, `fix-all` or `decided` | None | When security findings wait for a person in the Upgrade in place stage. |
+| `dataAccess` | stored | `port` or `same-library` | `port` for an old application on Entity Framework 6 | When you want the rebuild to reference the old data library instead of porting it to EF Core. |
 | `pins` | act | `enough` | | Only while the Pin stage waits or failed. |
 | `rebuild` | act | `enough` | | Only while the Rebuild stage waits or failed. |
 
@@ -52,6 +53,7 @@ What the values mean:
 - `database=<name>`: the name of the connection string that the new API reads. The string itself stays out of the repository. `database=sample-seed`: the new API starts on a sample database, reset before every journey.
 - `pinsDatabase=done`: you wrote the connection in the pins' git-ignored connections file. `env:<NAME>`: an environment variable holds it. See [Pins](../modernization/pins.md#the-pins-own-database).
 - `security=decided`: you waived or fixed each finding yourself. `fix-all`: the stage fixes them all. `fix-none`: they stay open. See [Waive a security finding](../how-to/waive-a-security-finding.md).
+- `dataAccess=port`: the rebuild ports the data access to EF Core inside the new API. `same-library`: the new API references the old data library. The Initialize the rebuild stage writes it into the manifest. See [The data access](../modernization/rebuild.md#the-data-access).
 
 > [!NOTE]
 > **New to this?** `identity` and `database` are the same decisions that [`codelead rebuild init`](codelead-rebuild-init.md) asks for with `--identity` and `--database`. The program keeps them in its state file, so that you give them once.
@@ -65,7 +67,7 @@ The command is part of the modernization program, which is in CodeLead's Pro pla
 
 - **`<KEY=VALUE>...`**
 
-  One or more `key=value` pairs, separated by spaces. The keys are `rebuildFolder`, `template`, `framework`, `identity`, `database`, `pinsDatabase`, `security`, `pins` and `rebuild`.
+  One or more `key=value` pairs, separated by spaces. The keys are `rebuildFolder`, `template`, `framework`, `identity`, `database`, `pinsDatabase`, `security`, `dataAccess`, `pins` and `rebuild`.
 
 ## Examples
 
@@ -131,7 +133,7 @@ The command is part of the modernization program, which is in CodeLead's Pro pla
 
   <!-- described, not captured -->
   ```output
-  Refused: nonsense: not an answer the program takes (rebuildFolder=<folder>, template=<name|path>, framework=net10.0|net8.0, identity=keep|drop, database=<connection name>|sample-seed, pinsDatabase=done|env:<NAME>|<copy's path>, security=fix-none|fix-all|decided, pins=enough, rebuild=enough). Nothing was recorded.
+  Refused: nonsense: not an answer the program takes (rebuildFolder=<folder>, template=<name|path>, framework=net10.0|net8.0, identity=keep|drop, database=<connection name>|sample-seed, pinsDatabase=done|env:<NAME>|<copy's path>, security=fix-none|fix-all|decided, dataAccess=port|same-library, pins=enough, rebuild=enough). Nothing was recorded.
   ```
 
 ## Exit codes

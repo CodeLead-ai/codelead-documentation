@@ -92,7 +92,20 @@ T1 converts each project in its scope to an SDK-style project file that targets 
 
 Use T1 on class libraries. A web project on System.Web, such as an MVC 5 project, has no current .NET target, so the program never applies T1 to it. T1 refuses a scope with no project: `T1 has no scope: name the projects with --scope.`
 
-On current .NET, a host has no `Web.config` to read a named connection from. So a library's Entity Framework 6 context may only read its connection by name, such as `: base("name=StoreContext")`. Then T1 asks one source change: one more public constructor that takes the connection. The old constructors stay as they are, so the old application and its pins make the context as before. The rebuilt API then gives the context its own connection. See [The data access](rebuild.md#the-data-access).
+T1 leaves a project that references something that exists only on the .NET Framework, such as `System.Web`. It reads this from the project file and its `packages.config`, never from the project's name. Named with other libraries, the project is left out with a note. Named alone, T1 refuses: `T1 cannot give net10.0 to StoreHost (tools/StoreHost/StoreHost.csproj) references System.Web (ASP.NET on System.Web), which exists only on the .NET Framework …`.
+
+A project that is SDK-style already needs no conversion. Its request is small: replace one line of its project file, and keep every other line as it is. For example:
+
+<!-- described, not captured -->
+```output
+Add the net10.0 target to the SDK-style project BasicStore.Web.Data, with no behaviour change: in BasicStore.Web.Data/BasicStore.Web.Data.csproj replace the line `<TargetFramework>net48</TargetFramework>` with `<TargetFrameworks>net48;net10.0</TargetFrameworks>`, and keep every other line of that file exactly as it is …
+```
+
+The request names no `packages.config`, no `AssemblyInfo.cs`, and no other project's file. The same request comes from the stage and from the chat line `/modernize --transform T1 --scope BasicStore.Web.Data --target net10.0`.
+
+On current .NET, a host has no `Web.config` to read a named connection from. So a library's Entity Framework 6 context may only read its connection by name, such as `: base("name=StoreContext")`. Then T1 asks one source change: one more public constructor that takes the connection. The old constructors stay as they are, so the old application and its pins make the context as before. This matters only when the rebuild references the old library (`dataAccess: same-library`). By default the rebuild ports the data access to EF Core, and T1 is not needed for it. See [The data access](rebuild.md#the-data-access).
+
+When the gate refuses a transform and its repair rounds end, CodeLead unapplies it. It puts back only the files that the transform's own patches changed, and removes the files they created. It never runs a checkout, a clean or a stash. A file that someone changed after the patch is kept, and the line names it. Inside a program stage, nothing is asked. At a terminal, you are asked first, and Enter keeps the patch applied.
 
 ### T5: a seam around a static gateway
 

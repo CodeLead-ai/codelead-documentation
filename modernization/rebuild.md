@@ -296,15 +296,27 @@ These sentences only describe where the work lives. The gates owe the patch none
 
 An endpoint can answer the right shape over no data. For example, a list endpoint returns `new List<ClientDto>()`, and its contract test checks only the answer's shape. The walk then passes the step "click Clients" on an empty list.
 
-So the plan has a part `data-access` when two things hold. The manifest's `database` decision gives the new API a database. And the System Model says that old actions read or write it. The part builds three things:
+So the plan has a part `data-access` when two things hold. The manifest's `database` decision gives the new API a database. And the System Model says that old actions read or write it. Every endpoint whose old action reads or writes the database needs this part. An endpoint that reads no data, such as an empty form, does not need it.
 
-- the API's reference to the old application's data library, and the packages that open its database;
-- the registration of the library's context in `Program.cs`, with the database provider registered by code, because ASP.NET Core has no `Web.config`;
+How the part works depends on the manifest's decision `dataAccess`. There are two choices.
+
+**`port`, the default for an old application on Entity Framework 6.** The rebuild ports the data access to EF Core inside the new API. The API references none of the old projects, and the old application is not changed for it. The part builds three things:
+
+- an EF Core context of the API's own, the port of the old one, such as `api/Api/Data/StoreContext.cs`. It holds an entity for each table that the plan's endpoints reach. Each entity is mapped to its real table with `ToTable`;
+- the EF Core provider's package, and the context's registration in `Program.cs`;
 - with `sample-seed`, the sample database, made at start-up from the old application's schema and seed scripts.
 
-Every endpoint whose old action reads or writes the database needs this part. An endpoint that reads no data, such as an empty form, does not need it.
+Its request shows the old context and entities, as an endpoint's request shows the old action. It also lists the places where the port is not mechanical:
 
-Sometimes the old application stands in the way. Its library may target the .NET Framework alone, such as `net48`. Or its context may read its connection only by name from `Web.config`. Then the part waits, and its note says what to run in the old application's folder:
+- EF6 named the tables by its conventions, and EF Core takes the set's name. So each entity names its table.
+- The keys and relationships of the old `OnModelCreating` are ported one for one. For example, `HasRequired(..).WithMany(..)` becomes `HasOne(..).WithMany(..).IsRequired()`.
+- EF Core loads no navigation by itself. So each endpoint uses `Include` for what it reads.
+- Nothing creates or migrates the schema, because the old context turned its initializer off.
+- A query that EF Core cannot translate runs on the rows read, as the old code does.
+
+A large application has many entities, so one session ports at most eight. The others come with the endpoint that first reaches each one. That endpoint's request shows the entity's old source and asks to add it to the context.
+
+**`same-library`, a person's choice.** The rebuilt API references the old application's data library and reaches the data through it. The part adds the reference, registers the provider by code and registers the library's context. Sometimes the old application stands in the way. Its library may target the .NET Framework alone, such as `net48`. Or its context may read its connection only by name from `Web.config`. Then the part waits, and its note says what to run in the old application's folder:
 
 <!-- described, not captured -->
 ```output
@@ -313,7 +325,14 @@ The data access cannot be built as the old application stands: BasicStore.Web.Da
 
 The Upgrade in place stage then runs [T1](transforms.md) on that library, under the old application's pins. See [the eight stages](the-eight-stages.md#4-upgrade-in-place).
 
-CodeLead also reads each rebuilt endpoint's code, with no model call. It looks for the context or a library type in the action, or in a member of the controller that the action calls. An endpoint that reaches neither is **accepted on its contract, and it reads no data yet**. The part's `Data` line in `rebuild-plan.md` says so:
+[`codelead rebuild init`](../cli/codelead-rebuild-init.md) writes the decision. You can also answer `dataAccess=port` or `dataAccess=same-library` with `codelead modernize answer`. A rebuild made before the decision existed records none. The plan then reads it as `port` when the old application is on Entity Framework 6, and says so in a line:
+
+<!-- described, not captured -->
+```output
+The manifest records no data-access decision (a rebuild made before it existed): the old application is on Entity Framework 6, so the plan reads it as port: …
+```
+
+CodeLead also reads each rebuilt endpoint's code, with no model call. With `port`, it looks for the API's own EF Core context in the action, or in a member of the controller that the action calls. With `same-library`, it looks for the old library's context or types. An endpoint that reaches neither is **accepted on its contract, and it reads no data yet**. The part's `Data` line in `rebuild-plan.md` says so:
 
 <!-- described, not captured -->
 ```output
@@ -322,7 +341,11 @@ CodeLead also reads each rebuilt endpoint's code, with no model call. It looks f
 
 Once `data-access` has landed, the plan plans such an endpoint again, to be revised in place. Its request opens with `(revised in place for its data: it was accepted on its contract and read no data)`. It quotes the stub's first line, and it asks for a test of a row that the seed holds. An empty answer then fails the test. When a revision whose request asked for the data still reads none, the part gets a note: a person's turn.
 
+With `port`, the revised endpoint's request says it reaches the same rows over the same database, through the rebuild's EF Core context. It no longer says "the same library calls".
+
 A screen judged while its endpoint read no data is judged again by the run itself, with no model call. When its own steps fail then, it is planned again, as [when a part's steps change](#when-a-parts-steps-change).
+
+A screen's own step may need a row that an empty list cannot give. For example, the step clicks "Edit" on the clients' list, and the list's endpoint reads no data yet. CodeLead reads, with no model call, that the old view writes this control once per row. Such a step is owed to the data, and no repair round runs for it. The acceptance line says `it needs rows that clients.index:endpoint does not read yet`. The screen waits on that endpoint. Once the endpoint reads the data, the run judges the screen again by itself. When CodeLead cannot tell whether the step needs a row, the line says so, and the step is judged as before.
 
 The plan says the count at its top, so that the accepted parts never overstate:
 
