@@ -21,6 +21,7 @@ date: 2026-11-20
 ```console
 codelead rebuild init --out <FOLDER> [<OPTIONS>]
 codelead rebuild run [<OPTIONS>]
+codelead rebuild journeys [--target <REPO>] [--refresh]
 codelead rebuild --plan [--target <REPO>] [--scope <PREFIXES>] [--json]
 codelead rebuild -h|--help
 ```
@@ -33,6 +34,7 @@ A [rebuild](../modernization/rebuild.md) does not change the old code. CodeLead 
 |---|---|
 | [`init`](codelead-rebuild-init.md) | Makes the rebuild repository beside the old application: the template, the manifest, the journeys, the plan and a dry run. |
 | [`run`](codelead-rebuild-run.md) | Runs the plan's queue without a person: each part composed, validated, walked and judged. |
+| [`journeys`](codelead-rebuild-journeys.md) | Compares the rebuild's copy of the journeys with the System Model's draft. With `--refresh`, it replaces the copy's drafted journeys with the draft's. |
 
 ### The overall flow
 
@@ -63,7 +65,7 @@ The [modernization program](codelead-modernize.md) runs steps 1, 2, 4 and 5 as i
 
 Without `--plan` and without a subcommand, `codelead rebuild` prints its help.
 
-`codelead rebuild` is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, `--plan` and `run` are refused before anything runs, with exit code 1. `init` is refused with exit code 2. The help is free. A rebuild counts as on the Pro plan when its own folder has the plan, or the old application that its manifest names has it. See [Licence and plans](../concepts/licence-and-plans.md).
+`codelead rebuild` is part of the modernization program, which is in CodeLead's Pro plan. In a folder without the Pro plan, `--plan`, `run` and `journeys` are refused before anything runs, with exit code 1. `init` is refused with exit code 2. The help is free. A rebuild counts as on the Pro plan when its own folder has the plan, or the old application that its manifest names has it. See [Licence and plans](../concepts/licence-and-plans.md).
 
 ## Options
 
@@ -179,6 +181,7 @@ These options belong to `codelead rebuild --plan`. Each subcommand has its own o
 
 - [The rebuild](../modernization/rebuild.md)
 - [`codelead rebuild init`](codelead-rebuild-init.md) and [`codelead rebuild run`](codelead-rebuild-run.md)
+- [`codelead rebuild journeys`](codelead-rebuild-journeys.md): refresh the rebuild's journeys from the System Model's draft.
 - [Rebuild manifest](../reference/rebuild-manifest.md)
 - [`codelead modernize`](codelead-modernize.md): the program that runs the rebuild as a stage.
 - [`/modernize`](../chat-commands/modernize.md): `--rebuild-plan` writes the plan's files.

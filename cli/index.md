@@ -87,7 +87,7 @@ To see the help of any command, add `--help`: `codelead doctor --help`.
 
 ### Rebuild and verify
 
-- [`codelead rebuild`](codelead-rebuild.md): prints a rebuild's plan. Its subcommands [`init`](codelead-rebuild-init.md) and [`run`](codelead-rebuild-run.md) make the rebuild and run it.
+- [`codelead rebuild`](codelead-rebuild.md): prints a rebuild's plan. Its subcommands [`init`](codelead-rebuild-init.md) and [`run`](codelead-rebuild-run.md) make the rebuild and run it. [`journeys`](codelead-rebuild-journeys.md) compares the rebuild's journeys with the System Model's draft, and refreshes them.
 - [`codelead rebuild-report`](codelead-rebuild-report.md): writes a rebuild's progress report as a page.
 - [`codelead walk`](codelead-walk.md): walks the running application as a new user would, and reports each step.
 - [`codelead parity`](codelead-parity.md): compares pages before and after a change, or checks that a rebuild is finished.

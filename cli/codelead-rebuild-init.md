@@ -42,9 +42,9 @@ Then it makes the rebuild in ten steps:
 4. **The install**: `npm install`, unless `--no-install`.
 5. **The manifest**, `docs/codelead/rebuild/rebuild.json`. It names the old application, its feature map and its web project. It names the targets: the new API and the web application. It keeps the decisions: identity and database.
 6. **The run profile** in the manifest: how to start the API and the web application, the clock, the caps of an unattended run. For a sign-in with a cookie across two origins, it also holds a check of the API's CORS policy. That policy is the API's rule for which origins may call it. See [The two answers](#the-two-answers).
-7. **The journeys**, `docs/codelead/rebuild/journeys.json`: merged from the model's draft, the Analyst's recordings and the Explorer's stories.
+7. **The journeys**, `docs/codelead/rebuild/journeys.json`: merged from the model's draft, the Analyst's recordings and the Explorer's stories. `init` makes this copy once. See [The journeys copy](#the-journeys-copy).
 8. **CodeLead initialized** in the folder: the configuration, the repository map, a board, a conventions starter and the declared validation gate.
-9. **The plan**, with no model call, and a dry run of [`codelead rebuild run`](codelead-rebuild-run.md). The dry run asks the model server for its list of models, and nothing more. The `Plan:` line counts the parts that the plan drops because nothing live reaches them.
+9. **The plan**, with no model call, and a dry run of [`codelead rebuild run`](codelead-rebuild-run.md). The dry run asks the model server for its list of models, and nothing more. The `Plan:` line counts the parts that the plan drops because nothing live reaches them. The plan's notes follow it, each on a `Note:` line. For example, a note says when the stored System Model is older than this CodeLead's reading: the plan's warning `model-reading-old`. See [The System Model](../modernization/system-model.md#when-codelead-reads-more-than-the-stored-model).
 10. **One evidence record**, `rebuild-init`, for success or failure. Then **the commit** of what was made, with this machine's git user, unless `--no-commit`.
 
 ### The ports
@@ -81,9 +81,15 @@ When the System Model reads a sign-in action in the old code, the rebuild signs 
 
 A template name is looked up in this order: `greenfield.templates` in the configuration, then `CODELEAD_TEMPLATES_DIR/<name>`, then `../codelead-templates/<name>` beside the repository. For `dotnet-next-shadcn`, CodeLead then clones the template's git repository. `--template` also takes a folder or a git address.
 
+### The journeys copy
+
+The rebuild walks its own copy of the journeys. `init` makes it once, from the sources as they are then. After that, the copy belongs to the rebuild repository: you commit it, and you can edit it. No stage of the program copies the journeys again.
+
+The System Model's draft can change later. For example, `codelead model` runs again with a newer CodeLead, whose draft signs a site's users in. The plan then warns with `journeys-draft-moved`: the copy stands otherwise than the draft. The warning names the journeys that moved, and the start of each run prints it. To bring the new draft in, run [`codelead rebuild journeys --refresh`](codelead-rebuild-journeys.md) in the rebuild. It keeps the Analyst's and the Explorer's journeys, the journeys written by hand, and a drafted journey that a person marked.
+
 ### A second run
 
-When `--out` already holds a rebuild that this command made, `init` says so and stops. It changes nothing.
+When `--out` already holds a rebuild that this command made, `init` says so and stops. It changes nothing, and it does not copy the journeys again.
 
 > [!TIP]
 > **For experienced users:** the unattended caps start at 12 parts, $20 and 480 minutes, with 8 repairs for each session. Raise them under `run.unattended` in the manifest. With `sample-seed`, the run profile's day reset is `node scripts/reset-sample-seed.mjs`.
@@ -241,7 +247,7 @@ In the old application, `init` reads `docs/codelead/rebuild/system-model.json`, 
 |---|---|
 | The template's files | The new API and web application. |
 | `docs/codelead/rebuild/rebuild.json` | The manifest and its run profile. See [Rebuild manifest](../reference/rebuild-manifest.md). |
-| `docs/codelead/rebuild/journeys.json` | The merged journeys. See [Journeys format](../reference/journeys-format.md). |
+| `docs/codelead/rebuild/journeys.json` | The merged journeys, the rebuild's own copy. [`codelead rebuild journeys`](codelead-rebuild-journeys.md) refreshes it. See [Journeys format](../reference/journeys-format.md). |
 | `docs/codelead/rebuild/rebuild-plan.json`, `.md` | The plan. |
 | `.codelead/config.json`, `docs/codelead/repository-map.*`, `docs/codelead/board/` | CodeLead initialized. |
 | `.codelead/CONVENTIONS.md` | A conventions starter, to fill in. |
@@ -258,6 +264,7 @@ A moved API port is written into the API's `Properties/launchSettings.json`. A m
 - [`codelead model`](codelead-model.md): the step before.
 - [`codelead rebuild run`](codelead-rebuild-run.md): the step after.
 - [`codelead rebuild`](codelead-rebuild.md): print the plan.
+- [`codelead rebuild journeys`](codelead-rebuild-journeys.md): refresh the journeys copy from a new draft.
 - [Rebuild manifest](../reference/rebuild-manifest.md)
 - [Template manifest](../reference/template-manifest.md)
 - [`codelead modernize answer`](codelead-modernize-answer.md): the same answers, for the program.

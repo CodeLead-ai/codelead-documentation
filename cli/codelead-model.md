@@ -51,6 +51,14 @@ A model whose gate does not pass is written all the same. It is the evidence tha
 
 Everything is made in memory first. Files are written only when all of them were made. An extraction that read nothing of the application writes nothing, and a model stored before stays as it was.
 
+### The journeys draft
+
+The journeys draft, `journeys.draft.json`, holds journeys drafted from the code. A drafted journey signs its user in as the old application did. On a site with a sign-in form of its own, the user is an account that the walk is given, such as the placeholder `walk-user-1@example.com`. When the old application sent a visitor to its sign-in page, the journey starts as that visitor. It opens `/`, expects the sign-in page, then signs in with `{user.account}` and `{user.password}`. The draft never holds a password. See [The journeys draft](../modernization/system-model.md#the-journeys-draft).
+
+### The reading's stamp
+
+The model records which reading of the code extracted it, and the CodeLead build that ran the command: `extractedBy` in `system-model.json`. The feature map records the same stamp. A newer CodeLead that reads more of the code says when a stored model is older than its reading. The rebuild's plan warns with `model-reading-old`, and `codelead modernize status` prints an `Older reading:` line. The way out is to run this command again in the old application's folder. Then run [`codelead rebuild journeys --refresh`](codelead-rebuild-journeys.md) in the rebuild. See [When CodeLead reads more than the stored model](../modernization/system-model.md#when-codelead-reads-more-than-the-stored-model).
+
 ### The database's own definition
 
 When you have the database's definition, give it to CodeLead:
@@ -178,12 +186,12 @@ All files are under `docs/codelead/rebuild/` of the old repository.
 
 | File | What it holds |
 |---|---|
-| `system-model.json` | The System Model. |
+| `system-model.json` | The System Model, with `extractedBy`: the reading and the build that extracted it. |
 | `extraction-gate.md` | The gate's report: each finding and its key. |
 | `extraction-dispositions.json` | Read, not written: your reasons for the gate's findings. |
-| `journeys.draft.json`, `truth.draft.json` | Drafts of the journeys and of the truth file. |
+| `journeys.draft.json`, `truth.draft.json` | Drafts of the journeys and of the truth file. The rebuild keeps its own copy of the journeys: [`codelead rebuild journeys`](codelead-rebuild-journeys.md) brings a new draft into it. |
 | `model.md` | The model, for people. |
-| `feature-map.json`, `feature-map.md` | The feature map: the features that the rebuild will carry. |
+| `feature-map.json`, `feature-map.md` | The feature map: the features that the rebuild will carry. `source.systemModel` in the JSON records the model's stamp. |
 | `schema.json`, `schema.md` | The database as the code reads it, reconciled with a definition when one was given. |
 
 The command also registers the gate report, the map and the schema in `docs/codelead/CATALOG.md` and `catalog.json`.
@@ -192,6 +200,7 @@ The command also registers the gate report, the map and the schema in `docs/code
 
 - [The System Model](../modernization/system-model.md)
 - [`codelead rebuild init`](codelead-rebuild-init.md): the next step, after the model.
+- [`codelead rebuild journeys`](codelead-rebuild-journeys.md): bring a new draft into a rebuild made before.
 - [`codelead modernize run`](codelead-modernize-run.md): the program's `model` stage runs this command.
 - [`codelead register`](codelead-register.md) and [`codelead seed`](codelead-seed.md): read the model's files.
 - [Rebuild manifest](../reference/rebuild-manifest.md)

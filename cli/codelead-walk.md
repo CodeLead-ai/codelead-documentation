@@ -31,7 +31,7 @@ A **journey** is a path that a person takes through the application, step by ste
 The walk follows each journey in a real browser (Playwright's Chromium):
 
 - It starts at the first screen, and reaches every page by clicking. It never jumps to a URL.
-- It prepares nothing by hand. A new user registers through the screens. For a spec with a given identity, the walk signs in as the accounts that the spec names.
+- It prepares nothing by hand. A new user registers through the screens. For a spec with a given identity, the walk signs in as the accounts that the spec names. The browser answers the server's own challenge, or the journey's steps type the account into the sign-in form. See [What a given identity does](../reference/journeys-format.md#what-a-given-identity-does-and-what-it-does-not).
 - After each step, it checks what the step expects, and marks the step **pass** or **fail**. A step after a failed step is **blocked**.
 
 > [!NOTE]

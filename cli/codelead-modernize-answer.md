@@ -44,7 +44,7 @@ The program takes nine keys, from one table:
 - **A stored answer** is kept under `answers` in `.codelead/modernization.json`. You can give it at any time, whatever stage waits. A stage reads it when it runs.
 - **An act** acts on its stage, and is never kept. At any other time, it is refused.
   - `pins=enough` marks the Pin stage `done` with the coverage as it stands, and you go on.
-  - `rebuild=enough` marks the Rebuild stage `done` with what is built, and you go on to the audit pack. The program's evidence record of the answer keeps what the stage waited for.
+  - `rebuild=enough` marks the Rebuild stage `done` with what is built, and you go on to the audit pack. The program's evidence record of the answer keeps what the stage waited for. The audit pack then lists each part that is not accepted, with the plan's reason. See [The rebuild as it stands](../modernization/audit-pack.md#the-rebuild-as-it-stands).
 
 What the values mean:
 

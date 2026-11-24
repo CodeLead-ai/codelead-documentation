@@ -122,6 +122,10 @@ A **journey** is a path that a person takes through the application, step by ste
 
 When two journeys are the same, CodeLead keeps one. It judges this by where the journey ends and what its last step expects. The Analyst's journey wins over the model's, and the model's over the Explorer's. See [Journeys format](../reference/journeys-format.md).
 
+`rebuild init` makes this copy once. The copy is the rebuild's own: you commit it, and you can edit it. When `codelead model` runs again in the old application, its draft can change. For example, a newer CodeLead drafts a sign-in for a site that signs in its own accounts. The copy does not change by itself.
+
+The plan warns with `journeys-draft-moved` when the copy stands otherwise than the draft. Its note names the journeys that the draft writes otherwise, and the command to run. [`codelead rebuild journeys --refresh`](../cli/codelead-rebuild-journeys.md) replaces the copy's drafted journeys with the draft's. It keeps the Analyst's and the Explorer's journeys and the journeys written by hand. It also keeps a drafted journey that a person marked with a `note` or a `covers` list. Review the change with `git diff`, and commit it.
+
 ## The plan and its parts
 
 The plan cuts the rebuild into **parts**. CodeLead computes it from the System Model, the feature map, the manifest and the journeys, with no model call. A part is one of these:
@@ -176,6 +180,12 @@ A screen part asks for a page of the new web application. CodeLead reads the web
 - **A React Router application**: the screen is a component in the existing pages folder. Its route is registered where the other pages are registered.
 
 The rest of the rebuild reads the same layout. For example, [parity](walk-and-parity.md#parity-of-a-rebuild) reads an app router's routes from its folders. It reads a React Router application's routes from its route table.
+
+### The site's root
+
+The old application's root, `/`, often shows the page of one action, such as Home/Index, without a change of the address. The screen part of that feature then builds `/` too, so the rebuilt root shows the same screen. `rebuild-plan.md` says so on the part: `- The site's root: this screen is served at / as well (the old root, <PLACE>, reached home.index)`. When the old root sent a visitor to its sign-in page, the part's request asks the rebuilt root to do the same.
+
+Sometimes the model cannot tell which page the root shows, for example when the old root reaches two such pages. Then the plan warns with `site-root`, and no part builds `/`. The root stays as the template left it. The same warning says why when the root's feature has no screen part in the plan.
 
 ### A step has two ends
 

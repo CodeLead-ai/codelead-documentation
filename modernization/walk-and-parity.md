@@ -80,9 +80,23 @@ The check fails on a route that changed, is missing or gave an error, unless the
 `codelead parity --rebuild` fetches nothing. It reads the rebuild's files, and it is the gate for calling the rebuild finished. It checks:
 
 - every feature of the old application's map: landed as an endpoint and a screen, or dropped by a recorded decision;
-- the pins: the features that carry pins have contract tests that run on the new endpoint;
+- the pins: each feature that carries pins has a contract test that runs and sends the feature's endpoint, its method and its route;
 - the wiring of the new code: what a person cannot reach, what the code calls and nothing serves;
 - the last walk: a clean walk of the code as it is now, with the rebuild's own journeys.
+
+A contract test proves an endpoint only when it calls that endpoint. So parity reads what each test sends, not only the name of its file. Two statuses of a pin are blockers of their own:
+
+- `calls another endpoint`: the tests run, and none sends the endpoint. They send another method or route.
+- `not read`: the tests run, and CodeLead cannot read what they send, such as a route held in a constant.
+
+In this example from CodeLead's tests, the route of the GET's test is held in a constant. The Pins table reads:
+
+<!-- described, not captured -->
+```output
+| clients.create-get | GET /api/clients/create | 1: Create_ShowsTheForm | ClientsCreateGetContractTests.cs (1 test runs; what 1 sends cannot be read) | **not read** |
+```
+
+Write the route as text in the test's request, so that CodeLead can read it. See [`codelead parity`](../cli/codelead-parity.md#the-pins-of-a-rebuild) for every status.
 
 Parity checks the whole rebuild, at its end. Each part is also protected on the way. Before a patch lands, the patch check refuses one that breaks what an accepted part built: an endpoint, a screen's route or a test. See [What an accepted part built stays built](rebuild.md#what-an-accepted-part-built-stays-built).
 

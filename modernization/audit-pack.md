@@ -44,14 +44,42 @@ After a full modernization, the pack holds one folder for each landed increment:
 
 | Folder | What it holds |
 |---|---|
-| `README.md` | The summary. It opens with the stages that a person skipped: who, when and why. Then what was done, the increments, the metrics before and after, the criteria and where each proof is. Read it first. |
+| `README.md` | The summary. It opens with the stages that a person skipped: who, when and why. Then the rebuild as it stands, when the program's Rebuild stage is done or skipped. Then what was done, the increments, the metrics before and after, the criteria and where each proof is. Read it first. |
 | `0-dossier/` | The survey, the intake and the options that the work started from. |
-| `1-program/` | The program's state file, and the evidence record of each skipped stage. |
+| `1-program/` | The program's state file, and the evidence record of each skipped stage. When the Rebuild stage is done or skipped, also the rebuild's plan as it stands, `rebuild-plan.json`, and the evidence record of the person's `rebuild=enough` answer. |
 | `2-increments/<nn>-<stage>-<id>/` | One folder for each landed increment: `request.txt`, `evidence-record.json`, `commit.txt` and `diff.patch` when a commit exists, and `attempts.md` with every record of the same request. |
 | `3-baselines/` | The declared gate (`validation-gate.json`), the knowledge store, the branch log, and `metrics.json`: the survey run on the tree before and the tree after. |
 | `4-sessions/<session>/` | The full session log of each session, with every prompt and response, and `INDEX.md` with the reason of each stop. |
 | `5-security/` | The security scan on both trees, and each finding's state: fixed, open, waived or new (`DISPOSITIONS.md`). |
 | `manifest.json` | Every file of the pack with its size and its SHA-256. |
+
+### The rebuild as it stands
+
+A person can end the Rebuild stage with parts left: `codelead modernize answer rebuild=enough` goes on with what is built. The pack then says what is not built. When the program's Rebuild stage is done or skipped, `README.md` holds the section `## The rebuild as it stands`. CodeLead reads it from the rebuild's plan and the stage's evidence record, with no model call. It holds:
+
+- **How the stage ended.** After an answer: its date, what the stage waited for, and the answer's record. Or the skip, or the stage's own end.
+- **How many parts are accepted**, of how many, and how many the plan dropped.
+- **A table of each part that is not accepted**: its state, and why, in the plan's own words. A state is, for example, `parked for a person`, `planned, waiting` or `planned and never taken`.
+- **The plan's blockers**, and its notes to a person.
+
+The plan is copied as `1-program/rebuild-plan.json`, with its secrets removed. In this example from CodeLead's tests, the person answered `rebuild=enough` while a prerequisite was parked:
+
+<!-- described, not captured -->
+```output
+## The rebuild as it stands
+
+The rebuild stage ended by the person's answer `codelead modernize answer rebuild=enough` at 2026-11-24T08:00:…Z: go on with what is built. It waited: The rebuild waits for you: 4 parts of 6 are not accepted yet: identity-seam is parked (the answer's record: `1-program/ev-….json`).
+
+From the rebuild's plan `../shop-rebuild/docs/codelead/rebuild/rebuild-plan.json`, copied as `1-program/rebuild-plan.json`: **2 of 6 parts accepted** (1 dropped by the plan); 3 parts not accepted:
+
+| Part | State | Why, in the plan's words |
+|---|---|---|
+| identity-seam | parked for a person | parked after 2 attempts that did not land (the last: ev-seam-2, the patch check refused the same change twice): a later rule or a person reopens it |
+| orders.index:screen | planned, waiting | no evidence record shows it landed; waits on identity-seam (parked for a person) |
+| orders.edit:screen | planned and never taken | no evidence record shows it landed |
+```
+
+A rebuild with nothing left ends the line with `every part is accepted, satisfied, judged without a walk or dropped: nothing is left`. When CodeLead cannot read the plan, the section says so, with the plan's path relative to the old application's folder.
 
 ### Before and after
 

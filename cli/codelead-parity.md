@@ -54,7 +54,24 @@ A difference that you expect is a **waiver**. Write it in `docs/codelead/parity-
 - the wiring and the reachability of the new code;
 - the last walk: it must be a clean walk of the code as it is now, with the rebuild's own journeys.
 
-It fails while a feature is missing or half landed. It fails while a pin has no contract test that runs, or while a wiring finding is open. It also fails while there is no clean walk of the current code; run [`codelead walk --base <url>`](codelead-walk.md) for that. The report names each blocker, and is written to `docs/codelead/parity/rebuild-parity.md`.
+It fails while a feature is missing or half landed. It fails while a pin is not covered, or while a wiring finding is open. It also fails while there is no clean walk of the current code; run [`codelead walk --base <url>`](codelead-walk.md) for that. The report names each blocker, and is written to `docs/codelead/parity/rebuild-parity.md`.
+
+### The pins of a rebuild
+
+A [pin](../modernization/pins.md) is a characterization test of the old application: a test that records what the old code does. The feature map ties each pin to its feature. For each pinned feature, parity reads the rebuild's contract-test file of the feature, such as `ClientsCreateGetContractTests.cs`. It reads what each test that runs sends, in the same way as the [check of accepted parts](../modernization/rebuild.md#what-an-accepted-part-built-stays-built).
+
+A test covers the feature's endpoint only when it sends that endpoint's method and route. A parameter's segment of the route matches any value. The case of the letters and a last `/` do not count. Each pinned feature gets one status:
+
+| Status | What it means | A blocker |
+|---|---|---|
+| `covered` | A test that runs sends the endpoint's method and route. A feature with no endpoint needs one test that runs. | No |
+| `no contract tests` | The rebuild has no contract-test file for the feature. | Yes |
+| `no test that runs` | Every test of the file is skipped or commented out. | Yes |
+| `calls another endpoint` | The tests run, and none sends the endpoint: they send another method or another route. | Yes |
+| `not read` | The tests run, and CodeLead cannot read what they send. For example, the route is held in a constant, or a helper sends the request. | Yes |
+| `dropped` | A recorded decision drops the feature. | No |
+
+A test of the wrong endpoint is never counted as covered. Neither is a test whose request CodeLead cannot read.
 
 This gate is for the end of a rebuild, not for each part. It fails until the first clean walk.
 
@@ -169,6 +186,19 @@ The first three examples ran against a small local site with three pages, on por
   Under the title, the report starts with `Generated <time> for the rebuild in this repository`. The report is committed with the rebuild, so neither the page nor its JSON record holds a path of this machine.
 
   This report was captured before CodeLead read the routes of a Next.js app router, the web application of this template. Its `26 screen not read` and its `no React Router route table` come from that gap. CodeLead now reads the app router's routes from its folders, so the numbers of a new rebuild differ.
+
+- Read a pin whose contract tests send another endpoint. In this example from CodeLead's tests, the tests of the GET endpoint send POST. The report's summary line, a row of its Pins table, and one of its blockers read:
+
+  <!-- described, not captured -->
+  ```output
+  **Pins:** 2 features carry characterization tests — 1 with contract tests that run on the new endpoint, 0 without, 1 whose tests send another endpoint.
+  …
+  - 1 pinned feature whose contract tests run and none sends its endpoint (calls another endpoint): clients.create-get
+  …
+  | clients.create-get | GET /api/clients/create | 1: Create_ShowsTheForm | ClientsCreateGetContractTests.cs (2 tests run; none sends GET /api/clients/create: they send POST /api/clients/create) | **calls another endpoint** |
+  ```
+
+  To clear the blocker, make the GET's tests send GET again. The POST's tests belong in their own file, such as `ClientsCreatePostContractTests.cs`.
 
 - Check before any baseline was captured. CodeLead says what to run first:
 

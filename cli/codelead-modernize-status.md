@@ -30,6 +30,7 @@ The program keeps its state in `.codelead/modernization.json`. `status` reads it
 - one line for each stage, with its status and its times;
 - the arrow `← the program is here` on the current stage;
 - under a stage that waits or failed, its problem: what happened, the way out, and the line to run after;
+- under the Model stage, an `Older reading:` line when the stored System Model is older than this CodeLead's reading. The line says to run the stage again, then [`codelead rebuild journeys --refresh`](codelead-rebuild-journeys.md) in the rebuild. See [The System Model](../modernization/system-model.md#when-codelead-reads-more-than-the-stored-model);
 - the answers that the rebuild uses;
 - `Next:`, the command to run now.
 

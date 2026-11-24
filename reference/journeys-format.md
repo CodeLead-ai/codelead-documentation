@@ -19,7 +19,7 @@ A **journeys file** describes paths that people take through an application, ste
 
 | File | Written by | Walked by |
 |---|---|---|
-| `docs/codelead/rebuild/journeys.json` in a rebuild | [`codelead rebuild init`](../cli/codelead-rebuild-init.md), merged from three sources | the rebuild's acceptance walk, [`codelead walk`](../cli/codelead-walk.md) |
+| `docs/codelead/rebuild/journeys.json` in a rebuild | [`codelead rebuild init`](../cli/codelead-rebuild-init.md), merged from three sources; [`codelead rebuild journeys --refresh`](../cli/codelead-rebuild-journeys.md) refreshes its drafted journeys | the rebuild's acceptance walk, [`codelead walk`](../cli/codelead-walk.md) |
 | `docs/codelead/rebuild/journeys.draft.json` in the old application | [`codelead model`](../cli/codelead-model.md) | nothing until a person confirms it |
 | `docs/codelead/specs/<name>.journeys.json` | [`codelead spec draft`](../cli/codelead-spec.md) | `codelead spec walk`, `/implement --spec` |
 | `journeys.json` of a recording | [`codelead analyst draft`](../analyst/reference/analyst-draft.md) | [`codelead analyst replay`](../analyst/reference/analyst-replay.md) |
@@ -117,11 +117,63 @@ Any other key is refused.
 |---|---|---|
 | `mode` | `registered` | The default. The walk registers new users through the screens, in every run. |
 | | `windows` | The application takes the visitor from Windows authentication (Negotiate or NTLM). |
-| | `given` | The application takes the visitor from something that registers nobody through its screens: single sign-on, a directory, an invitation. |
+| | `given` | The application takes the visitor from something that registers nobody through its screens: single sign-on, a directory, an invitation, or its own accounts. |
 | `credentials` | `explicit` | Required under `windows` and `given`. Each user's browser answers the server's challenge with its own account and password. Several roles in one walk. |
 | | `integrated` | One account only. Its password when the walk is given one, else the session of the machine that the walk runs on. |
 
-Under `windows` and `given`, every journey starts at the root: the first action of its first step is `{ "open": "/" }`. The passwords are never in the file. The walk reads them from `CODELEAD_WALK_PASSWORD_<USER>` or from the file that `CODELEAD_WALK_CREDENTIALS` names. See [Passwords](../analyst/passwords.md).
+Under `windows` and `given`, every journey starts at the root: the first action of its first step is `{ "open": "/" }`.
+
+A password is never written in a journeys file. Under `windows` and `given`, the walk reads each user's password when it runs, where it needs one:
+
+- from the environment variable `CODELEAD_WALK_PASSWORD_<USER>`, where `<USER>` is the user's key in capitals. For the user `user`, it is `CODELEAD_WALK_PASSWORD_USER`;
+- else from the credentials file that `CODELEAD_WALK_CREDENTIALS` names, outside the repository. The file maps each account to its password. In a rebuild's run, `run.unattended.credentials` of the [run profile](run-profile.md#rununattended) can name it.
+
+The variable wins over the file. See [Passwords](../analyst/passwords.md).
+
+### What a given identity does, and what it does not
+
+Under `given` and `explicit`, the walk gives each user's browser the account and its password. The browser answers the server's own authentication challenge with them: an answer `401` that asks for an account. The walk registers nobody. The identity does nothing more to sign a user in.
+
+A sign-in form sends no such challenge. So on a site that signs users in with its own form, the identity signs nobody in before a journey. Each journey signs in by its own steps. It opens `/`, then a step types `{<user>.account}` and `{<user>.password}` into the form, and clicks its button.
+
+[`codelead model`](../cli/codelead-model.md) drafts the journeys of such a site in this way. This draft comes from CodeLead's tests, shortened. The old application sent a visitor who opened `/` to its sign-in page, with the address that the visitor came from:
+
+```json
+{
+  "identity": { "mode": "given", "credentials": "explicit" },
+  "users": { "user": { "account": "walk-user-1@example.com" } },
+  "journeys": [
+    {
+      "id": "orders.edit-post",
+      "steps": [
+        {
+          "id": "orders.edit-post-1",
+          "title": "Open the application at its root as user (`walk-user-1@example.com`): … where the next step signs in",
+          "user": "user",
+          "do": [{ "open": "/" }],
+          "expect": [{ "path": "^/Account/SignIn\\?(?:[^#]*&)?[Rr][Ee][Tt][Uu][Rr][Nn][Uu][Rr][Ll]=%2[Ff](?:&|$)" }]
+        },
+        {
+          "id": "orders.edit-post-2",
+          "title": "Sign in as user on the sign-in page `~/Account/SignIn`: …",
+          "user": "user",
+          "do": [
+            { "fill": { "textbox": 0 }, "value": "{user.account}" },
+            { "fill": { "textbox": 1 }, "value": "{user.password}" },
+            { "click": ["Sign in"] }
+          ],
+          "expect": [{ "path": "^/$" }]
+        }
+      ]
+    }
+  ]
+}
+```
+
+- The first step is the visitor's: it opens `/` and expects the sign-in page. Its address carries the return address `/` in `returnUrl`, written `%2f` or `%2F`. The pattern takes both.
+- The second step signs in. It expects the page where the old sign-in sent the account: here `/`, the address that the visitor came from.
+- The feature's own steps follow, as the signed-in user.
+- The account `walk-user-1@example.com` is a placeholder. Replace it with a test account that the application signs in, and give its password in `CODELEAD_WALK_PASSWORD_USER`.
 
 ## clock
 
@@ -146,7 +198,7 @@ The journey spec is refused and nothing was walked: The user key "1clerk" is not
 | `password` | string | The password that the walk registers the user with. The default satisfies ASP.NET Core Identity's default rules. |
 | `newPassword` | string | A second password, for a journey that changes it. |
 | `location` | `{ latitude, longitude }` | Where the user's browser says it is. Without it, the browser refuses to say. |
-| `account` | string | Under `windows` or `given` only: the account that the walk signs in as, such as `STORE\\walk-clerk`. Under `integrated`, `{computer}` stands for the account signed in to the machine. |
+| `account` | string | Under `windows` or `given` only: the account that the walk signs in as, such as `STORE\\walk-clerk`. Under `integrated`, `{computer}` stands for the account signed in to the machine. The System Model's draft writes a placeholder, such as `walk-user-1@example.com`, for a person to replace with a test account. |
 
 All of them are optional. A user's own values can hold no placeholder but `{stamp}`.
 
@@ -210,7 +262,7 @@ The walk looks for a control in the page, then in each of its frames. A step's *
 | `{stamp}` | The run's stamp. |
 | `{<user>.name}`, `{<user>.nick}` | The user's sign-in name and display name. Under a given identity, `{<user>.name}` is the account. |
 | `{<user>.account}` | Under a given identity: the account. |
-| `{<user>.password}`, `{<user>.newPassword}` | The user's passwords. Only as a fill's value. |
+| `{<user>.password}`, `{<user>.newPassword}` | The user's passwords. Only as a fill's value. Under a given identity, `{<user>.password}` is the password that the walk is given: see [identity](#identity). |
 | `{<user>.wrongPassword}` | A value that is certainly not the user's password, for a sign-in that must be refused. Only as a fill's value. |
 | `{today}`, `{today:<format>}` | The server's date. |
 | `{now:<format>}` | The server's time, for example `{now:HH:mm}`. |

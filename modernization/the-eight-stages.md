@@ -128,7 +128,7 @@ The eight names above are the names of the stages. The program's files and comma
   - `The rebuild waits for you`: a person's turn stands between. The reason names each turn with its line. For example, a parked part comes with its `/modernize --transform T9 --reopen <PART_ID> --reason "<why>"` line.
   - `The rebuild is not finished`: the run stopped at its caps, and nothing in the plan asks a person. Run the stage again.
 
-  A walk that fails does not fail the stage. To go on with what is built, answer `codelead modernize answer rebuild=enough`. The program's evidence record of the answer keeps what the stage waited for. Or go past the stage with `codelead modernize skip rebuild --reason "<WHY>"`.
+  A walk that fails does not fail the stage. To go on with what is built, answer `codelead modernize answer rebuild=enough`. The program's evidence record of the answer keeps what the stage waited for. The [audit pack](audit-pack.md#the-rebuild-as-it-stands) then lists each part that is not accepted, with the plan's reason. Or go past the stage with `codelead modernize skip rebuild --reason "<WHY>"`.
 - **The command and the chat line**: `codelead modernize run rebuild`, or `/modernize --run rebuild`.
 
 > [!WARNING]

@@ -274,6 +274,8 @@
       href: cli/codelead-rebuild-run.md
     - name: "codelead rebuild init"
       href: cli/codelead-rebuild-init.md
+    - name: "codelead rebuild journeys"
+      href: cli/codelead-rebuild-journeys.md
     - name: "codelead implement"
       href: cli/codelead-implement.md
     - name: "codelead walk"
