@@ -29,6 +29,7 @@ A command in a profile is one executable and its arguments. CodeLead starts it w
 - On Windows, `npm`, `npx` and a `.cmd` file run through `cmd.exe`. An argument that holds a space, a quote or `& | < > ^ %` is refused there.
 - **`cwd`** is a folder inside the repository, relative to its root. A path that leaves the repository is refused.
 - **`env`** sets variables over CodeLead's own environment. **`unsetEnv`** takes variables out of it. A name cannot be in both.
+- **The walk's accounts.** Some journeys sign in by their own steps, against a fake directory that the API holds for Development. CodeLead then gives the API the walk's accounts when it starts it. They are in that process's environment only. Nothing is written to a file.
 - A key that starts with `//` is a comment. CodeLead passes over it.
 - A profile with a problem is refused whole. CodeLead says every problem in plain words, and starts nothing.
 

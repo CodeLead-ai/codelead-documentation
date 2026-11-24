@@ -226,7 +226,7 @@ Each repair round of `repair_rounds`:
 
 | Field | On | What it holds |
 |---|---|---|
-| `rebuild_part` | an implement of a rebuild part | `id`, the part's id, and `composer`, the CodeLead build that composed it. |
+| `rebuild_part` | an implement of a rebuild part | `id`, the part's id, `composer`, the CodeLead build that composed it, and `model_reading`, the reading of the System Model that its request was composed from. |
 | `ladder` | every record of a session that the model ladder runs | `rung` (`compose`, `repair` or `intervene`), `provider`, `model`, `effort`, and `stops_after` on a reopen. |
 | `judged_again` | `judge-again` | `of`, the landing; `reason`, a person's words, or the run's own when it judged again by itself; `walker`; `target` (`plan`); `stepsChanged`; `note`; `against`. |
 | `unapplied` | `unapply` | `decided` (`unattended` or `confirmed`), `repair_rounds`, `restored`, `removed`, `patches`, `checkpoint`, `not_restored`, `outside_surface`. |
