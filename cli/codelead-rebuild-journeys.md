@@ -98,7 +98,7 @@ When an account is still the draft's placeholder, such as `walk-user-1@example.c
 3. For a walk of the old application, write a real test account in place of each placeholder. The next refresh keeps it.
 4. Commit the file before the next run.
 
-The plan reads the new copy at its next turn. A part that a walk accepted before keeps its acceptance, and the plan reads its steps anew.
+The plan reads the new copy at its next turn. A part that a walk accepted stays accepted while that walk judged its own steps as the new copy writes them. When its own steps changed, the run judges it again by itself, with no model call. When they fail, the plan plans it again, to be revised in place. See [When a part's steps change](../modernization/rebuild.md#when-a-parts-steps-change).
 
 Without a password for each account, [`codelead rebuild run`](codelead-rebuild-run.md) refuses at its checks, with the line `The walk's passwords: …`.
 
@@ -130,7 +130,7 @@ The examples come from CodeLead's tests. In them, the rebuild was made before th
 
   <!-- described, not captured -->
   ```output
-  The journeys copy docs/codelead/rebuild/journeys.json stands otherwise than the System Model's draft ../old/docs/codelead/rebuild/journeys.draft.json: 1 drafted journey is drafted otherwise now (orders.edit-post); the draft signs its users in as given/explicit, the copy as registered. The copy is the rebuild's own and is not rewritten by itself: `codelead rebuild journeys --refresh` replaces its drafted journeys with the draft's, and keeps the Analyst's, the Explorer's, those written by hand and a drafted journey a person marked with a note or a covers.
+  The journeys copy docs/codelead/rebuild/journeys.json stands otherwise than the System Model's draft ../old/docs/codelead/rebuild/journeys.draft.json: 1 drafted journey is drafted otherwise now (orders.edit-post); the draft signs its users in as given/explicit, the copy as registered. The copy is the rebuild's own and is not rewritten by itself: `codelead rebuild journeys --refresh` replaces its drafted journeys with the draft's, and keeps the Analyst's, the Explorer's, those written by hand and a drafted journey a person marked with a note or a covers; after it, a part a walk accepted whose own steps changed is judged again by the run itself, and planned again when they fail.
   ```
 
   Nothing is written, and the exit code is 0.
@@ -148,7 +148,7 @@ The examples come from CodeLead's tests. In them, the rebuild was made before th
   Added from the draft: none.
   Removed (drafted no more): none.
   Kept as they were: none.
-  The file is the repository's: git diff shows what changed; commit it before the next run. The plan reads it at its next turn; a part accepted by a walk of the journeys before keeps its acceptance, and its steps are read anew.
+  The file is the repository's: git diff shows what changed; commit it before the next run. The plan reads it at its next turn. A part a walk accepted stays accepted while that walk judged its own steps as the journeys write them now. Where they changed, the run judges it again by itself, with no model call, and plans it again, to be revised in place, when they fail.
   The walk signs in as the accounts the journeys give, each with its password, which is never written in the journeys:
   - user (walk-user-1@example.com): CODELEAD_WALK_PASSWORD_USER is not set, and no file of passwords is named (CODELEAD_WALK_CREDENTIALS, or run.unattended.credentials of the run profile).
   The account of user, walk-user-1@example.com, is the draft's placeholder. A walk of the old application needs a real test account there: write it in users.user.account of docs/codelead/rebuild/journeys.json. A walk of this rebuild can keep it when the rebuilt API holds a fake directory for Development, which the walk gives its accounts to: none is in the API's code yet (the sign-in's endpoint builds it).
@@ -184,7 +184,7 @@ The examples come from CodeLead's tests. In them, the rebuild was made before th
   Removed (drafted no more): none.
   Kept as they were: none.
   Kept: the account of user user.
-  The file is the repository's: git diff shows what changed; commit it before the next run. The plan reads it at its next turn; a part accepted by a walk of the journeys before keeps its acceptance, and its steps are read anew.
+  The file is the repository's: git diff shows what changed; commit it before the next run. The plan reads it at its next turn. A part a walk accepted stays accepted while that walk judged its own steps as the journeys write them now. Where they changed, the run judges it again by itself, with no model call, and plans it again, to be revised in place, when they fail.
   The walk signs in as the accounts the journeys give, each with its password, which is never written in the journeys:
   - user (desk-tester@example.org): CODELEAD_WALK_PASSWORD_USER is set.
   ```

@@ -91,6 +91,18 @@ The numbers table has two more rows when the run had such a part:
 - `Accepted when judged again by the run (the page its step acts on accepted since)`: the count of `accepted-judged-again`.
 - `Accepted on what regresses, its steps waiting on another part's page`: the count of `waits-on-page`.
 
+Two more rows count the accepted parts by what judged them, when the run accepted any:
+
+- `Accepted by their own steps`: the walk judged the part by its own steps.
+- `Accepted on what regresses (no step of their own yet)`: no step of the journeys covered the part's request. The walk judged only that nothing regressed. The part's line in the run reads `accepted on what regresses (no step of its own yet)`, never `accepted at the first walk`.
+
+A section `Landed, and no walk judged them` follows the asks when the run left such a part. These parts are not finished: no walk could reach their own steps. Each line says what its steps wait on. For example:
+
+<!-- described, not captured -->
+```markdown
+- `clients.index:screen`: landed, and no walk judged it (landed, not walked): its own step clients.edit-post-3 waits on clients.edit-post-2, which fails, a step of sign-in:screen (accepted before, its steps changed since: to be judged again); the run judges it again by itself once that step passes.
+```
+
 The section of accepted parts whose contract does not hold is always there, with `None.` when every accepted part holds. Each line names the part, the record that accepted it, and what is gone. For example:
 
 <!-- described, not captured -->
@@ -141,7 +153,7 @@ The run also says it before it starts, in a line such as `Note: sign-in:screen w
 
 ### totals
 
-`partsTaken`, `acceptedAtFirstWalk`, `acceptedAfterRepair`, `acceptedOnRepairRung`, `acceptedByIntervention`, `landedNotWalked`, `asks`, `unsettled`, `repairRounds`, `interventions`, `interventionsAccepted` and `sessions`. Each is a whole number. Two more keys are there only when the count is more than 0: `acceptedJudgedAgain` and `waitsOnPages`.
+`partsTaken`, `acceptedAtFirstWalk`, `acceptedAfterRepair`, `acceptedOnRepairRung`, `acceptedByIntervention`, `landedNotWalked`, `asks`, `unsettled`, `repairRounds`, `interventions`, `interventionsAccepted` and `sessions`. Each is a whole number. Two more keys are there only when the count is more than 0: `acceptedJudgedAgain` and `waitsOnPages`. Two more are there when the run accepted a part: `acceptedByOwnSteps` and `acceptedOnWhatRegresses`.
 
 `asks` is the honest number of a run: every part that a person must look at.
 
@@ -161,6 +173,7 @@ The run also says it before it starts, in a line such as `Note: sign-in:screen w
 | `id`, `title`, `kind` | The part, as the plan names it, such as `clients.index:endpoint`. |
 | `outcome` | What the part came to. See below. |
 | `words` | The outcome in words. |
+| `acceptedBy` | For an accepted part: `own-steps`, or `what-regresses` when no step of the journeys covered its request. |
 | `state` | The part's state in the plan after the run: `planned`, `accepted`, `parked`, and so on. |
 | `sessions`, `repairRounds`, `interventions`, `minutes` | The counts for the part. |
 | `cost`, `costByRung` | Its cost, in all and by rung. |
@@ -175,7 +188,7 @@ The outcomes of a part:
 | `accepted-on-repair-rung` | The repair rung of the ladder made the walk accept it. |
 | `accepted-by-intervention` | The intervention rung made the walk accept it. |
 | `accepted-judged-again` | The run judged it again by itself, with no model call, and accepted it. Its walk had failed only on a step whose control is on another part's page, and that part was accepted since. |
-| `landed-not-walked` | It landed, and no walk judged it. |
+| `landed-not-walked` | It landed, and no walk judged it. It is not finished. Its `words` say which steps of which part its own steps wait on. The run judges it again by itself once they pass. |
 | `waits-on-page` | It landed, and is accepted on what regresses. Its own steps wait on the page that another part builds. The run judges it again once that part is accepted. It is not an ask. |
 | `asked` | The ladder asked a person. |
 | `refused` | The composition was refused. The run passes the part by for the rest of the run. |

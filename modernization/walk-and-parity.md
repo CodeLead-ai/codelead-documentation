@@ -47,9 +47,11 @@ The walk refuses to record a result that it cannot trust. It stops with exit cod
 
 The passwords of the journeys' accounts come from `CODELEAD_WALK_PASSWORD_<USER>`, or from the file that `CODELEAD_WALK_CREDENTIALS` names. They never come from the journeys, and the walk never prints them. See [Passwords](../analyst/passwords.md).
 
+In a rebuild whose API holds a fake directory, CodeLead signs the walk's first account in itself before the walk. When the API refuses it, the walk is not run, and the line says `the API refused the walk's own account …`. An account may have no roles, and the fake directory must accept it so. When its code shows that it needs roles, the plan plans the sign-in's endpoint again, to be revised in place.
+
 ### The walk of a rebuild's part
 
-In the Rebuild stage, the walk judges each part that lands. The part is accepted when its own steps pass, no step regresses, and no new finding counts. A step has two ends: the page where its control is, and the page that it reaches. The step judges the screen that it reaches, once the page that holds its control exists. See [A step has two ends](rebuild.md#a-step-has-two-ends).
+In the Rebuild stage, the walk judges each part that lands. The part is accepted when its own steps pass, no step regresses, and no new finding counts. A step has two ends: the page where its control is, and the page that it reaches. The step judges the screen that it reaches, once the page that holds its control exists. See [A step has two ends](rebuild.md#a-step-has-two-ends). When an earlier step fails, the walk cannot reach the part's own steps. Then no walk judges the part, and it is not finished. The run judges it again once that step passes. An accepted part stays accepted only while its own steps are the ones its walk judged. See [When a part's steps change](rebuild.md#when-a-parts-steps-change).
 
 The judge reads some findings before it counts them:
 

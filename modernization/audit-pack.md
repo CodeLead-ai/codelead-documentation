@@ -58,8 +58,10 @@ After a full modernization, the pack holds one folder for each landed increment:
 A person can end the Rebuild stage with parts left: `codelead modernize answer rebuild=enough` goes on with what is built. The pack then says what is not built. When the program's Rebuild stage is done or skipped, `README.md` holds the section `## The rebuild as it stands`. CodeLead reads it from the rebuild's plan and the stage's evidence record, with no model call. It holds:
 
 - **How the stage ended.** After an answer: its date, what the stage waited for, and the answer's record. Or the skip, or the stage's own end.
-- **How many parts are accepted**, of how many, and how many the plan dropped.
-- **A table of each part that is not accepted**: its state, and why, in the plan's own words. A state is, for example, `parked for a person`, `planned, waiting` or `planned and never taken`.
+- **How many parts a walk of their own steps accepted**, of how many. Beside it: how many are accepted on what regresses, satisfied, or dropped by the plan.
+- **The parts accepted on what regresses**, listed apart. The plan gives them no step of their own, and says why.
+- **The parts that landed and that no walk judged**, in a table of their own. They are not finished.
+- **A table of each other part that is not finished**: its state, and why, in the plan's own words. A state is, for example, `parked for a person`, `planned, waiting` or `planned and never taken`.
 - **The plan's blockers**, and its notes to a person.
 
 The plan is copied as `1-program/rebuild-plan.json`, with its secrets removed. In this example from CodeLead's tests, the person answered `rebuild=enough` while a prerequisite was parked:
@@ -70,16 +72,26 @@ The plan is copied as `1-program/rebuild-plan.json`, with its secrets removed. I
 
 The rebuild stage ended by the person's answer `codelead modernize answer rebuild=enough` at 2026-11-24T08:00:…Z: go on with what is built. It waited: The rebuild waits for you: 4 parts of 6 are not accepted yet: identity-seam is parked (the answer's record: `1-program/ev-….json`).
 
-From the rebuild's plan `../shop-rebuild/docs/codelead/rebuild/rebuild-plan.json`, copied as `1-program/rebuild-plan.json`: **2 of 6 parts accepted** (1 dropped by the plan); 3 parts not accepted:
+From the rebuild's plan `../shop-rebuild/docs/codelead/rebuild/rebuild-plan.json`, copied as `1-program/rebuild-plan.json`: **1 of 7 parts accepted by a walk of its own steps** (1 accepted on what regresses, 1 dropped by the plan); 4 parts not finished:
+
+Accepted on what regresses: the plan gives them no step of their own.
+
+- `sign-in:endpoint`: no step of the spec covers it.
+
+Landed, and no walk judged them: not finished.
+
+| Part | Why, in the plan's words |
+|---|---|
+| orders.edit:screen | landed (ev-…), and its acceptance was not judged (own-steps-unreachable): its own step orders.edit-3 waits on orders.edit-2, which fails, a step of identity-seam (parked) |
 
 | Part | State | Why, in the plan's words |
 |---|---|---|
 | identity-seam | parked for a person | parked after 2 attempts that did not land (the last: ev-seam-2, the patch check refused the same change twice): a later rule or a person reopens it |
 | orders.index:screen | planned, waiting | no evidence record shows it landed; waits on identity-seam (parked for a person) |
-| orders.edit:screen | planned and never taken | no evidence record shows it landed |
+| orders.close:screen | planned and never taken | no evidence record shows it landed |
 ```
 
-A rebuild with nothing left ends the line with `every part is accepted, satisfied, judged without a walk or dropped: nothing is left`. When CodeLead cannot read the plan, the section says so, with the plan's path relative to the old application's folder.
+A rebuild with nothing left ends the line with `every part is accepted, satisfied or dropped: nothing is left`. A part that landed and that no walk judged is never counted as finished. When CodeLead cannot read the plan, the section says so, with the plan's path relative to the old application's folder.
 
 ### Before and after
 

@@ -228,7 +228,7 @@ Each repair round of `repair_rounds`:
 |---|---|---|
 | `rebuild_part` | an implement of a rebuild part | `id`, the part's id, `composer`, the CodeLead build that composed it, and `model_reading`, the reading of the System Model that its request was composed from. |
 | `ladder` | every record of a session that the model ladder runs | `rung` (`compose`, `repair` or `intervene`), `provider`, `model`, `effort`, and `stops_after` on a reopen. |
-| `judged_again` | `judge-again` | `of`, the landing; `reason`, a person's words, or the run's own when it judged again by itself; `walker`; `target` (`plan`); `stepsChanged`; `note`; `against`. |
+| `judged_again` | `judge-again` | `of`, the landing; `reason`, a person's words, or the run's own when it judged again by itself; `walker`; `target` (`plan`); `stepsChanged`; `note`; `against`; `cause`: `steps-changed` when an accepted landing was judged again because its own steps changed since its walk. |
 | `unapplied` | `unapply` | `decided` (`unattended` or `confirmed`), `repair_rounds`, `restored`, `removed`, `patches`, `checkpoint`, `not_restored`, `outside_surface`. |
 | `reopened` | `reopen` | `reason`, and `attempts`: the records of the attempts that parked the part. For a part that held work already, `attempts` is empty, `from` is the state the plan read it in, such as `accepted`, and `of` is the record that set that state. |
 | `asked` | `ask` | `of`, `on`, `reason`, `walk_words`, `files`, and `landed`: the board card or the plan line where the ask went. |

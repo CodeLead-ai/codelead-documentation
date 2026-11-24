@@ -40,6 +40,15 @@ Before any patch lands, the patch check refuses a patch that breaks what an acce
 
 A part whose own step clicks a control on another part's page can land before that page is accepted. The part is then accepted on what regresses, and waits. Once the page's part is accepted, the run judges the waiting part again by itself, with no model call, before it composes anything else. See [A step has two ends](../modernization/rebuild.md#a-step-has-two-ends).
 
+A part can also land when its own steps wait on a failing step of another part. Then no walk judges it. It is work left, and its lane is not said to have `no work left`. Its line names the part whose step it waits on:
+
+<!-- described, not captured -->
+```output
+… clients.index:screen: landed, not walked, and no walk judged it: its own step clients.edit-post-3 waits on clients.edit-post-2, which fails, a step of sign-in:screen (…); the run judges it again by itself once that step passes (12.5 min).
+```
+
+Once that step passes in the stored walk, the run judges the part again by itself.
+
 > [!NOTE]
 > **New to this?** *Unattended* means that nobody answers questions during the run. CodeLead gives each question its recommended answer, yes or no, and records every answer in the evidence records. A person reads the result after the run.
 
@@ -75,7 +84,14 @@ Before the first part, the run prints its notes. An accepted part whose endpoint
 Note: <PART_ID> is accepted no more (<RECORD>): its endpoint <METHOD> <ROUTE> is no longer in the code: the part <OTHER_PART_ID> removed it in <RECORD> (checkpoint <COMMIT>); it is planned again, to be rebuilt.
 ```
 
-A part that the run judges again by itself is said as `<PART_ID> (<TITLE>), part <N> of <M>: judged again by itself, with no model call (…).`
+An accepted part whose own steps changed since its walk is a note too. The run judges it again by itself before anything that needs it:
+
+<!-- described, not captured -->
+```output
+Note: <PART_ID> is accepted before, its steps changed since (<RECORD>): the run judges it again by itself, with no model call, before anything that needs it; if its own steps fail, it is planned again, to be revised in place.
+```
+
+A part that the run judges again by itself is said as `<PART_ID> (<TITLE>), part <N> of <M>: judged again by itself, with no model call (…).` The run never makes the same judgement twice. When the plan asks for it again, the part is passed by for the rest of the run, and listed for a person.
 
 ### When the run stops
 

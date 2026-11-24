@@ -124,7 +124,7 @@ When two journeys are the same, CodeLead keeps one. It judges this by where the 
 
 `rebuild init` makes this copy once. The copy is the rebuild's own: you commit it, and you can edit it. When `codelead model` runs again in the old application, its draft can change. For example, a newer CodeLead drafts a sign-in for a site that signs in its own accounts. The copy does not change by itself.
 
-The plan warns with `journeys-draft-moved` when the copy stands otherwise than the draft. Its note names the journeys that the draft writes otherwise, and the command to run. [`codelead rebuild journeys --refresh`](../cli/codelead-rebuild-journeys.md) replaces the copy's drafted journeys with the draft's. It keeps the Analyst's and the Explorer's journeys and the journeys written by hand. It also keeps a drafted journey that a person marked with a `note` or a `covers` list. Review the change with `git diff`, and commit it.
+The plan warns with `journeys-draft-moved` when the copy stands otherwise than the draft. Its note names the journeys that the draft writes otherwise, and the command to run. [`codelead rebuild journeys --refresh`](../cli/codelead-rebuild-journeys.md) replaces the copy's drafted journeys with the draft's. It keeps the Analyst's and the Explorer's journeys and the journeys written by hand. It also keeps a drafted journey that a person marked with a `note` or a `covers` list. Review the change with `git diff`, and commit it. An accepted part whose own steps the refresh changes is judged again, as [below](#when-a-parts-steps-change).
 
 ## The plan and its parts
 
@@ -140,10 +140,10 @@ Each part has its needs: the parts that must land before it. Each part has a sta
 | State | What it means |
 |---|---|
 | `planned` | To compose. A part whose accepted work is no longer in the code is `planned` again. So is a part that a person [reopened](#reopen-a-part). |
-| `accepted` | It landed, and its walk accepted it. |
+| `accepted` | It landed, and its walk accepted it on its own steps as they are now. When its own steps changed since that walk, it is [accepted before, to be judged again](#when-a-parts-steps-change). |
 | `landed`, `landed-not-accepted` | It landed, and its walk did not accept it. `landed` still has repair rounds. |
 | `satisfied` | It is in the code already, and its own steps pass in the walk. It is not composed again. |
-| `not-walked` | It landed, and no walk could judge it. What needs it goes on, with a warning. |
+| `not-walked` | It landed, and no walk could judge it. It is not finished. What needs it goes on, with a warning. When its own steps wait on a failing step of another part, the plan names that part. See [A step has two ends](#a-step-has-two-ends). |
 | `parked` | Its attempts did not land. It waits for a person. |
 | `dropped` | The old application does not need it. |
 
@@ -193,7 +193,30 @@ A step of a journey often clicks a control on one page and reaches another page.
 
 Sometimes a screen lands, and the page with its control is not accepted yet. Its own step cannot pass, and nothing else fails. Then the part is **accepted on what regresses**: the walk found no regression and no new finding, and only that step waits. The parts that need it wait too. Once the page's part is accepted, the run judges the waiting part again by itself, with no model call.
 
+A step of a journey also waits on the steps before it. When an earlier step fails, the walk cannot reach the later ones. Then a part whose own steps come later lands, and no walk judges it. For example, the screen at `/clients/index` lands, and its step waits on the sign-in step, which fails. The plan names the part whose step it waits on, and that part's state:
+
+<!-- described, not captured -->
+```output
+landed (ev-<ID>), and its acceptance was not judged (own-steps-unreachable): its own step clients.edit-post-3 waits on clients.edit-post-2, which fails, a step of sign-in:screen (accepted before, its steps changed since: to be judged again); the run judges it again by itself once that step passes
+```
+
+Such a part is not finished, and the run counts it as work left. Once the stored walk of the tree reaches its steps, the run judges it again by itself, with no model call. When the plan cannot tell which part owns the step, it says so. A page and a step follow one rule: a part that another part keeps from being judged waits on that part.
+
 When the plan cannot tell which page a step acts on, it warns with `step-page-unknown`. A title that names the control's place, or a `covers` list in the journey, settles it. See [Journeys format](../reference/journeys-format.md#steps).
+
+### When a part's steps change
+
+A part stays accepted only while the walk that accepted it judged its own steps as the journeys write them now. A later stored walk of the tree, in which those steps pass, counts too. The steps can change in two ways:
+
+- The journeys change. For example, `codelead rebuild journeys --refresh` brings in journeys that begin with a sign-in.
+- The plan gives the part new steps. For example, the sign-in's screen now owns the typed sign-in of every journey.
+
+Then the part is **accepted before, its steps changed since: to be judged again**. The plan warns with `steps-changed`. The parts that need it wait. The run judges the part again by itself first, with no model call:
+
+- When its own steps pass, it stays accepted.
+- When they fail, the judgement offers no repair round. The plan plans the part again: `accepted (ev-<ID>) by a walk of its earlier steps; its own step now, <STEP>, fails in the walk of <TIME>: revise it`.
+
+The next composition revises in place what the part built, as for a [reopened part](#reopen-a-part). Its request says why, and quotes the walk's words for the failing steps. The check of accepted parts protects what the part built until its revision lands.
 
 ### Lanes
 
@@ -219,6 +242,15 @@ Before a real run, check the plan in two ways. Neither calls a model.
 2. **Validate**: the gate of the rebuild builds the API and the web application, and runs their tests.
 3. **Walk**: [the walk](walk-and-parity.md) follows the part's steps of the journeys on the running application.
 4. **Judge**: the part is accepted, repaired, or parked. A part whose own step waits on another part's page is accepted on what regresses, as [above](#a-step-has-two-ends).
+
+A part with no step of its own, such as an endpoint, is accepted on what regresses: no step that passed before fails. Its acceptance line says what the walk exercised when some steps fail or are blocked:
+
+<!-- described, not captured -->
+```output
+Acceptance (walk r0): no step of the journeys covers this request; nothing that passed before fails, in a walk where 9 steps pass, 9 fail and 21 are blocked: none is this part's own; accepted on what regresses, and to be judged by its own steps when the journeys reach it: first walked with clients.create-post-3.
+```
+
+The run then says `accepted on what regresses (no step of its own yet)`, and never `accepted at the first walk`. The run summary counts the two kinds of acceptance apart.
 
 When a check fails, the **model ladder** decides what comes next. First repair rounds on the compose model. Then the part moves to a stronger repair model. Then an intervention: an agent on a frontier model takes the part over once, within limits of turns, minutes and dollars. When that fails too, the part is **parked** for a person, and the run continues with the next part. See [Use a stronger model for repairs](../how-to/use-a-stronger-model-for-repairs.md).
 
@@ -303,7 +335,7 @@ What happens then:
 - **The caps**: `run.unattended` in the manifest (`maxParts`, `maxCostUsd`, `maxMinutes`, `repairsPerSession`), or `--max-parts`, `--max-cost-usd` and `--max-minutes` for one run.
 - **The ladder**: `run.models` in the manifest (`compose`, `repair`, `intervene`, `escalate`). With no `models` block, the ladder is off.
 - **The run summary**: `.codelead/rebuild-run-<stamp>.md` and `.json`: each part, its outcome and its cost, and the accepted parts whose work no longer holds in the code. It also lists the parts that a person reopened. See [Rebuild run summary](../reference/rebuild-run-summary.md).
-- **Planned again**: the plan's warning `contract-broken` names an accepted part whose work is gone from the code. The warning `contract-changed` names the identity seam when a cookie session across two origins needs a CORS policy that the seam's code lacks. A CORS policy is the API's rule for which origins may call it. The plan then revises the seam in place, once. When the revision landed and the code still lacks the policy, it is a person's turn.
+- **Planned again**: the plan's warning `contract-broken` names an accepted part whose work is gone from the code. The warning `contract-changed` names the identity seam when a cookie session across two origins needs a CORS policy that the seam's code lacks. A CORS policy is the API's rule for which origins may call it. The plan then revises the seam in place, once. When the revision landed and the code still lacks the policy, it is a person's turn. The same warning names the sign-in's endpoint when the API refused the walk's own account and its fake directory requires roles. The revision then makes roles optional, once.
 - **What the check of accepted parts reads**: the plan, the evidence records and git, with no model call. It reads tests written in C# (xUnit, NUnit and MSTest) and in TypeScript or JavaScript (`it` and `test`). A changed test file in another language is a warning. The check never runs outside a rebuild.
 - **The report**: `codelead rebuild-report` writes `.codelead/rebuild-report.html`, which the wizard shows.
 - **Evidence**: `rebuild init` writes one record, `rebuild-init`. Each part's session writes its own.
