@@ -232,7 +232,7 @@ Docker keeps the data in two volumes, `<project>_mongod-data` and `<project>_mon
 
 ### The configuration
 
-`pkb.json` holds the whole configuration of the PKB service. This release reads `store`, `embeddings`, `projects`, `privacy` and `paused`. The other keys are for the service, which comes later. A key that the file leaves out takes its default.
+`pkb.json` holds the whole configuration of the PKB service. This release reads `store`, `embeddings`, `chat`, `projects`, `privacy` and `paused`. The other keys are for the service, which comes later. A key that the file leaves out takes its default.
 
 | Key | Default | What it does |
 |---|---|---|
@@ -243,9 +243,9 @@ Docker keeps the data in two volumes, `<project>_mongod-data` and `<project>_mon
 | `embeddings.baseUrl`, `embeddings.model`, `embeddings.remote` | `http://localhost:1234/v1`, no model, `false` | The embeddings server of [`codelead pkb embed`](codelead-pkb-embed.md#the-embeddings-server) and [`codelead pkb search`](codelead-pkb-search.md). |
 | `embeddings.documentPrefix`, `embeddings.queryPrefix` | empty, empty | The text put before each stored text and each question when they are embedded. See [the task prefixes](codelead-pkb-embed.md#the-task-prefixes). |
 | `bind`, `port` | `127.0.0.1`, `7415` | The service's own address. Not used yet. |
-| `chat` | a local model server, no model | The chat model of the service. Not used yet. |
+| `chat.baseUrl`, `chat.model`, `chat.remote` | `http://localhost:8080/v1`, no model, `false` | The chat model that writes the answers of [`codelead pkb ask`](codelead-pkb-ask.md#the-chat-model). |
 | `projects` | none | The projects, each with its repositories and their checkouts. [`codelead pkb sync`](codelead-pkb-sync.md#the-project-in-pkbjson) reads them. |
-| `privacy.allowRemoteModels`, `paused` | `false`, `false` | Whether texts may go to a remote model, and whether every model call waits. `embed` and `search` follow them. |
+| `privacy.allowRemoteModels`, `paused` | `false`, `false` | Whether texts may go to a remote model, and whether every model call waits. `embed`, `search`, `ask` and `reask` follow them. |
 
 ## Details
 

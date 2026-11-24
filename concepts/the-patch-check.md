@@ -3,7 +3,7 @@ title: The patch check
 description: What CodeLead checks in a patch before it asks you to apply it, the difference between a blocking finding and a note, and what each status means.
 kind: concept
 area: concepts
-date: 2026-11-23
+date: 2026-11-24
 ---
 
 # The patch check
@@ -142,7 +142,15 @@ Next:
 ## Details
 
 - **Statuses.** `can_apply` (shown as "can apply cleanly"), `cannot_apply`, `unsafe`, `invalid_patch`, and `no_patch` when nothing waits to be checked.
-- **Retries.** After a refusal, `/implement` asks for a new patch at most 2 times. The retry carries the problems and asks for smaller hunks. [`/patch --retry`](../chat-commands/patch.md) does the same by hand.
+- **Retries.** After a refusal, `/implement` asks for a new patch at most 2 times. The retry carries the problems and asks for smaller hunks. [`/patch --retry`](../chat-commands/patch.md) does the same by hand. When a SEARCH block did not match a file, the retry shows that file's current text, so that the model can copy real lines. A small file of that kind may also be replaced whole.
+- **A retry that is too large.** A retry prompt has a size budget: 90,000 characters, or what the model's window allows. Over the budget, CodeLead cuts parts in a fixed order, and one session line names each cut. When the retry shows a file that the previous patch failed on, that file's current text is cut last. The previous patch, the other files, the repeated request and the repository summary go before it. For example:
+
+  <!-- described, not captured -->
+  ```output
+  Retry prompt: 30,955 characters, budget 28,155: left out the request repeated in the current context (2,056 characters); the repository summary (274 characters); the files shown in part, 1 file (1,694 characters); 26,931 characters sent.
+  ```
+
+  A failed file larger than the whole budget is shown in part. You see its first lines and the lines that the failed edit aimed at. A note above its code says so, and the session line names `the failed files shown in part`.
 - **Files the request does not name.** A missing planned file is a note when the request names other files and not this one. A name that several files share names none of them. In a web project where every screen is a `page.tsx` in its own folder, "the page web/src/app/items/list/page.tsx" names that page only. Another screen's `page.tsx` that the plan added stays a note when the patch leaves it out. Only a path that tells the files apart names one of them.
 - **The file a change goes through.** Some requests name an existing file only as the way the change goes. For example: "through the API client module (src/lib/api.ts)". The patch may change that file, but it does not have to. The note then says: "the request names it as what the change goes through, not as a file to change". A file that does not exist yet stays required. So does a file that the request also asks to change, as in "and add the same data to the mock".
 - **The change surface.** CodeLead derives the files that a request is likely to change. A file outside them gets a note that ends with the words "a note, it does not block applying". In a .NET repository, some files must change together, for example a class and the base class it relies on. A patch that changes only one side gets a blocking finding.

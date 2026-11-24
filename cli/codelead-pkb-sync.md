@@ -13,7 +13,7 @@ date: 2026-11-24
 `codelead pkb sync` sends what a project knows into the store of the [PKB service](codelead-pkb.md). It reads the files that CodeLead keeps in each repository of the project. It scans every text for secrets, paths of this machine and private names before anything leaves. It logs what left which folder, as file names, hashes and counts.
 
 > [!IMPORTANT]
-> The store must run first: see [`codelead pkb store`](codelead-pkb-store.md). [`codelead pkb search`](codelead-pkb-search.md) reads the knowledge back. Answers (`codelead pkb ask`) come later.
+> The store must run first: see [`codelead pkb store`](codelead-pkb-store.md). [`codelead pkb search`](codelead-pkb-search.md) reads the knowledge back, and [`codelead pkb ask`](codelead-pkb-ask.md) answers from it.
 
 ## Name
 
@@ -79,6 +79,23 @@ Each entry keeps the trust level of its source. The levels are those of the [enc
 The store keeps each file by its hash. A second sync of files that did not change changes nothing. Its last line says `Nothing changed`.
 
 When a file changed, the store keeps its new version and marks the pieces of the old one as superseded. A search never finds a superseded piece. It stays in the store, so that an answer that cited it can still show it.
+
+### Stored answers
+
+A sync marks the stored answers of [`codelead pkb ask`](codelead-pkb-ask.md) whose evidence it changed. An answer is never edited: it gains a mark, and [`codelead pkb asks`](codelead-pkb-asks.md#marks) shows it.
+
+- An entry that gets a new version marks the answers that cited the older one. A new text, a new trust level or a stale mark each give a new version.
+- A workspace downgrade made in the store marks the answers that cited the entry.
+- A file with a new version marks the answers that cited the version before.
+- A changed evidence record marks the answers that cited it.
+- When a repository's checkout is at another commit than an answer cited, `sync` reads the cited code lines again. When their hash changed, the answers that cited those lines are marked.
+
+Two lines say so, only when there was something to say:
+
+```output
+Cited code: 2 spans of the stored answers read again at the checkouts' commits; 1 changed.
+Stored answers marked: 1, because the evidence they rested on changed. codelead pkb asks shows them; codelead pkb reask asks one again.
+```
 
 ### The embeddings
 

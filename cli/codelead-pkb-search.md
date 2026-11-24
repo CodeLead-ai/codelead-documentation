@@ -13,7 +13,7 @@ date: 2026-11-24
 `codelead pkb search` finds what the store of the [PKB service](codelead-pkb.md) holds about a question. It searches by words and by meaning. For some questions it also reads the code. Each hit says why it was found and how far you can trust it. The command never calls a chat model, so it writes no answer.
 
 > [!IMPORTANT]
-> This command shows what an answer would rest on. The answer itself comes later, with `codelead pkb ask`. Sync the project first: see [`codelead pkb sync`](codelead-pkb-sync.md).
+> This command shows what an answer would rest on. The answer itself comes from [`codelead pkb ask`](codelead-pkb-ask.md), which searches the same way. Sync the project first: see [`codelead pkb sync`](codelead-pkb-sync.md).
 
 ## Name
 

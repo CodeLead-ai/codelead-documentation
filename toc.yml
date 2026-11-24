@@ -338,6 +338,14 @@
       href: cli/codelead-pkb-embed.md
     - name: "codelead pkb search"
       href: cli/codelead-pkb-search.md
+    - name: "codelead pkb ask"
+      href: cli/codelead-pkb-ask.md
+    - name: "codelead pkb asks"
+      href: cli/codelead-pkb-asks.md
+    - name: "codelead pkb reask"
+      href: cli/codelead-pkb-reask.md
+    - name: "codelead pkb promote"
+      href: cli/codelead-pkb-promote.md
 - name: Chat command reference
   items:
     - name: "Overview"

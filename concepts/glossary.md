@@ -19,6 +19,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 
 - **Acceptance probe**. A check of one increment of a new app. CodeLead starts the app in a browser and looks for what the increment promised. See [`/build-incremental`](../chat-commands/build-incremental.md).
 - **Analyst**. The CodeLead Analyst records a running application from its screens while a person uses it, and drafts journeys from the recording. See [Analyst and Explorer](../analyst/index.md).
+- **Answer snapshot**. One dated answer of the PKB service to a stored question. It keeps its sentences, the sources it cited at their versions, the model and what was dropped. It is never edited. See [`codelead pkb ask`](../cli/codelead-pkb-ask.md).
 - **Apply**. To write a checked patch into your files. Only your yes, or the fixed rules of an unattended run, applies a patch. See [Requests, plans and patches](requests-plans-and-patches.md).
 - **Assumption**. A choice that the preflight would make unless you say otherwise. You accept, reject or correct the list in one answer. See [Prompts and recommended answers](prompts-and-recommended-answers.md).
 - **Audit pack**. A folder that collects the evidence of a modernization for a reviewer, with secrets removed. See [The audit pack](../modernization/audit-pack.md).
@@ -84,6 +85,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 
 ## M
 
+- **Mark (of an answer)**. A line under a stored answer of the PKB service that says the evidence it rested on changed, when and how. The answer itself stays as it was. See [Marks](../cli/codelead-pkb-asks.md#marks).
 - **Model**. A large language model: a program that writes text and code from a request. CodeLead contains no model. See [Models and roles](models-and-roles.md).
 - **Model server**. A program that runs a model and answers requests from other programs, such as LM Studio on your computer. See [Set up local models](../how-to/set-up-local-models.md).
 - **Modernization program**. The eight stages that take an old application to a new one, with its behaviour recorded first. See [The modernization program](../modernization/the-program.md).
@@ -91,7 +93,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 ## N
 
 - **Non-goal**. Something that the plan says the change must not touch. A patch that crosses one gets a note. See [Requests, plans and patches](requests-plans-and-patches.md).
-- **Not in the knowledge base**. What the PKB service says when nothing it found clears its floor. Then no model writes an answer. See [`codelead pkb search`](../cli/codelead-pkb-search.md#not-in-the-knowledge-base).
+- **Not in the knowledge base**. What the PKB service says when nothing it found clears its floor. Then no model writes an answer. An answer whose every sentence was dropped says it too. See [`codelead pkb search`](../cli/codelead-pkb-search.md#not-in-the-knowledge-base) and [`codelead pkb ask`](../cli/codelead-pkb-ask.md#what-the-service-drops).
 - **Note**. A finding of the patch check that never blocks a patch, for example a convention that a new line does not follow. See [The patch check](the-patch-check.md).
 
 ## O
@@ -105,7 +107,8 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 - **Patch**. A description of changes to files, as a diff, that nobody has applied yet. See [Requests, plans and patches](requests-plans-and-patches.md).
 - **Patch check, the**. CodeLead's own reading of a patch against your files, before the apply and with no model. See [The patch check](the-patch-check.md).
 - **Pin**. A test that records what the old code does today, so that a later change cannot break it unseen. See [Pins](../modernization/pins.md).
-- **PKB service**. The project knowledge base shared by a team: what several projects know, in one place, with every answer cited. Today its store, its sync and its search exist: [`codelead pkb sync`](../cli/codelead-pkb-sync.md) sends a project's knowledge into the store, and [`codelead pkb search`](../cli/codelead-pkb-search.md) finds it again. See [`codelead pkb`](../cli/codelead-pkb.md).
+- **PKB service**. The project knowledge base shared by a team: what several projects know, in one place, with every answer cited. Today its store, its sync, its search and its answers exist. [`codelead pkb sync`](../cli/codelead-pkb-sync.md) sends a project's knowledge into the store, and [`codelead pkb ask`](../cli/codelead-pkb-ask.md) answers from it. See [`codelead pkb`](../cli/codelead-pkb.md).
+- **Promote (an answer)**. A person's act that makes a stored answer of the PKB service an entry. The entry is confirmed, with the answer as its source and the person's name in its history. See [`codelead pkb promote`](../cli/codelead-pkb-promote.md).
 - **Plan (of a change)**. The preflight's result: the files to change, the non-goals and how to validate. The patch check holds the patch to it. See [Requests, plans and patches](requests-plans-and-patches.md).
 - **Plan (of a licence)**. Free or pro: which parts of CodeLead a folder can use. See [Licence and plans](licence-and-plans.md).
 - **Preflight**. The first step of a change: CodeLead chooses the files, and a model analyzes them and writes the plan. It can ask questions. See [Requests, plans and patches](requests-plans-and-patches.md).
@@ -116,6 +119,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 
 ## R
 
+- **Re-ask**. To ask a stored question of the PKB service again. The new answer rests on what the project knows now, and the earlier answers stay. See [`codelead pkb reask`](../cli/codelead-pkb-reask.md).
 - **Rebuild**. A new application built in its own repository from what the old one does, part by part. See [The rebuild](../modernization/rebuild.md).
 - **Recommended answer**. The answer that CodeLead would give in your place. Enter gives it, except for a step that is hard to undo. See [Prompts and recommended answers](prompts-and-recommended-answers.md).
 - **Register**. The behaviour register: every rule and behaviour found in an old application, each with the check that the new one must pass. See [The behaviour register and seed data](register-and-seed.md).
@@ -141,6 +145,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 - **Stage**. One of the eight steps of the modernization program, such as `read` or `pins`. See [The eight stages](../modernization/the-eight-stages.md).
 - **Stop**. A run that ends before its job is done. A stop always says why and what you can do next. See [Results and stops](results-and-stops.md).
 - **Stop file**. A file whose presence asks an unattended run to stop after its current part, for example `.codelead/STOP`. See [Unattended runs and the run lock](unattended-runs.md).
+- **Stored ask**. A question asked of the PKB service, kept with every answer it had, each a dated snapshot. See [`codelead pkb asks`](../cli/codelead-pkb-asks.md).
 - **Strategy**. How much the preflight does, from no questions to a deep analysis: `auto`, `fast`, `clarify`, `architect` or `deep`. See [Strategies](strategies.md).
 - **Structural route**. The PKB search's way into the code. A question that asks where, which file or how do I takes it, and so does a name in the code. For a named type it also reads where the type is declared and what implements it. See [`codelead pkb search`](../cli/codelead-pkb-search.md#the-structural-route).
 - **System Model**. What CodeLead reads from an old application's sources: its entry points, its rules and its data, with no model call. See [The System Model](../modernization/system-model.md).
