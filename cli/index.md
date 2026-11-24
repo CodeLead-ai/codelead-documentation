@@ -100,7 +100,7 @@ To see the help of any command, add `--help`: `codelead doctor --help`.
 
 ### The shared knowledge base
 
-- [`codelead pkb`](codelead-pkb.md): the commands of the PKB service, the shared project knowledge base. [`codelead pkb store`](codelead-pkb-store.md) starts, stops and checks its store. [`codelead pkb sync`](codelead-pkb-sync.md) sends a project's knowledge into it.
+- [`codelead pkb`](codelead-pkb.md): the commands of the PKB service, the shared project knowledge base. [`codelead pkb store`](codelead-pkb-store.md) starts, stops and checks its store. [`codelead pkb sync`](codelead-pkb-sync.md) sends a project's knowledge into it. [`codelead pkb embed`](codelead-pkb-embed.md) makes the embeddings of its pieces. [`codelead pkb search`](codelead-pkb-search.md) searches it for a question, and says why each hit was found.
 
 ## Options that every command shares
 

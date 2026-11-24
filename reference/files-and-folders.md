@@ -44,7 +44,7 @@ The first chat session adds `.codeleadsessions/` and its line in `.gitignore`. I
 | `.codelead/config.json` | `codelead init`, `codelead modernize source`, the extension's Settings | `codelead.config/1` | Yes | The settings. See [Configuration file](configuration.md). |
 | `.codelead/knowledge.json` | every run that learns a fact, and `init` | `codelead.knowledge/1` | Yes | The [knowledge base](../concepts/knowledge-base.md): the entries and their evidence. |
 | `.codelead/evidence/ev-<time>-<id>.json` | every run | `codelead.evidence/1` | Yes | One [evidence record](evidence-record-format.md) per run. |
-| `.codelead/disclosures.jsonl` | [`codelead pkb sync`](../cli/codelead-pkb-sync.md) | | Yes | One line for each sync: what left which folder for the PKB store, as file names, hashes and counts, never the text. |
+| `.codelead/disclosures.jsonl` | [`codelead pkb sync`](../cli/codelead-pkb-sync.md), [`codelead pkb embed`](../cli/codelead-pkb-embed.md) | | Yes | One line for each sync that changed something in the PKB store, and for each send of texts to a remote embeddings server: what left, as file names, hashes and counts, never the text. |
 | `.codelead/project-index.json` | the project library | `codelead.project-index/1` | No | The index of the [project library](../concepts/project-library.md). CodeLead writes it again when the repository changes. |
 | `.codelead/validation.json` | you, and the pins and `rebuild init` when they add an entry | `codelead.validation/1` | Yes | The gate's commands. See [Validation file](validation-file.md). |
 | `.codelead/run.json` | you | `codelead.run/1` | Yes | How to start the application for a spec walk. See [Run file](run-file.md). |
@@ -185,7 +185,7 @@ The lines that `init` adds to `.gitignore`:
 |---|---|---|
 | `<home>/.codelead/accepted.json` | the first run of a packaged release | That you accepted the evaluation terms on this machine. `codelead doctor` and `codelead licence` run without it. |
 | `<home>/.codelead/locks/walk-<key>.lock` | a rebuild run, `codelead implement` | One run per walk database on this machine. `CODELEAD_LOCKS_DIR` moves the folder. |
-| `<home>/.codelead/pkb/` | [`codelead pkb store up`](../cli/codelead-pkb-store.md) | The PKB store: `pkb.json`, the env file `.env` with its passwords (readable by you only), `compose.yaml`, `mongod.yml` and `mongot.yml`. `CODELEAD_PKB_HOME` moves the folder. |
+| `<home>/.codelead/pkb/` | [`codelead pkb store up`](../cli/codelead-pkb-store.md) | The PKB store: `pkb.json`, the env file `.env` with its passwords (readable by you only), `compose.yaml`, `mongod.yml` and `mongot.yml`. `pkb.json` also names the embeddings server ([`codelead pkb embed`](../cli/codelead-pkb-embed.md#the-embeddings-server)). `CODELEAD_PKB_HOME` moves the folder. |
 
 CodeLead writes nothing else outside the project. Docker keeps the PKB store's data in its own volumes. The walk's passwords file, when you use one, is a file that you make and name with `CODELEAD_WALK_CREDENTIALS`. Keep it outside every repository.
 

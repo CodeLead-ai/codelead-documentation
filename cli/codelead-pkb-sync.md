@@ -13,7 +13,7 @@ date: 2026-11-24
 `codelead pkb sync` sends what a project knows into the store of the [PKB service](codelead-pkb.md). It reads the files that CodeLead keeps in each repository of the project. It scans every text for secrets, paths of this machine and private names before anything leaves. It logs what left which folder, as file names, hashes and counts.
 
 > [!IMPORTANT]
-> The store must run first: see [`codelead pkb store`](codelead-pkb-store.md). Nothing reads the knowledge back yet. Questions and answers (`codelead pkb ask`) come later.
+> The store must run first: see [`codelead pkb store`](codelead-pkb-store.md). [`codelead pkb search`](codelead-pkb-search.md) reads the knowledge back. Answers (`codelead pkb ask`) come later.
 
 ## Name
 
@@ -22,7 +22,7 @@ date: 2026-11-24
 ## Synopsis
 
 ```console
-codelead pkb sync [--project <ID>] [--dir <FOLDER>] [--dossier <FOLDER>] [--audit-pack <FOLDER>] [--dry-run] [--by <NAME>] [--json]
+codelead pkb sync [--project <ID>] [--dir <FOLDER>] [--dossier <FOLDER>] [--audit-pack <FOLDER>] [--dry-run] [--by <NAME>] [--no-embed] [--json]
 codelead pkb sync -h|--help
 ```
 
@@ -80,6 +80,15 @@ The store keeps each file by its hash. A second sync of files that did not chang
 
 When a file changed, the store keeps its new version and marks the pieces of the old one as superseded. A search never finds a superseded piece. It stays in the store, so that an answer that cited it can still show it.
 
+### The embeddings
+
+At its end, `sync` makes the embeddings of the pieces that have none, as [`codelead pkb embed`](codelead-pkb-embed.md) does. A search by meaning compares them. This step never changes the sync's exit code.
+
+- When `pkb.json` names no embeddings model, the last lines say how many pieces wait, and how to name one.
+- When the embeddings server does not answer, the pieces made so far are kept. The others wait for `codelead pkb embed`.
+- When `pkb.json` says `paused`, no model is called, and the pieces wait.
+- `--no-embed` skips the step. A dry run never runs it.
+
 ### One sync at a time
 
 Only one sync of a project runs at a time. A second sync of the same project stops before it sends anything, and names the sync that runs. A sync that died gives the project back after one hour.
@@ -89,6 +98,8 @@ Only one sync of a project runs at a time. A second sync of the same project sto
 Each sync writes one line in the store's disclosure log for each project it wrote into. The line says who ran the sync and when. For each reader, it gives the repository, the folder, each file read with its SHA-256 hash, and the counts. It never holds the text of a file.
 
 `sync` also adds the same line to `.codelead/disclosures.jsonl` in each repository that it read. A sync that fails part-way still writes its line, with the count `partial`, because some files left already.
+
+A sync that changed nothing in the store adds no line to the repositories. The store held all of it already, so nothing new left. The store's own log still gets its line, with the count `unchanged`, so it shows that the sync ran. Your working tree stays as it was.
 
 ## Options
 
@@ -115,6 +126,10 @@ Each sync writes one line in the store's disclosure log for each project it wrot
 - **`--by <NAME>`**
 
   Who runs the sync. The history of each entry and the disclosure log name it. The default is `codelead pkb sync`.
+
+- **`--no-embed`**
+
+  Skips the embedding step at the end. Run [`codelead pkb embed`](codelead-pkb-embed.md) later to make the embeddings.
 
 - **`--json`**
 
@@ -155,7 +170,11 @@ Each sync writes one line in the store's disclosure log for each project it wrot
   …
   Changed: the counts above say what is new, updated or superseded.
   Disclosure: d-af41f913fe9ac9f5042d, d-ff1780ca8039c0fa82f6, in the store and in each repository read (.codelead/disclosures.jsonl).
+  Embeddings: 32 chunks wait for their embeddings: pkb.json names no embeddings model (embeddings.model).
+  Name one in pkb.json (an embedding model the embeddings server has loaded, of embeddings.dimensions numbers), then run codelead pkb embed.
   ```
+
+  The last two lines come from the embedding step. Here `pkb.json` names no model yet.
 
 - Run the same sync again. Nothing changed in the files, so nothing changes in the store:
 
@@ -169,6 +188,20 @@ Each sync writes one line in the store's disclosure log for each project it wrot
   - evidence (webapp, .codelead/evidence): 2 files holding 2 records; sources 0 new, 0 updated, 2 unchanged; evidence 0 new, 0 updated, 2 unchanged; chunks 0 new, 0 updated, 2 unchanged.
   …
   Nothing changed: every file read was synced already, as it is.
+  Disclosure: d-0c5be2f1a7d34e9b6a18, d-7e2f9d4c1b0a58e3c6f2, in the store only: the store held all of it already, so no repository's .codelead/disclosures.jsonl gained a line.
+  ```
+
+- See the board's line. The reader reads every card, and sends only the cards that a person decided:
+
+  ```console
+  codelead pkb sync --dry-run
+  ```
+
+  ```output
+  Dry run of the project orchard: read, scanned and checked; sent to a store in memory, so everything counts as new. Nothing was written.
+  …
+  - board (orchard, docs/codelead/board/items): 1 card read, 1 decided: 1 file sent; sources 1 new, 0 updated, 0 unchanged; entries 1 new, 0 updated, 0 unchanged; chunks 1 new, 0 updated, 0 unchanged.
+  …
   ```
 
 - Run it when the store does not run. Nothing is read or sent, and the exit code is `2`:
@@ -233,7 +266,7 @@ Each sync writes one line in the store's disclosure log for each project it wrot
 |---|---|
 | `<home>/.codelead/pkb/pkb.json` | Reads the project: its repositories, its folders and its private names. |
 | `<home>/.codelead/pkb/.env` | Reads the store's password. |
-| `.codelead/disclosures.jsonl`, in each repository read | Adds one line for each sync. |
+| `.codelead/disclosures.jsonl`, in each repository read | Adds one line for each sync that changed something in the store. |
 | `docs/codelead/board/private-names.txt`, in each repository | Reads the names to keep private. Git ignores this file. |
 
 ### The project in pkb.json
@@ -261,6 +294,8 @@ Each sync writes one line in the store's disclosure log for each project it wrot
 
 - [`codelead pkb`](codelead-pkb.md): the commands of the PKB service.
 - [`codelead pkb store`](codelead-pkb-store.md): start, stop and check the store.
+- [`codelead pkb embed`](codelead-pkb-embed.md): make the embeddings that the sync's last step makes.
+- [`codelead pkb search`](codelead-pkb-search.md): search what the sync sent.
 - [The knowledge base](../concepts/knowledge-base.md)
 - [Evidence records](../concepts/evidence-records.md)
 - [The audit pack](../modernization/audit-pack.md)

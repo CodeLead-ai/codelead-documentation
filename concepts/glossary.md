@@ -50,6 +50,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 
 ## E
 
+- **Embedding**. A list of numbers that stands for what a text means. Two texts that mean the same thing get lists that point the same way. The PKB service searches by meaning with them. See [`codelead pkb embed`](../cli/codelead-pkb-embed.md).
 - **Encyclopedia**. The project's knowledge entries in `.codelead/knowledge.json`, each with its trust level and its evidence. See [The knowledge base](knowledge-base.md).
 - **Evidence record**. A small JSON file that CodeLead writes at the end of every run. It says what was asked, what changed and what the checks said. See [Evidence records](evidence-records.md).
 - **Explorer**. The part of the Analyst that visits a running web application by itself and writes what it saw on each screen. See [Explore an application](../analyst/explore-an-application.md).
@@ -90,6 +91,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 ## N
 
 - **Non-goal**. Something that the plan says the change must not touch. A patch that crosses one gets a note. See [Requests, plans and patches](requests-plans-and-patches.md).
+- **Not in the knowledge base**. What the PKB service says when nothing it found clears its floor. Then no model writes an answer. See [`codelead pkb search`](../cli/codelead-pkb-search.md#not-in-the-knowledge-base).
 - **Note**. A finding of the patch check that never blocks a patch, for example a convention that a new line does not follow. See [The patch check](the-patch-check.md).
 
 ## O
@@ -103,7 +105,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 - **Patch**. A description of changes to files, as a diff, that nobody has applied yet. See [Requests, plans and patches](requests-plans-and-patches.md).
 - **Patch check, the**. CodeLead's own reading of a patch against your files, before the apply and with no model. See [The patch check](the-patch-check.md).
 - **Pin**. A test that records what the old code does today, so that a later change cannot break it unseen. See [Pins](../modernization/pins.md).
-- **PKB service**. The project knowledge base shared by a team: what several projects know, in one place, with every answer cited. Today its store and its sync exist: [`codelead pkb sync`](../cli/codelead-pkb-sync.md) sends a project's knowledge into the store. See [`codelead pkb`](../cli/codelead-pkb.md).
+- **PKB service**. The project knowledge base shared by a team: what several projects know, in one place, with every answer cited. Today its store, its sync and its search exist: [`codelead pkb sync`](../cli/codelead-pkb-sync.md) sends a project's knowledge into the store, and [`codelead pkb search`](../cli/codelead-pkb-search.md) finds it again. See [`codelead pkb`](../cli/codelead-pkb.md).
 - **Plan (of a change)**. The preflight's result: the files to change, the non-goals and how to validate. The patch check holds the patch to it. See [Requests, plans and patches](requests-plans-and-patches.md).
 - **Plan (of a licence)**. Free or pro: which parts of CodeLead a folder can use. See [Licence and plans](licence-and-plans.md).
 - **Preflight**. The first step of a change: CodeLead chooses the files, and a model analyzes them and writes the plan. It can ask questions. See [Requests, plans and patches](requests-plans-and-patches.md).
@@ -140,6 +142,7 @@ This page explains every term that CodeLead uses, in alphabetical order. Each en
 - **Stop**. A run that ends before its job is done. A stop always says why and what you can do next. See [Results and stops](results-and-stops.md).
 - **Stop file**. A file whose presence asks an unattended run to stop after its current part, for example `.codelead/STOP`. See [Unattended runs and the run lock](unattended-runs.md).
 - **Strategy**. How much the preflight does, from no questions to a deep analysis: `auto`, `fast`, `clarify`, `architect` or `deep`. See [Strategies](strategies.md).
+- **Structural route**. The PKB search's way into the code. A question that asks where, which file or how do I takes it, and so does a name in the code. See [`codelead pkb search`](../cli/codelead-pkb-search.md#the-structural-route).
 - **System Model**. What CodeLead reads from an old application's sources: its entry points, its rules and its data, with no model call. See [The System Model](../modernization/system-model.md).
 
 ## T
