@@ -213,12 +213,14 @@ An old layout often shows more than its controls. For example, it shows the sign
 What the old shell shows of the session: the signed-in user's name (`User.Identity.Name`, BasicStore.Web/Views/Shared/_Layout.cshtml:22), shown when signed in. Render it in the menu as text while someone is signed in, and no name for a visitor: read it from the field userName of the answer of GET /api/me, the API's caller-identity seam (the part identity-seam), through the API client. The walk's sign-in steps look for that name on the page.
 ```
 
-A menu can land before its request asked for the name. CodeLead then reads the rebuilt shell's files, with no model call. When no file shows the name, the plan plans the menu again, to be revised in place:
+A menu can land before its request asked for the name. CodeLead then reads the rebuilt shell's files, with no model call. They are its layout and every file it imports, by a relative path, the tsconfig's `paths` or `@/`. When no file shows the name, the plan plans the menu again, to be revised in place:
 
 <!-- described, not captured -->
 ```output
 accepted (ev-<ID>) before its request asked it to show the signed-in name the old shell shows (`User.Identity.Name` at BasicStore.Web/Views/Shared/_Layout.cshtml:22): no file of the shell renders the name's field (userName) as text: the menu shows no signed-in name: planned again, to be revised in place
 ```
+
+Its next request names the files the menu built, and the patch is shown them. See [What a revised part is shown](#what-a-revised-part-is-shown).
 
 When CodeLead cannot tell from the code, the menu gets a note for a person. An example is a name handed to another component.
 
@@ -237,6 +239,33 @@ Then the part is **accepted before, its steps changed since: to be judged again*
 - When they fail, the judgement offers no repair round. The plan plans the part again: `accepted (ev-<ID>) by a walk of its earlier steps; its own step now, <STEP>, fails in the walk of <TIME>: revise it`.
 
 The next composition revises in place what the part built, as for a [reopened part](#reopen-a-part). Its request says why, and quotes the walk's words for the failing steps. The check of accepted parts protects what the part built until its revision lands.
+
+### What a revised part is shown
+
+A part can be composed again to be revised in place. A person reopened it, its changed steps failed, its contract asks for more, or its endpoint moved. The model must then see what the part built, not guess it.
+
+The part's evidence records name the files its patches changed. CodeLead reads them, keeps the files the tree still holds, and names them in the request:
+
+<!-- described, not captured -->
+```output
+What it built lives in web/src/components/shell-menu.tsx, web/src/app/layout.tsx and web/src/components/shell-menu.test.tsx. The context below holds these files as they are now: revise them there, and write nothing from memory.
+```
+
+The session then hands those files to the patch, as they are now, and says so:
+
+<!-- described, not captured -->
+```output
+Revised in place (its records' patches, from ev-<ID>): the patch's context holds what it built, as it stands now: web/src/components/shell-menu.tsx, web/src/app/layout.tsx and web/src/components/shell-menu.test.tsx.
+```
+
+The rule for what the patch is shown:
+
+- First the files the revision's own words name, then the code, then its tests.
+- At most 4 files, and 40,000 characters in all. A file over 30,000 characters is not shown whole.
+- A file it does not show whole is still named, as not shown, with the limit.
+- A file the part built and someone deleted since is not named.
+
+These sentences only describe where the work lives. The gates owe the patch none of these files, so a revision may leave one of them alone. On a revision, the menu's request no longer says it replaces the shell's navigation, and its tests are the part's own.
 
 ### Lanes
 
