@@ -3,7 +3,7 @@ title: /modernize
 description: Every modernization action of the chat, from the dossier to the audit pack, with its options, its questions, its results and its stops.
 kind: reference
 area: chat-commands
-date: 2026-11-20
+date: 2026-11-25
 ---
 
 # /modernize
@@ -416,7 +416,7 @@ Waived S-001 Debug compilation enabled — the page is internal only. Recorded i
 /modernize --audit-pack [--since <COMMIT>] [--out <FOLDER>] [--secret-file <PATH>]
 ```
 
-Builds the audit pack in `docs/codelead/audit-pack/`. It holds every landed increment with its request, its evidence record, its commit and its attempts. It also holds the gate, the survey before and after, and every session, sanitized. A manifest lists the SHA-256 of every file. Read its `README.md` first. See [The audit pack](../modernization/audit-pack.md).
+Builds the audit pack in `docs/codelead/audit-pack/`. It holds every landed increment with its request, its evidence record, its commit and its attempts. It also holds the gate, the survey before and after, and every session, sanitized. When the modernization program has a rebuild, the pack also holds what judged the rebuild, in `6-rebuild/`. That is its last walk, its parity report, its journeys with their proof, and its evidence records. The rebuild's sessions stay in the rebuild. A manifest lists the SHA-256 of every file. Read its `README.md` first. See [The audit pack](../modernization/audit-pack.md).
 
 - `--since <COMMIT>`: the commit before the work started. The default is the parent of the first checkpoint commit.
 - `--out <FOLDER>`: the pack's folder.

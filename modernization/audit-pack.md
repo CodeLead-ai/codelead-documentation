@@ -3,12 +3,12 @@ title: The audit pack
 description: What the audit pack of a modernization holds, who reads it, and how to check that nothing in it was changed.
 kind: concept
 area: modernization
-date: 2026-11-23
+date: 2026-11-25
 ---
 
 # The audit pack
 
-The audit pack is one folder that proves what a modernization did. It holds every change that landed, with its request, its evidence record, its commit and its attempts. It also holds the gate, the survey before and after, the security findings, and every session with its secrets removed. CodeLead writes it in the last stage, Hand over.
+The audit pack is one folder that proves what a modernization did. It holds every change that landed, with its request, its evidence record, its commit and its attempts. It also holds the gate, the survey before and after, the security findings, and every session with its secrets removed. For a rebuild, it also holds what judged the rebuild: its last walk, its parity report, its journeys and its evidence records. CodeLead writes it in the last stage, Hand over.
 
 **In short**
 - You know what the audit pack holds, layer by layer, and which file to read first.
@@ -44,13 +44,14 @@ After a full modernization, the pack holds one folder for each landed increment:
 
 | Folder | What it holds |
 |---|---|
-| `README.md` | The summary. It opens with the stages that a person skipped: who, when and why. Then the rebuild as it stands, when the program's Rebuild stage is done or skipped. Then what was done, the increments, the metrics before and after, the criteria and where each proof is. Read it first. |
+| `README.md` | The summary. It opens with the stages that a person skipped: who, when and why. Then the rebuild as it stands, when the program's Rebuild stage is done or skipped, with what its last walk says. Then what was done, the increments, the metrics before and after, the criteria and where each proof is. Read it first. |
 | `0-dossier/` | The survey, the intake and the options that the work started from. |
 | `1-program/` | The program's state file, and the evidence record of each skipped stage. When the Rebuild stage is done or skipped, also the rebuild's plan as it stands, `rebuild-plan.json`, and the evidence record of the person's `rebuild=enough` answer. |
 | `2-increments/<nn>-<stage>-<id>/` | One folder for each landed increment: `request.txt`, `evidence-record.json`, `commit.txt` and `diff.patch` when a commit exists, and `attempts.md` with every record of the same request. |
 | `3-baselines/` | The declared gate (`validation-gate.json`), the knowledge store, the branch log, and `metrics.json`: the survey run on the tree before and the tree after. |
 | `4-sessions/<session>/` | The full session log of each session, with every prompt and response, and `INDEX.md` with the reason of each stop. |
 | `5-security/` | The security scan on both trees, and each finding's state: fixed, open, waived or new (`DISPOSITIONS.md`). |
+| `6-rebuild/` | Only when the program has a rebuild. What judged the rebuild: the last walk, the parity report, the journeys and their proof on the old application, and every evidence record of the rebuild, with `INDEX.md`. See [What judged the rebuild](#what-judged-the-rebuild). |
 | `manifest.json` | Every file of the pack with its size and its SHA-256. |
 
 ### The rebuild as it stands
@@ -63,8 +64,18 @@ A person can end the Rebuild stage with parts left: `codelead modernize answer r
 - **The parts that landed and that no walk judged**, in a table of their own. They are not finished.
 - **How many endpoints read the data**, when the old application reaches a database. An endpoint whose rebuilt code reads no data is not finished, whatever its walk said. The line reads, for example, `Data access: of 17 endpoints whose old action reads or writes the database, 0 read the data in the code; 17 are accepted on their contract and read no data yet …`. By default the rebuild ports the data access to EF Core, and the manifest's `decisions.dataAccess` says which way was chosen. See [The data access](rebuild.md#the-data-access).
 - **The user directory**, when the rebuild keeps the old accounts. The line says what was built and how it was proved, or that none is built. For example: `User directory: the part user-directory is accepted (ev-…): UserDirectory behind IUserDirectory, its password check ported from PasswordHasher.Verify (…). Proved by its contract tests … and by its walk …`. Until that part is accepted, the line says that a build for production signs nobody in. See [The user directory](rebuild.md#the-user-directory).
+- **The last walk of the rebuild**, in one paragraph, after what the plan says. It names when the walk ran, on which commit, and its counts. It names each failing step with the walk's words. A step that fails on the old application as well is said apart, in the walk's own words, with the date of the proof. See [The old application's journeys](walk-and-parity.md#the-old-applications-journeys).
 - **A table of each other part that is not finished**: its state, and why, in the plan's own words. A state is, for example, `parked for a person`, `planned, waiting` or `planned and never taken`.
 - **The plan's blockers**, and its notes to a person.
+
+On the Basic Store sample's full run, the walk's paragraph reads:
+
+<!-- described, not captured -->
+```output
+The last stored walk of the rebuild ran at 2026-11-25T07:48:41.803Z on commit `abc852d`, at `http://localhost:3000` (`6-rebuild/walk.json`): **39 steps, 38 pass, 1 fail, 0 blocked, 12 findings**. The failing step: `orders.cancel-5` (nothing to click named "Cancel this order" on /orders/details?id=3). Not the rebuild's: orders.cancel-5 fails on the old application as well (the proof of 2026-11-25): a defect of the drafted journey, not of the rebuild (`6-rebuild/journeys-proof.json`). The findings are listed in `6-rebuild/walk.md`.
+```
+
+A walk can be older than the rebuild. It may have run before the rebuild's last landing, or on another tree than the one on disk. Then the paragraph does not quote it as current. It says why, in words such as `is not the walk of the rebuild as it stands: it ran at …, before the rebuild's last landing (ev-… at …)`.
 
 The plan is copied as `1-program/rebuild-plan.json`, with its secrets removed. In this example from CodeLead's tests, the person answered `rebuild=enough` while a prerequisite was parked:
 
@@ -94,6 +105,33 @@ Landed, and no walk judged them: not finished.
 ```
 
 A rebuild with nothing left ends the line with `every part is accepted, satisfied or dropped: nothing is left`. A part that landed and that no walk judged is never counted as finished. When CodeLead cannot read the plan, the section says so, with the plan's path relative to the old application's folder.
+
+### What judged the rebuild
+
+The plan says which parts are accepted. A reviewer also needs what accepted them. So when the program has a rebuild, the pack holds the layer `6-rebuild/`. A program has a rebuild when the folder of its `rebuildFolder` answer holds `docs/codelead/rebuild/rebuild.json`. Each file goes through the same rules for secrets as the other layers. The layer holds:
+
+| File | What it is |
+|---|---|
+| `walk.json`, `walk.md` | The last walk of the rebuild, from `docs/codelead/parity/` in the rebuild. |
+| `rebuild-parity.json`, `rebuild-parity.md` | The parity report of the rebuild. See [Parity of a rebuild](walk-and-parity.md#parity-of-a-rebuild). |
+| `journeys.json`, `journeys-proof.json` | The journeys that the walk follows, and their proof on the old application. |
+| `evidence/ev-….json` | Every evidence record of the rebuild. |
+| `INDEX.md` | One line for each record: its id, its part, its command, its outcome, its date and its commit. Then each part of the plan with the record that the plan names for it. Then each session of the rebuild, with its part and its size. |
+
+So a reviewer can follow every "accepted" of the plan to the record that says why. For example, the line of the part `user-directory` in `INDEX.md` links to `evidence/ev-20261125015518-9vtb53.json`.
+
+The sessions of a rebuild are large: 163 sessions and 67 MB on the Basic Store sample's full run. So the pack does not copy them. `INDEX.md` lists them, and the README says where they are. To add them, write the rebuild's own audit pack: run `/modernize --audit-pack` in the rebuild's chat. Its `4-sessions/` holds them, with their secrets removed.
+
+The criteria table of `README.md` gains the rebuild's rows, each only when its proof is in the pack:
+
+<!-- described, not captured -->
+```output
+| Every part of the rebuild's plan is accepted, satisfied or dropped | yes (45 parts) | `1-program/rebuild-plan.json`, `6-rebuild/INDEX.md` (the record each part names) |
+| The last walk of the rebuild passes, but for what is not the rebuild's | no: 38 of 39 steps pass, 1 fail, 0 blocked, 12 findings; not the rebuild's: orders.cancel-5 fails on the old application as well | `6-rebuild/walk.json`, `6-rebuild/journeys-proof.json` |
+| Parity of the rebuild says it is finished | no: 4 blockers | `6-rebuild/rebuild-parity.md` |
+```
+
+A walk whose only failing steps fail on the old application as well, with no finding at another step, meets the walk's row: `yes: every other step passes; …`. A program with no rebuild has no layer `6-rebuild/` and no rebuild rows. Its pack is the same as before, byte for byte.
 
 ### Before and after
 
@@ -205,7 +243,8 @@ Read the sessions with care. A session holds the prompts and the model's answers
 ## Details
 
 - **Options**: `--since <COMMIT>`, the commit before the work started (the default is the parent of the first checkpoint commit); `--out <FOLDER>`; `--secret-file <PATH>`.
-- **The program**: the Hand over stage runs it in the old application: `codelead modernize run audit`, or `/modernize --run audit`. Run `/modernize --audit-pack` in the rebuild's own chat too, for the rebuild's increments.
+- **The program**: the Hand over stage runs it in the old application: `codelead modernize run audit`, or `/modernize --run audit`. Its line then counts the rebuild's records too: `Done: The audit pack: 2 landed increments, 12 sessions, … files; the rebuild's 240 evidence records, its last walk and parity in 6-rebuild/.` Run `/modernize --audit-pack` in the rebuild's own chat too, for the rebuild's increments and its sessions.
+- **No option copies the rebuild's sessions** into this pack. The rebuild's own pack holds them.
 - **Waivers**: a security finding that you decided not to fix is recorded with [`/modernize --waive`](../chat-commands/modernize.md#--waive) in `docs/codelead/security-waivers.json`, and the pack lists it in `5-security/`.
 - **The manifest**: `codelead.audit-pack-manifest/1`, with `head`, `since`, and each file's `path`, `bytes` and `sha256`.
 - **The catalog**: the pack's `README.md` is added to the repository's document catalog, `docs/codelead/CATALOG.md`.

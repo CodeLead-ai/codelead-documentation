@@ -3,7 +3,7 @@ title: The walk and parity
 description: How the walk runs the journeys on a running application, step by step, and how parity decides that the new application does what the old one did.
 kind: concept
 area: modernization
-date: 2026-11-20
+date: 2026-11-25
 ---
 
 # The walk and parity
@@ -125,11 +125,29 @@ Such a step is never held against the rebuild. Wherever a failing step is said, 
 Not the rebuild's: orders.cancel-5 fails on the old application as well (the proof of 2026-11-25): a defect of the drafted journey, not of the rebuild. Every other step passes.
 ```
 
-- **The walk** says it after its counts, as above.
+- **The walk** says it after its counts, as above. When it adds `Every other step passes.`, the walk's exit code is 0.
 - **A part's acceptance** counts no regression and no finding at that step. Its line says `Not this part's: …`.
 - **Parity** reads a walk that fails only on such steps, and on steps blocked behind them, as passing. Its note names them.
 - **The stage** says `the walk passed but for what is not the rebuild's (…)`.
 - **A part whose own steps wait only on such a step** is your turn: correct the draft. The run does not wait to judge it.
+
+A finding at another step still counts. So a walk whose only failing step is the draft's, with findings at other steps, does not pass. The Rebuild stage's line then says what is true, with the walk's counts and the draft's step apart. On the Basic Store sample's full run, the walk had one failing step, the draft's, and 12 findings:
+
+<!-- described, not captured -->
+```output
+… the walk found no failing step of the rebuild's, and 12 findings (39 steps at `http://localhost:3000`: 38 pass, 1 fail, 0 blocked, 12 findings; not the rebuild's: orders.cancel-5 fails on the old application as well (the proof of 2026-11-25): a defect of the drafted journey, not of the rebuild); parity says what is left.
+```
+
+The stage's line says one of these about the walk:
+
+| The walk | The stage's words |
+|---|---|
+| Every step passed, with no finding. | `the walk passed` |
+| Only the draft's steps fail, and the steps behind them, with no finding at another step. | `the walk passed but for what is not the rebuild's (…)` |
+| Only the draft's steps fail, and findings remain at other steps. | `the walk found no failing step of the rebuild's, and 12 findings (…)` |
+| A step of the rebuild fails or is blocked. | `the walk found what fails (…)`, with the counts, and the draft's steps apart |
+| The walk recorded nothing, for example because nothing answered. | `the walk recorded nothing (its words are above)` |
+| The walk could not start. | `the walk was not run (…)`, with the reason |
 
 Some controls are rendered only under a condition. For example, the old order page writes "Cancel this order" inside `@if (Model.Status == Order.Placed)`. The drafted step then says so, with the condition and its place: `the old view renders it only when`, then `Model.Status == …` and `Views/Orders/Details.cshtml:25`. The draft does not guess which row meets the condition. When the proof finds nothing to click there, its words name the condition the page did not meet.
 
@@ -205,7 +223,7 @@ In a rebuild, a feature that you decide not to carry is not waived. It is droppe
 - **The walk's report**: `docs/codelead/parity/walk.md` and `walk.json` in the rebuild. `--no-write` prints it and writes nothing, for any application.
 - **The time zone**: the walk reads the server's day in the run profile's zone, or in `--time-zone <ZONE>`.
 - **Page parity's files**: the baseline in `docs/codelead/parity/baseline/`, each check in `docs/codelead/parity/latest/`. The routes come from the dossier's structural inventory, or from `--routes`.
-- **Exit codes** of `codelead walk`: `0` every step passed, `1` a step failed or was blocked, `2` nothing honest could be recorded. Of `codelead parity --rebuild`: `0` finished, `1` a blocker is open.
+- **Exit codes** of `codelead walk`: `0` every step passed, or only the draft's steps did not pass. `1` a step of the rebuild failed or was blocked, or a finding counts. `2` nothing honest could be recorded. See [Exit codes](../cli/codelead-walk.md#exit-codes). Of `codelead parity --rebuild`: `0` finished, `1` a blocker is open.
 - **A browser**: the walk needs Playwright's Chromium. [`codelead doctor`](../cli/codelead-doctor.md) checks that it starts.
 
 ## What it is not

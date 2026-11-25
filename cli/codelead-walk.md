@@ -3,7 +3,7 @@ title: codelead walk
 description: Walk the running application as a new user would, through the screens, and report every journey step as pass, fail or blocked.
 kind: reference
 area: cli
-date: 2026-11-20
+date: 2026-11-25
 ---
 
 # codelead walk
@@ -106,6 +106,23 @@ The passwords of a spec's accounts come from `CODELEAD_WALK_PASSWORD_<USER>`, or
 
   Start the rebuild's API and web application first, then walk again. The walk then prints each step as `PASS`, `FAIL` or `BLOCKED`, writes `docs/codelead/parity/walk.md`, and ends with the counts. When every step passes, the last line counts only passes, and the exit code is 0.
 
+- Walk a rebuild whose only failing step also fails on the old application. The journeys' proof, `docs/codelead/rebuild/journeys-proof.json`, says so. So the step is a defect of the drafted journey, not of the rebuild. The walk says it apart, after its counts, and the exit code is 0:
+
+  ```console
+  codelead walk --base http://localhost:3000 --rebuild
+  ```
+
+  <!-- described, not captured -->
+  ```output
+  …
+  FAIL    orders.cancel · Click "Cancel this order": … — nothing to click named "Cancel this order" on /orders/details?id=3
+  …
+  39 steps: 38 pass, 1 fail, 0 blocked. 0 findings.
+  Not the rebuild's: orders.cancel-5 fails on the old application as well (the proof of 2026-11-25): a defect of the drafted journey, not of the rebuild. Every other step passes.
+  ```
+
+  A finding at another step still counts. Then the line ends without `Every other step passes.`, and the exit code is 1. See [The old application's journeys](../modernization/walk-and-parity.md#the-old-applications-journeys).
+
 - Walk a spec whose user key does not start with a letter. The walk refuses the spec before it sends anything, and the exit code is 2:
 
   ```console
@@ -165,8 +182,8 @@ The passwords of a spec's accounts come from `CODELEAD_WALK_PASSWORD_<USER>`, or
 
 | Code | Meaning |
 |---|---|
-| `0` | Every step passed, and there was no finding. |
-| `1` | A step failed or was blocked, there was a finding, or no step was walked. |
+| `0` | Every step passed, and there was no finding. Or every step that did not pass fails on the old application as well, by the journeys' proof, or waits on such a step. Then no finding is at another step, and the last line starts with `Not the rebuild's:`. |
+| `1` | A step of the rebuild failed or was blocked, there was a finding at a step of the rebuild, or no step was walked. A journey whose clock was not put back is `1` too. |
 | `2` | Nothing honest could be recorded: a refused spec, nothing that answers at `--base`, a server that lends an identity, a root that is not a rebuild, a browser that is not installed, an option that is not valid, `--rebuild` in a folder without the Pro plan. `--base` missing is also `2`. |
 
 ## Files
@@ -176,6 +193,7 @@ The passwords of a spec's accounts come from `CODELEAD_WALK_PASSWORD_<USER>`, or
 | `docs/codelead/rebuild/journeys.json`, or `--journeys` | Reads the journeys. |
 | `docs/codelead/rebuild/rebuild.json` | Reads the rebuild's manifest, its run profile and its day reset. |
 | `docs/codelead/parity/walk.md`, `walk.json` | Writes the report. Not with `--no-write`, and not when nothing answers at `--base`. |
+| `docs/codelead/rebuild/journeys-proof.json` | Reads the journeys' proof on the old application, when it is there. A step that fails there is said apart. With `--json`, that line goes to the standard error. |
 | `CODELEAD_WALK_CREDENTIALS` | Reads the passwords from the file that it names, when it is set. |
 
 ## See also

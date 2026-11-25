@@ -3,7 +3,7 @@ title: Modernize a .NET Framework application
 description: Take the Basic Store sample, an ASP.NET MVC 5 application on .NET Framework 4.5, through the eight stages of a modernization, from the dossier to the audit pack.
 kind: tutorial
 area: tutorials
-date: 2026-11-20
+date: 2026-11-25
 ---
 
 # Modernize a .NET Framework application
@@ -403,11 +403,12 @@ Stage 8 of 8, **Hand over**, writes the audit pack: every landing with its proof
    ▸ Write the audit pack (codelead modernize run audit)
    Audit pack: docs/codelead/audit-pack/ (… files, … MB)
    Increments: … landed; sessions: …; stops: …. Before `…` → after `…`.
+   The rebuild: … evidence records, its last walk, parity and the journeys' proof in 6-rebuild/; its sessions (…, … MB) stay in the rebuild repository.
    …
-     Done: The audit pack: … landed increments, … sessions, … files.
+     Done: The audit pack: … landed increments, … sessions, … files; the rebuild's … evidence records, its last walk and parity in 6-rebuild/.
    ```
 
-2. Open `docs/codelead/audit-pack/README.md`. Check the table of increments: each pin and each transform, with its commit and its attempts.
+2. Open `docs/codelead/audit-pack/README.md`. Check the table of increments: each pin and each transform, with its commit and its attempts. Then read the section `## The rebuild as it stands`: what the plan accepted, and what the rebuild's last walk says. See [What judged the rebuild](../modernization/audit-pack.md#what-judged-the-rebuild).
 3. See the whole program:
 
    ```console

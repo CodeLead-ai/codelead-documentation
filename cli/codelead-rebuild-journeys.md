@@ -3,7 +3,7 @@ title: codelead rebuild journeys
 description: Compare the rebuild's copy of the journeys with the System Model's draft, and refresh the copy's drafted journeys from the draft.
 kind: reference
 area: cli
-date: 2026-11-24
+date: 2026-11-25
 ---
 
 # codelead rebuild journeys
@@ -117,6 +117,8 @@ A defect of the draft: clients.edit-post-5 fails on the old application (on /Cli
 The results go in `docs/codelead/rebuild/journeys-proof.json`, beside the journeys, never in them. Each step's result is kept with the hash of the step. A note you add changes no hash, so the mark stays. A step that `--refresh` drafts anew has a new hash, so the proof no longer speaks for it. Prove the journeys again after a refresh.
 
 The plan reads the proof. It leaves a defect of the draft out of every part's own steps, and warns with `draft-defect`. A step that is only blocked on the old application stays a part's step.
+
+**What the exit code says.** The command writes the proof even when a step fails on the old application. The exit code is then 1, on purpose: the draft has a defect, and a person must look at it. Correct the step in the journeys, or draft it anew, then prove the journeys again. The exit code 1 does not mean that the proof is missing, and it stops nothing. The plan and the run read the proof all the same, and judge no part on that step. The exit code is 0 when every step passes on the old application, or is only blocked there. When nothing could be walked, for example because nothing answers at the address, the command writes no proof, and the exit code is 1 too. Its words then start with `The journeys … were not walked on the old application`.
 
 The walk sends the journeys' forms. What they write stays in the old application's data, so run it against a copy you can reset. CodeLead starts nothing here: pass `--base`, or record the old application's run profile with `codelead modernize source`.
 
@@ -246,8 +248,8 @@ A journey that the refresh keeps is listed with its reason, in the form `Kept as
 
 | Code | Meaning |
 |---|---|
-| `0` | The copy was compared with the draft, whether it stands as the draft or otherwise. With `--refresh`: the copy was written. |
-| `1` | No rebuild manifest, a copy that cannot be read, or a draft that is missing or cannot be read. With `--refresh`: the refresh was refused, and nothing was written. With `--prove`: a step fails on the old application, or nothing could be walked. A folder without the Pro plan is refused too. |
+| `0` | The copy was compared with the draft, whether it stands as the draft or otherwise. With `--refresh`: the copy was written. With `--prove`: the proof was written, and every step passes on the old application or is only blocked there. |
+| `1` | No rebuild manifest, a copy that cannot be read, or a draft that is missing or cannot be read. With `--refresh`: the refresh was refused, and nothing was written. With `--prove`: the proof was written, and a step fails on the old application, a defect of the draft for a person to correct; or nothing could be walked, and nothing was written. A folder without the Pro plan is refused too. |
 
 ## Files
 
