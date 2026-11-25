@@ -182,7 +182,7 @@ The passwords of a spec's accounts come from `CODELEAD_WALK_PASSWORD_<USER>`, or
 
 | Code | Meaning |
 |---|---|
-| `0` | Every step passed, and there was no finding. Or every step that did not pass fails on the old application as well, by the journeys' proof, or waits on such a step. Then no finding is at another step, and the last line starts with `Not the rebuild's:`. |
+| `0` | Every step passed, and there was no finding that counts. An expected finding, such as the signed-out state, is said on its own line, `Expected, not counted: …`, and does not count (see [Expected findings](../modernization/walk-and-parity.md#expected-findings)). Or every step that did not pass fails on the old application as well, by the journeys' proof, or waits on such a step. Then no finding is at another step, and the last line starts with `Not the rebuild's:`. |
 | `1` | A step of the rebuild failed or was blocked, there was a finding at a step of the rebuild, or no step was walked. A journey whose clock was not put back is `1` too. |
 | `2` | Nothing honest could be recorded: a refused spec, nothing that answers at `--base`, a server that lends an identity, a root that is not a rebuild, a browser that is not installed, an option that is not valid, `--rebuild` in a folder without the Pro plan. `--base` missing is also `2`. |
 

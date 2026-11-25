@@ -102,7 +102,8 @@ A step can pass on empty data. For example, "click Clients, the address is the c
 
 The judge reads some findings before it counts them:
 
-- **The signed-out state.** The caller-identity route, such as `GET /api/me`, tells the web application who is signed in. It answers 401 to a user who has not signed in yet in the journey. That is the signed-out state of the shell, not a fault. The judge shows it and does not count it: `Signed out, as expected (not counted): GET /api/me (identity-seam) answered 401 to a user not signed in yet, the shell's signed-out state, at <STEPS>.` A 401 after the user signed in still counts.
+- **The signed-out state.** The caller-identity route, such as `GET /api/me`, tells the web application who is signed in. It answers 401 to a user who has not signed in yet in the journey. That is the signed-out state of the shell, not a fault. The judge shows it and does not count it: `Signed out, as expected (not counted): GET /api/me (identity-seam) answered 401 to a user not signed in yet, the shell's signed-out state, at <STEPS>.` A 401 after the user signed in still counts. See [Expected findings](#expected-findings).
+- **The old model's own refusal.** The old action refuses the form with the same message, and the step passes on the old application too. The judge shows it and does not count it. See [Expected findings](#expected-findings).
 - **A cross-origin block.** An origin is the scheme, the host and the port of an address. The API is up at another origin than the page's, and the browser gets no answer at all from it. The judge names this a cross-origin block: the API's CORS policy refuses the web application's origin, or the credentials that its calls send. A CORS policy is the API's rule for which origins may call it. The finding says so, in place of a wrong route.
 - **A page not accepted yet.** The step's control is on the page of a part that is not accepted yet. The finding says so, for example `nothing to click named "New client" on / (the page of home.index:screen, which is not accepted yet)`.
 - **What another part builds.** The step failed only on what another part builds, and that part does not build it yet. An example is the signed-in name that the old shell showed, which the shell's menu builds. The part judged gets no repair round, and waits on that part. See [What the old shell shows](rebuild.md#what-the-old-shell-shows).
@@ -111,6 +112,29 @@ The judge reads some findings before it counts them:
 The rebuild's walk reads the journeys' old addresses as the new ones. Some steps click the first link to an old address, because the link's text is computed. Such a step clicks the first link to the new screen's address. For example, `/Orders/Details` becomes `/orders/details`. See [A link whose text is computed](../reference/journeys-format.md#a-link-whose-text-is-computed).
 
 An old address can carry a value of its row, such as the id in `^/Products/Edit/[^/]+$`. The rebuild carries it in the query, so the walk then asks for it: the step passes at `/products/edit?id=3`, and fails at `/products/edit`. See [Where an old redirect lands](rebuild.md#where-an-old-redirect-lands).
+
+### Expected findings
+
+Some findings are expected. CodeLead decides this with one rule, in one place. A part's acceptance, the walk's summary and its exit code, parity, the Rebuild stage's line and the audit pack all read it. An expected finding stays listed, apart, with its reason. It is only not counted.
+
+- **The signed-out state.** The caller-identity route, such as `GET /api/me`, answers 401 to a user who is not signed in. That is before the journey's sign-in, or after its sign-out.
+- **The old model's own refusal.** A step sends the form as the old page shows it, for example with an empty SKU. The new endpoint answers 400 with the old model's own message, `The SKU is required.`. The old action refuses the same form with the same words. All of these must be true:
+  - the step passes;
+  - each request of the finding is a planned endpoint that answered 400;
+  - the answer carries a message that the old model writes for that endpoint (the plan reads it from the old code);
+  - the journeys' proof passes the step on the old application.
+
+On the Basic Store sample's full run, the walk's last lines then read:
+
+<!-- described, not captured -->
+```output
+39 steps: 38 pass, 1 fail, 0 blocked. 12 findings.
+…
+Expected, not counted: 11 × GET /api/me 401 where nobody is signed in (…); 1 × POST /api/products/create 400 with the old model's own message "The SKU is required." (the old action refuses the same form: …; at products.create-post-5, which passes on the old application as well).
+Not the rebuild's: orders.cancel-5 fails on the old application as well (the proof of 2026-11-25): a defect of the drafted journey, not of the rebuild. Every other step passes.
+```
+
+Anything else stays a finding. A 401 after the user signed in counts. So does a 400 with other words, or at a step that fails, or at a step that the old application does not pass.
 
 ### The old application's journeys
 
@@ -131,20 +155,20 @@ Not the rebuild's: orders.cancel-5 fails on the old application as well (the pro
 - **The stage** says `the walk passed but for what is not the rebuild's (…)`.
 - **A part whose own steps wait only on such a step** is your turn: correct the draft. The run does not wait to judge it.
 
-A finding at another step still counts. So a walk whose only failing step is the draft's, with findings at other steps, does not pass. The Rebuild stage's line then says what is true, with the walk's counts and the draft's step apart. On the Basic Store sample's full run, the walk had one failing step, the draft's, and 12 findings:
+A finding that counts, at another step, still counts. So a walk whose only failing step is the draft's, with such a finding at another step, does not pass. The Rebuild stage's line then says what is true, with the walk's counts and the draft's step apart. For example, with one page error at another step:
 
 <!-- described, not captured -->
 ```output
-… the walk found no failing step of the rebuild's, and 12 findings (39 steps at `http://localhost:3000`: 38 pass, 1 fail, 0 blocked, 12 findings; not the rebuild's: orders.cancel-5 fails on the old application as well (the proof of 2026-11-25): a defect of the drafted journey, not of the rebuild); parity says what is left.
+… the walk found no failing step of the rebuild's, and 1 finding (39 steps at `http://localhost:3000`: 38 pass, 1 fail, 0 blocked, 1 finding that counts; expected, not counted: …; not the rebuild's: orders.cancel-5 fails on the old application as well (the proof of 2026-11-25): a defect of the drafted journey, not of the rebuild); parity says what is left.
 ```
 
 The stage's line says one of these about the walk:
 
 | The walk | The stage's words |
 |---|---|
-| Every step passed, with no finding. | `the walk passed` |
+| Every step passed, with no finding that counts. | `the walk passed`, or, with expected findings, `the walk passed but for what is not the rebuild's (…)` |
 | Only the draft's steps fail, and the steps behind them, with no finding at another step. | `the walk passed but for what is not the rebuild's (…)` |
-| Only the draft's steps fail, and findings remain at other steps. | `the walk found no failing step of the rebuild's, and 12 findings (…)` |
+| Only the draft's steps fail, and findings that count remain at other steps. | `the walk found no failing step of the rebuild's, and 1 finding (…)` |
 | A step of the rebuild fails or is blocked. | `the walk found what fails (…)`, with the counts, and the draft's steps apart |
 | The walk recorded nothing, for example because nothing answered. | `the walk recorded nothing (its words are above)` |
 | The walk could not start. | `the walk was not run (…)`, with the reason |
@@ -188,6 +212,40 @@ In this example from CodeLead's tests, the route of the GET's test is held in a 
 
 Write the route as text in the test's request, so that CodeLead can read it. See [`codelead parity`](../cli/codelead-parity.md#the-pins-of-a-rebuild) for every status.
 
+#### A feature that the plan builds in a part of its own
+
+Some old features get no endpoint and no screen of their own in the map. The sign-in is one: the map's note says `replaced by the new API's identity scheme`. The plan builds the sign-in in two parts, `sign-in:endpoint` and `sign-in:screen`. Each part says in the plan which old features it builds, with its endpoint or its screen's route. Parity reads that, and checks them like any other:
+
+<!-- described, not captured -->
+```output
+| account.sign-in-post | auth | POST /Account/SignIn (SignInModel model) | POST /api/account/sign-in ✓ | — | **landed** | as the plan builds it: the sign-in's endpoint (the part sign-in:endpoint, accepted), POST /api/account/sign-in; … |
+```
+
+- **The pins** of such a feature are read in the test file that its part's request asks for, `SignInContractTests.cs`.
+- **A screen alone.** The old sign-in page becomes a screen with no endpoint. No contract test can run on it, so its pins stay a blocker. The row says why, and parity does not read the screen's own tests.
+- **An older plan.** A plan made before plans named these features says nothing of them. Parity then says `plan again` in the row's reason.
+
+#### What the wiring does not count
+
+The wiring section counts the findings that are left to resolve. Some cases are not the rebuild's to resolve. Parity reads why in the rebuild's own files.
+
+- **A page reached by a redirect.** A screen saves, then goes where the endpoint's answer says: `router.push(res.redirectTo)`. The endpoint writes that address, for example `redirectTo = $"/clients/details?id={stored.Id}"`. So the page is reached, and its row in the route table says how:
+
+  <!-- described, not captured -->
+  ```output
+  | /clients/details | ClientsDetailsPage | only as the result of the redirect the endpoint POST /api/clients/edit answers (redirectTo in api/Api/Controllers/ClientsController.cs:169) |
+  ```
+
+  When no endpoint answers a redirect to a page, and nothing else leads there, the page is still a finding.
+- **An endpoint that the run profile calls.** Nothing in the web application calls `GET /health`. The run profile's start check calls it: every walk and every run wait for it to answer 200 (`run.api.ready` in `rebuild.json`). So the finding is listed apart, with its reason, and not counted:
+
+  <!-- described, not captured -->
+  ```output
+  - uncalled-endpoint · GET /health (api/Api/Controllers/HealthController.cs:9): nothing in the SPA calls this endpoint; the run profile's start check calls it: every walk and every run start the API and wait for /health to answer 200 before anything else (run.api.ready in docs/codelead/rebuild/rebuild.json)
+  ```
+
+Another endpoint that nothing calls is still a finding.
+
 Parity checks the whole rebuild, at its end. Each part is also protected on the way. Before a patch lands, the patch check refuses one that breaks what an accepted part built: an endpoint, a screen's route or a test. See [What an accepted part built stays built](rebuild.md#what-an-accepted-part-built-stays-built).
 
 The screens are read in the web application's layout: the route table of a React Router application, or the folders of a Next.js app router. On the Basic Store sample's new rebuild, before any part landed, it says what is left:
@@ -223,7 +281,7 @@ In a rebuild, a feature that you decide not to carry is not waived. It is droppe
 - **The walk's report**: `docs/codelead/parity/walk.md` and `walk.json` in the rebuild. `--no-write` prints it and writes nothing, for any application.
 - **The time zone**: the walk reads the server's day in the run profile's zone, or in `--time-zone <ZONE>`.
 - **Page parity's files**: the baseline in `docs/codelead/parity/baseline/`, each check in `docs/codelead/parity/latest/`. The routes come from the dossier's structural inventory, or from `--routes`.
-- **Exit codes** of `codelead walk`: `0` every step passed, or only the draft's steps did not pass. `1` a step of the rebuild failed or was blocked, or a finding counts. `2` nothing honest could be recorded. See [Exit codes](../cli/codelead-walk.md#exit-codes). Of `codelead parity --rebuild`: `0` finished, `1` a blocker is open.
+- **Exit codes** of `codelead walk`: `0` every step passed, or only the draft's steps did not pass. `1` a step of the rebuild failed or was blocked, or a finding counts. An [expected finding](#expected-findings) does not count. `2` nothing honest could be recorded. See [Exit codes](../cli/codelead-walk.md#exit-codes). Of `codelead parity --rebuild`: `0` finished, `1` a blocker is open.
 - **A browser**: the walk needs Playwright's Chromium. [`codelead doctor`](../cli/codelead-doctor.md) checks that it starts.
 
 ## What it is not

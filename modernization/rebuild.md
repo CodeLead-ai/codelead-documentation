@@ -331,6 +331,23 @@ The screen's tests then send the form as the old page left it, and assert that t
 
 A step can expect a request at an old address, such as `POST ^/Orders/Create$`. The walk reads it as the endpoint of the feature whose old route answers that method. The form's own page is often an action that takes any verb at the same address. It no longer hides the command's endpoint, `POST ^/api/orders/create$`.
 
+### A failed call is shown
+
+A page calls the API, and the call can fail: the API refuses it, or does not answer. The person must see that. A catch that does nothing, or only puts a loading flag back, hides the failure. The wiring check names such a catch `silent-catch`.
+
+- **A new screen.** Every screen that reads the API is asked to show a failed call in the page, in the endpoint's own words. Its test makes the call fail and asserts that the page shows it.
+- **The shell's menu.** A 401 of the call that asks who is signed in is a visitor. Any other failure is shown, and never taken for "signed out".
+- **A part already accepted.** CodeLead reads its files with the wiring check, with no model call. When a screen's page, or the shell's menu, holds a silent catch, the plan plans the part again, to be revised in place. One revision covers every catch of the part:
+
+  <!-- described, not captured -->
+  ```output
+  accepted (ev-<ID>) before its request asked it to show a failed call to the API: a catch of a call to the API neither shows nor rethrows the failure: web/src/app/clients/index/page.tsx:46 (it calls setLoading(false)): planned again, to be revised in place
+  ```
+
+  Its next request opens with `(revised in place for its failed calls: …)`. It quotes each catch, with its file and line, and asks for a test that makes the call fail. When that revision landed and a catch is still silent, it is a person's turn.
+
+A catch that checks the answer's status, and shows or rethrows what it does not expect, is not silent. Two kinds plan nothing, and stay wiring findings in parity. One is a catch in a file that no part of the plan built. The other is a catch in a plain function that every page shares, such as an API client's `getPlayer`. Only a catch that the page or the menu writes itself, in its component, plans its part again.
+
 ### When a part's steps change
 
 A part stays accepted only while the walk that accepted it judged its own steps as the journeys write them now. A later stored walk of the tree, in which those steps pass, counts too. The steps can change in two ways:
