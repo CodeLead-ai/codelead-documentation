@@ -56,6 +56,7 @@ The board commands are `codelead board <command>`. Agents use them to take part 
 |---|---|
 | [`codelead board validate`](board-validate.md) | Checks every file of the board, and names each problem. |
 | [`codelead board add-ready`](board-add-ready.md) | Gives a board made before Ready its Ready column. No card moves. |
+| [`codelead board schedules`](board-schedules.md) | A person's standing ask: at its times a schedule puts one card in Ready. |
 | [`codelead board import`](board-import.md) | Turns `PINNED.md`, `DECISIONS-PENDING.md` and a plan's status table into cards, once. |
 | [`codelead board tidy`](board-tidy.md) | After an import, removes the title that each imported description repeats in bold. |
 

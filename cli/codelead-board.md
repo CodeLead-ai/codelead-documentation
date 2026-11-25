@@ -60,6 +60,7 @@ Or move a card to **Ready**, once it says how to tell it is done, what it may to
 | [`unarchive`](../pinboard/cli/board-unarchive.md) | Brings archived cards back, into the column each was archived from (a person only). |
 | [`validate`](../pinboard/cli/board-validate.md) | Checks every file of the board. Exit code 1, with the reasons, when something is wrong. |
 | [`add-ready`](../pinboard/cli/board-add-ready.md) | Gives a board made before Ready its Ready column. No card moves. |
+| [`schedules`](../pinboard/cli/board-schedules.md) | A person's standing ask: at its times a schedule puts one card in Ready. `schedules run` makes what is due. |
 | [`import`](../pinboard/cli/board-import.md) | Turns `PINNED.md`, `DECISIONS-PENDING.md` and, with `--plan`, a plan's status table into cards, once. |
 | [`tidy`](../pinboard/cli/board-tidy.md) | After an import: removes the title that an imported card's description repeats in bold at its start. |
 | [`serve`](../pinboard/cli/board-serve.md) | Serves the board's page on this machine (`127.0.0.1` only), live as the files change. |

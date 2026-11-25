@@ -214,6 +214,8 @@
       href: pinboard/cli/board-validate.md
     - name: "codelead board add-ready"
       href: pinboard/cli/board-add-ready.md
+    - name: "codelead board schedules"
+      href: pinboard/cli/board-schedules.md
     - name: "codelead board import"
       href: pinboard/cli/board-import.md
     - name: "codelead board tidy"
