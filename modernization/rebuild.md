@@ -201,7 +201,7 @@ Some controls are written once per row, such as an "Edit" link in each row of a 
 the link "Edit" to /products/edit?id=…, once per row (the old view wrote it once per row with id = product.Id: each row's link carries id the row's Id (id in the rows the page reads), as the screen there reads it from its address)
 ```
 
-A screen that landed before its request said so is read again, with no model call. When its page writes the address with no value, the plan plans it again, to be revised in place. When its request asked and it still writes none, it is a person's turn.
+A screen that landed before its request said so is read again, with no model call. When its page writes the address with no value, the plan plans it again, to be revised in place. Its next request opens with `(revised in place for its rows' links: …)`. When that revision landed and the page still writes none, it is a person's turn.
 
 A step of a journey also waits on the steps before it. When an earlier step fails, the walk cannot reach the later ones. Then a part whose own steps come later lands, and no walk judges it. For example, the screen at `/clients/index` lands, and its step waits on the sign-in step, which fails. The plan names the part whose step it waits on, and that part's state:
 
@@ -306,7 +306,7 @@ So an endpoint's request quotes those rules. It reads the bound type in the old 
 One test calls POST /api/products/create with sku and name empty and asserts 400 Bad Request with "The SKU is required." in its body, and that nothing was saved: the old form refused it.
 ```
 
-An endpoint that landed before its request said so is read again, with no model call. When its file holds none of the old messages, the plan plans it again, to be revised in place. When it holds only some of them, it gets a note.
+An endpoint that landed before its request said so is read again, with no model call. When its file holds none of the old messages, the plan plans it again, to be revised in place. Its next request opens with `(revised in place for its validation: …)`. When that revision landed and the file still holds none, it is a person's turn. When it holds only some of them, it gets a note.
 
 The data access keeps the attributes on the ported entities, with their messages. EF Core reads a required member and a string length as the schema. The refusals stay the endpoint's.
 
