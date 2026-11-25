@@ -173,7 +173,18 @@ The stage's line says one of these about the walk:
 | The walk recorded nothing, for example because nothing answered. | `the walk recorded nothing (its words are above)` |
 | The walk could not start. | `the walk was not run (…)`, with the reason |
 
-Some controls are rendered only under a condition. For example, the old order page writes "Cancel this order" inside `@if (Model.Status == Order.Placed)`. The drafted step then says so, with the condition and its place: `the old view renders it only when`, then `Model.Status == …` and `Views/Orders/Details.cshtml:25`. The draft does not guess which row meets the condition. When the proof finds nothing to click there, its words name the condition the page did not meet.
+Some controls are rendered only under a condition. For example, the old order page writes "Cancel this order" inside `@if (Model.Status == Order.Placed)`. The drafted step then says so, with the condition and its place: `the old view renders it only when`, then `Model.Status == …` and `Views/Orders/Details.cshtml:25`. When the proof finds nothing to click there, its words name the condition the page did not meet.
+
+The draft does not guess which row meets the condition. The walk finds out by looking, as a person would. The step before, which opens one of the orders, names the control with `pageOffers`. The walk opens the first order. When its page offers no "Cancel this order", the walk goes back and opens the next order, at most five. It takes the first whose page offers the control, and says which:
+
+<!-- described, not captured -->
+```output
+PASS    orders.cancel · Click the first link to `/Orders/Details` (…) — took the second of 3 matches: the first whose page offers "Cancel this order" (/Orders/Details/2)
+```
+
+Then "Cancel this order" is clicked on an order that is still placed. So the cancel is walked, on the old application by the proof, and on the rebuild by its walk, with the same rule. The step that opens the order changed, so prove the journeys again with `codelead rebuild journeys --prove`. Until then, the earlier proof still holds the cancel as failing on the old application. When no order tried offers the control, the cancel fails as before, and its words say how many orders were tried. When it fails on the old application too, it is still the draft's defect, not the rebuild's. See [A row whose page must offer a control](../reference/journeys-format.md#a-row-whose-page-must-offer-a-control).
+
+The cancel changes the data: the order is cancelled after it. The rebuild's walk runs the run profile's reset before every journey, so the next journey finds the data as the sample holds it. The proof on the old application runs no reset: what its journeys write stays in the old application's data. Put that data back before you prove the journeys again, or the next proof may find no placed order left.
 
 ## Parity
 

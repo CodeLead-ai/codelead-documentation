@@ -232,10 +232,10 @@ All of them are optional. A user's own values can hold no placeholder but `{stam
 | Action | Shape | What the walk does |
 |---|---|---|
 | open | `{ "open": "/" }` | Opens the application at its root. Only `/`: every other page is reached by clicking. |
-| click | `{ "click": ["Save", "Submit"], "role": "button", "inRow": "First item", "optional": true }` | Clicks the first control in sight that goes by one of the names. `role` is `link` or `button`. `inRow` looks in the innermost row that holds the text. `optional` is for a dismissal, and may find nothing. A control folded away in a closed menu is opened first. |
+| click | `{ "click": ["Save", "Submit"], "role": "button", "inRow": "First item", "optional": true }` | Clicks the first control in sight that goes by one of the names. `role` is `link` or `button`. `inRow` looks in the innermost row that holds the text. `optional` is for a dismissal, and may find nothing. A control folded away in a closed menu is opened first. `pageOffers` is described below. |
 | fill | `{ "fill": { "label": "Title" }, "value": "First item" }` | Types the value into a field in sight, named by exactly one of `label`, `placeholder`, or `textbox` (its position among the text fields, from 0). |
 | select | `{ "select": { "label": "Kind" }, "value": "Task" }` | Chooses an option of a drop-down, found as a fill finds its field, or by `selectbox`. The option is the first whose text is the value, else the first whose value is. |
-| clickNth | `{ "clickNth": { "selector": ".product", "n": 2 } }` | Clicks the n-th element, from 0, that the selector matches. |
+| clickNth | `{ "clickNth": { "selector": ".product", "n": 2 } }` | Clicks the n-th element, from 0, that the selector matches. `pageOffers` is described below. |
 | dragEach | `{ "dragEach": { "items": ".card", "handle": ".grip", "targets": ".slot" } }` | Drags every item onto the next free target. |
 | wait | `{ "wait": 500 }` | Waits so many milliseconds. |
 
@@ -256,6 +256,52 @@ Some old views write a link's text as an expression, such as `@Html.ActionLink("
 ```
 
 The selector matches the address followed by a segment, a query or nothing, case aside. So `/Orders/DetailsPrint/1` does not match. For a link written once per row, the first link is the first row's. The rebuild's walk reads the same step with the new screen's address, such as `/orders/details`, as it reads the step's `path`.
+
+### A row whose page must offer a control
+
+Some controls are on a row's page only under a condition. For example, the old order page writes "Cancel this order" only inside `@if (Model.Status == Order.Placed)`. The first order of the list may be cancelled already. Its page then offers nothing to click.
+
+A click or a clickNth can name the control that the page it leads to must offer, with `pageOffers`:
+
+```json
+{
+  "id": "orders.cancel-4",
+  "title": "Click the first link to `/Orders/Details` (…): …; the next step clicks \"Cancel this order\", which the old view renders only when `Model.Status == BasicStore.Web.Models.Order.Placed` (`BasicStore.Web/Views/Orders/Details.cshtml:25`): the walk opens the rows in order, at most 5, and takes the first whose page offers it",
+  "user": "user",
+  "do": [{ "clickNth": { "selector": "a[href*=\"/Orders/Details/\" i], a[href*=\"/Orders/Details?\" i], a[href$=\"/Orders/Details\" i]", "n": 0 }, "pageOffers": ["Cancel this order"] }],
+  "expect": [{ "path": "^/Orders/Details/[^/]+$" }]
+}
+```
+
+The walk then does what a person does:
+
+1. It clicks the first row's link, as without `pageOffers`.
+2. It looks for "Cancel this order" on that page, as a click would look for it.
+3. When the page does not offer it, the walk presses the browser's Back, and clicks the next row's link.
+4. It stops at the first page that offers the control, and at most at the fifth row from `n`.
+
+The step says which row it took. For example, on the Basic Store sample, whose first order is cancelled and whose second is placed:
+
+<!-- described, not captured -->
+```output
+PASS    orders.cancel · Click the first link to `/Orders/Details` (…) — took the second of 3 matches: the first whose page offers "Cancel this order" (/Orders/Details/2)
+```
+
+When no row tried offers it, the step stands on the last page it opened, and says how many it tried. The next step fails as it did before, with the count:
+
+<!-- described, not captured -->
+```output
+FAIL    orders.cancel · Click "Cancel this order": … — nothing to click named "Cancel this order" on /Orders/Details/1 (orders.cancel-4 tried 3 of 3, and none of their pages offers it)
+```
+
+Some rules keep this sound:
+
+- **Only reads are tried.** A row's page that sends a write, such as a POST, ends the trying. The step says what it sent.
+- **Nothing is guessed.** The walk looks at each page. It never reads which row meets the condition from the data.
+- **The same rule runs everywhere.** The proof on the old application and the rebuild's walk try the rows the same way. So both walks mean the same thing, even when they take different rows.
+- **Your own row.** Set `n` to start from another row, or remove `pageOffers` to take the first row only. To keep such a change when the journeys are refreshed, add a `note` to the step.
+
+The System Model's draft writes `pageOffers` on its own, on a link written once per row. It does so when the next step clicks a control that the old view renders only under a condition. That control must be on the page the link leads to. The next step stays as it was. A journey with no such condition is drafted as before.
 
 ### Steps a person completes
 
