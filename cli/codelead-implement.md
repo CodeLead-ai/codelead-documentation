@@ -54,7 +54,7 @@ A card in Ready says three things. It says how to tell it is done (`definitionOf
 
 1. It asks the board for its card, as every agent does ([`codelead board take`](../pinboard/cli/board-take.md)). CodeLead does not choose. The board moves the card to In progress and holds it for CodeLead with a claim.
 2. It makes the branch `card/<id>-<title>` from your HEAD, and a git worktree for it beside your checkout, in the folder `<repository>-cards/<id>-<title>`. Nothing lands on the branch you have checked out, and your own changes are never touched.
-3. It runs the card's session in that worktree. The session's checkpoint commits go to the card's branch.
+3. It runs the card's session in that worktree. The session's checkpoint commits go to the card's branch. A card's commit holds the card's change only. The session writes none of CodeLead's own files there, such as the repository map. When the map is out of date, the session reads the code again for itself. The file stays as it was.
 4. The card's three things steer the session:
    - The "done when" words go into the request, marked as the card's own.
    - A patch that touches a file outside `mayTouch` is refused at the patch check, in words that name the file and the card's `mayTouch`. It counts as a failed attempt, like any refusal.
