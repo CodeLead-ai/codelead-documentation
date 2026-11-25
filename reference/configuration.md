@@ -146,6 +146,7 @@ The `defaultApiKey` values `lm-studio` and `local` are placeholders that a local
 | [`incrementPlanner`](#incrementplanner) | object | No | The temperature of the increment planner of a new app. |
 | [`callBudgets`](#callbudgets) | object | No | How long a model call may think. |
 | [`greenfield`](#greenfield) | object | No | The switches and templates of new apps. |
+| [`knowledge`](#knowledge) | object | No | Whether the prompts get the knowledge section. |
 | [`modernization`](#modernization) | object | No | The old application's run profile, the pins and the repair rounds. |
 | `pkb` | object | No | The PKB service that the `codelead pkb` commands go through: `url`, such as `"http://127.0.0.1:7415"`, and `project`, the project they ask. A key in it is refused: the key goes in `CODELEAD_PKB_KEY`. See [How the commands find the service](../cli/codelead-pkb-serve.md#how-the-commands-find-the-service). |
 
@@ -352,6 +353,20 @@ Example: two named templates and the review pass:
 ```
 
 Then `/create-app --template store-ui …` starts from that folder. See [Template manifest](template-manifest.md).
+
+## knowledge
+
+Optional. See [What CodeLead gives back](../concepts/knowledge-base.md#what-codelead-gives-back).
+
+| Key | Type | Default | What it does |
+|---|---|---|---|
+| `contextInPrompts` | boolean | `false` | The preflight, patch and retry prompts get what the knowledge base proves about the request's files, at most 2,000 characters. `CODELEAD_KNOWLEDGE_CONTEXT` wins over it. |
+
+Example:
+
+```json
+"knowledge": { "contextInPrompts": true }
+```
 
 ## modernization
 

@@ -1,9 +1,9 @@
 ---
 title: The knowledge base
-description: Learn what CodeLead knows about a repository, how much it trusts each fact, where the facts come from, and the words capsule, context package and capability profile.
+description: Learn what CodeLead knows about a repository, how much it trusts each fact, where the facts come from, what it gives back to the next attempt, and the words capsule, context package and capability profile.
 kind: concept
 area: concepts
-date: 2026-11-20
+date: 2026-11-25
 ---
 
 # The knowledge base
@@ -13,6 +13,8 @@ The knowledge base is what CodeLead knows about one repository, kept as files in
 **In short**
 - The encyclopedia is `.codelead/knowledge.json`: facts such as "the stack is C#" or "`dotnet build` passes", each with its evidence.
 - Each fact has a trust level: `evidence_backed`, `confirmed`, `reported` or `downgraded`. Nothing is believed until it is shown.
+- A failure is recorded with its own words, its files and its evidence record. A later landing of the same work marks it resolved.
+- With `CODELEAD_KNOWLEDGE_CONTEXT=1`, the next attempt's prompts get what is proven about its files. It is off by default.
 - A context package is what one model call receives. A capsule is one governed unit of work. A capability profile fits the work to a model's strength.
 - You see the facts in the extension's Knowledge base view and in the file itself.
 
@@ -30,7 +32,7 @@ Each entry of the encyclopedia has a type, a short summary, a body, a trust leve
 |---|---|---|
 | [`codelead init`](../cli/codelead-init.md), [`codelead map`](../cli/codelead-map.md), [`/map`](../chat-commands/map.md), the end of a new app's build | The stack, the validation commands and the modules that the [repository map](repository-map.md) read | `evidence_backed` |
 | An [`/implement`](../chat-commands/implement.md) that lands | "Validation command passes: …", one for each command that passed | `evidence_backed` |
-| An `/implement` that stops, for example on the patch check or on the gate | A failure pattern, with the stop reason | `evidence_backed` |
+| An `/implement` that stops, for example on the patch check or on the gate, and a [`/repair`](../chat-commands/repair.md) round that fails | A failure pattern: what refused or failed, in its own words, and its files. See [What CodeLead records about a failure](#what-codelead-records-about-a-failure). | `evidence_backed` |
 | [`/ask --record`](../chat-commands/ask.md) | The question and the answer, as a trace | `reported` |
 | A modernization's testimony: documents (`.md` or `.txt`) in which people describe the old application | One entry for each statement | `reported` |
 
@@ -78,6 +80,98 @@ The entry names the [evidence record](evidence-records.md) of the read that wrot
 > [!NOTE]
 > **For team leads:** the [Knowledge base view](../extension/knowledge-base-view.md) of the extension shows the entries by group, with their trust level. The evidence records are beside them.
 
+### What CodeLead records about a failure
+
+A run can stop: the [patch check](the-patch-check.md) refuses the patch, or the [gate](validation-and-the-gate.md) fails. Then CodeLead writes one failure pattern. The failure pattern says four things:
+
+- **What refused or failed, in its own words.** For a refused patch: the check's problems, each once. For a failed gate: the command, its first error, and the error lines of its output. For a preflight or a patch call that failed: the reason.
+- **What it was about.** The files of the patch and of the plan, as tags such as `file:web/src/lib/api.ts`. When the [repository map](repository-map.md) knows the module of a file, a `module:` tag too.
+- **Where it came from.** The [evidence record](evidence-records.md) of the run, as its source.
+- **Which work it was.** One `work:` tag: the rebuild part, else the board card, else the request, word for word.
+
+The summary is short enough for a list: the kind of failure and its first reason. The same failure on the same files is one entry with a count. Two different failures are two entries.
+
+A later attempt of the same work can land. Then CodeLead adds a line to each earlier failure of that work: "Resolved by" the landing's evidence record, with the files that the landing changed. CodeLead never marks a failure resolved without that record.
+
+A real failure pattern, from a rebuild of the Basic Store sample:
+
+```json
+{
+  "type": "failure_pattern",
+  "summary": "Patch check refused: Patch targets unplanned missing file web/src/app/account/sign-in/page.test.tsx. (on 3 files #04f437)",
+  "body": "The patch check refused the patch (/implement, after 2 retries). Its words:\n- Patch targets unplanned missing file web/src/app/account/sign-in/page.test.tsx.\nPatch files: web/src/lib/api.ts, web/src/app/account/sign-in/page.tsx, web/src/app/account/sign-in/page.test.tsx.\nWork: rebuild part sign-in:screen.\nEvidence record: ev-20261123174814-b1w9gh.\nResolved by ev-20261125044911-fzqhj7: a later attempt of the same work (rebuild part sign-in:screen) landed and changed web/src/app/account/sign-in/page.tsx, web/src/app/account/sign-in/page.test.tsx (+117 -5 lines).",
+  "trust_level": "evidence_backed",
+  "source_links": ["ev-20261123173846-hb9d25", "ev-20261123174814-b1w9gh"],
+  "reuse_tags": [
+    "failure:patch_check_failed",
+    "work:part:sign-in:screen",
+    "file:web/src/lib/api.ts",
+    "file:web/src/app/account/sign-in/page.tsx",
+    "file:web/src/app/account/sign-in/page.test.tsx",
+    "module:web"
+  ],
+  "seen_count": 2
+}
+```
+
+Failure patterns of releases before 2026-11-25 have no body and no tags. They stay in the file. CodeLead never gives them to a model, because they name no file and no reason.
+
+### What CodeLead gives back
+
+A model forgets the last attempt. So CodeLead can give the next attempt what the encyclopedia proves about its files. This is the knowledge section. CodeLead adds it to these prompts:
+
+| Prompt | The files it is matched on |
+|---|---|
+| The preflight | The files of the repository that the request names. With none, only the commands that passed. |
+| The patch | The files that the preflight plans to change, and its relevant files. |
+| Each retry of the patch | The files of the patch plan, and the files of the refused patch. |
+
+The section gives, the most specific first:
+
+1. **Failures seen before on these files**, with how often, the words, and what resolved them. A failure that nothing resolved says so.
+2. **Other facts about these files**: an invariant, a contract, a risk or a co-change, at most 3.
+3. **The commands that a run saw pass** in this repository. A command that the repository map only read from a file is not given: no run showed that it passes.
+
+Trust limits what counts. CodeLead gives `evidence_backed` and `confirmed` entries as facts. It gives a `reported` entry only when nothing better exists for the same file or command, and marks it "reported, not proven". It never gives a `downgraded` entry. The section has a limit of 2,000 characters. When the limit cuts entries, its last line says how many.
+
+The section is background. Its first line says that it is not part of the request. It is never added to the request, so the request coverage check of the patch check does not read the files that it names.
+
+A real section, given to the second attempt of the same sign-in screen:
+
+```text
+WORKSPACE KNOWLEDGE (background from earlier runs in this workspace; not part of the request)
+What CodeLead's knowledge store holds about the files of this change. It asks for no change and names no file to change: the request and its plan decide what changes. Read it to avoid a refusal or a failure seen before.
+
+Failures seen before on these files:
+- Patch check refused (proven; seen once, on 2026-11-23; not resolved yet):
+  - Patch targets unplanned missing file web/src/app/account/sign-in/page.test.tsx.
+  Files: web/src/lib/api.ts, web/src/app/account/sign-in/page.tsx, web/src/app/account/sign-in/page.test.tsx.
+```
+
+#### Switch it on
+
+The section is **off by default**. With it off, every prompt is the same as before. To switch it on, do one of these:
+
+- Set the environment variable before you start CodeLead: `CODELEAD_KNOWLEDGE_CONTEXT=1`.
+- Or add this to `.codelead/config.json`:
+
+  ```json
+  "knowledge": { "contextInPrompts": true }
+  ```
+
+The environment variable wins over the file. `CODELEAD_KNOWLEDGE_CONTEXT=0` switches it off for one run.
+
+With it on, the session says one line each time that it gives the section, for example:
+
+```text
+Knowledge given: 1 entry (1 failure seen on these files), in the patch prompt.
+```
+
+The [session log](sessions.md) gets a `knowledge.given` event. The evidence record keeps the entries given in `knowledge_given`, beside `knowledge_ids`, the entries that the record wrote.
+
+> [!TIP]
+> **For experienced users:** a patch call with no preflight (`CODELEAD_SKIP_PREFLIGHT=1`) gets no section. The repair prompt of `/repair` does not get it yet.
+
 ### Context packages
 
 A context package is everything that one model call receives. For a change, it holds the request and the plan of the preflight. It also holds the files that CodeLead selected from the code, the repository map's summary and the [conventions](conventions.md) card. For a chat question, it holds the sources that CodeLead read for the question, between two markers, inside a size limit.
@@ -97,7 +191,7 @@ Today only the increment run driver, `scripts/incrementalBuildRun.ts`, applies a
 ## What it is not
 
 - **Not a copy of your documents**. The encyclopedia holds what CodeLead ran or read, with its source. It does not import a wiki.
-- **Not sent anywhere**. The file stays in the repository. A model sees an entry only when CodeLead puts it in a context package. Today `/ask --record` does this: it joins the entries that name the files of the question. The patch prompts do not read the encyclopedia yet.
+- **Not sent anywhere**. The file stays in the repository. A model sees an entry only when CodeLead puts it in a context package. `/ask` does this: it joins the entries that name the files of the question. The preflight, patch and retry prompts do it only when you switch the knowledge section on.
 - **Not always right**. A fact holds within its `validity_scope`. A stale repository map makes its facts stale until the next read.
 
 ## Details
@@ -105,7 +199,9 @@ Today only the increment run driver, `scripts/incrementalBuildRun.ts`, applies a
 - **The file**. `.codelead/knowledge.json`, schema `codelead.knowledge/1`. `CODELEAD_KNOWLEDGE_DIR` moves it, with the evidence records.
 - **Entry types**. `validation_command`, `stack_fact`, `failure_pattern`, `invariant`, `open_question`, `trace`, `contract_fact`, `cochange_fact`, `risk_fact`, `expert_testimony`.
 - **Trust levels**, highest first: `evidence_backed`, `confirmed`, `reported`, `downgraded`. A fact recorded again keeps the higher level. A `downgraded` fact is not promoted again.
-- **History events**. `created`, `seen`, `promoted`, `downgraded`, `edited`, each with its time.
+- **History events**. `created`, `seen`, `promoted`, `downgraded`, `edited`, each with its time. A failure's resolution is an `edited` event whose detail starts with "Resolved by".
+- **Tags of a failure pattern**. `failure:<stop reason>`, `work:part:<id>`, `work:card:<id>` or `work:request:<12 hex characters>`, `file:<path>`, `module:<path>`. A path outside the repository is never a tag.
+- **No machine path, no secret**. The words of a failure go through the same sanitizer as the repository map before CodeLead writes them.
 - **Never in the way**. A store that cannot be read or written never fails the command that writes to it.
 - **No model call**. Every entry is written by code, from recorded state. No model writes an entry, except the answer text of `/ask --record`, which is marked `reported`.
 

@@ -144,6 +144,7 @@ A relative path is read from the project's folder. See [Files and folders](files
 | `CODELEAD_FORMAT_ON_APPLY` | `0` | Stops the repository's formatter from running on the files that a patch changed. |
 | `CODELEAD_CONVENTIONS_CARD` | `0` | Leaves the conventions card out of the patch prompt. |
 | `CODELEAD_TYPE_CONTEXT` | `0` | Leaves type declarations out of the context. |
+| `CODELEAD_KNOWLEDGE_CONTEXT` | `1`, `true`, `yes`; `0`, `false`, `no` | Gives the preflight, patch and retry prompts what the [knowledge base](../concepts/knowledge-base.md#what-codelead-gives-back) proves about the request's files. Off by default. It wins over `knowledge.contextInPrompts` in the configuration. |
 | `CODELEAD_INSTALL_TIMEOUT_MS` | milliseconds | How long a dependency install of the gate may run. The default is 15 minutes. |
 
 ## Repository map, specs and modernization

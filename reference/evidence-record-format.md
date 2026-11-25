@@ -109,6 +109,7 @@ The [`/repair`](../chat-commands/repair.md) round that fixed it writes a second 
 | `outcome` | string | How the run ended. See [the outcomes](#outcomes). |
 | `surface` | object | `files`: the files that the patch changed. `additions` and `removals`: the lines added and removed. An empty `files` list on a record that changed nothing. |
 | `knowledge_ids` | list of strings | The entries of the [knowledge base](../concepts/knowledge-base.md) that the run created or confirmed. |
+| `knowledge_given` | list of strings | Optional. The entries of the knowledge base that the run's prompts were given, each once. Present only when the [knowledge section](../concepts/knowledge-base.md#what-codelead-gives-back) is on and gave something. |
 
 A field that does not apply is left out. A reader passes over a field that it does not know.
 
