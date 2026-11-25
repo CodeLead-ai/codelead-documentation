@@ -73,7 +73,7 @@ A test covers the feature's endpoint only when it sends that endpoint's method a
 
 A test of the wrong endpoint is never counted as covered. Neither is a test whose request CodeLead cannot read.
 
-Some features get no endpoint or screen of their own in the map, such as the old sign-in. The plan builds them in a part of their own, and says so. Parity reads such a feature's endpoint and screen from the plan, and its tests in the file that the part's request asks for, `SignInContractTests.cs`. A feature that the plan builds as a screen alone has no endpoint: it stays `no contract tests`, and the row says why. See [A feature that the plan builds in a part of its own](../modernization/walk-and-parity.md#a-feature-that-the-plan-builds-in-a-part-of-its-own).
+Some features get no endpoint or screen of their own in the map, such as the old sign-in. The plan builds them in a part of their own, and says so. Parity reads such a feature's endpoint and screen from the plan, and its tests in the file that the part's request asks for, `SignInContractTests.cs`. A feature that the plan builds as a screen alone has no endpoint. Parity reads the screen's own tests for it, in the test file beside its page. With a test that runs there, the row says `covered`. Without one, it stays `no contract tests` or `no test that runs`, and the row says why. See [A feature that the plan builds in a part of its own](../modernization/walk-and-parity.md#a-feature-that-the-plan-builds-in-a-part-of-its-own).
 
 This gate is for the end of a rebuild, not for each part. It fails until the first clean walk.
 

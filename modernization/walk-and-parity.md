@@ -222,7 +222,7 @@ Some old features get no endpoint and no screen of their own in the map. The sig
 ```
 
 - **The pins** of such a feature are read in the test file that its part's request asks for, `SignInContractTests.cs`.
-- **A screen alone.** The old sign-in page becomes a screen with no endpoint. No contract test can run on it, so its pins stay a blocker. The row says why, and parity does not read the screen's own tests.
+- **A screen alone.** The old sign-in page becomes a screen with no endpoint, so no contract test can run on it. Its pinned facts are held by the screen's own tests: the test file beside its page, such as `web/src/app/account/sign-in/page.test.tsx`. Parity reads that file with no model call. It counts when it imports the page and holds a test that runs. The row then says `covered`, and says that these are the screen's own tests, not a contract test. Otherwise the pin stays a blocker, and the row says why. There are three cases: no such file, a file that imports another module, and a file whose tests are all skipped.
 - **An older plan.** A plan made before plans named these features says nothing of them. Parity then says `plan again` in the row's reason.
 
 #### What the wiring does not count
