@@ -276,6 +276,25 @@ On the Basic Store sample, the sign-in's request now says:
 
 A command whose old action saves a client and shows it asks for `{ "redirectTo": "/clients/details?id=…" }`. The words name the old value, `stored.Id`.
 
+The endpoint's request also quotes each old redirect that carries a value, with its file and line. It asks for a test that the answer's `redirectTo` carries the value:
+
+<!-- described, not captured -->
+```output
+One test calls POST /api/clients/edit so that it succeeds and asserts that the answer's redirectTo is /clients/details?id=… with id (the value of stored.Id) in it, not /clients/details alone: the old redirect carried it.
+```
+
+An endpoint can land before its request said this. It may have no step of its own, so no walk judges its redirect. CodeLead reads the rebuilt action, with no model call. When its `redirectTo` is the route alone, the plan plans it again, to be revised in place:
+
+<!-- described, not captured -->
+```output
+accepted (ev-<ID>) before its request asked it to answer a redirectTo that carries what the old redirect carried: /clients/details?id=… (id from stored.Id, as the old redirect at BasicStore.Web/Controllers/ClientsController.cs:119 carried it): the endpoint's redirectTo at api/Api/Controllers/ClientsController.cs:127 is /clients/details, with no id: …: planned again, to be revised in place
+```
+
+- A value written as a segment (`/orders/details/3`) where the rebuild reads it from the query is read as missing too.
+- Its next request opens with `(revised in place for its redirect: …)`. When that revision landed and the value is still missing, it is a person's turn.
+- When CodeLead cannot read the address from the code (a helper writes it), the endpoint gets a note.
+- An endpoint whose old redirect carries no value is left alone.
+
 ### What the old model refused
 
 An old action often refuses an invalid form with `if (!ModelState.IsValid) return View(product);`. Its rules are not in the action. They are attributes of the model it binds, often in a data library: `[Required(ErrorMessage = "The SKU is required.")]`.
@@ -325,6 +344,18 @@ Then the part is **accepted before, its steps changed since: to be judged again*
 - When they fail, the judgement offers no repair round. The plan plans the part again: `accepted (ev-<ID>) by a walk of its earlier steps; its own step now, <STEP>, fails in the walk of <TIME>: revise it`.
 
 The next composition revises in place what the part built, as for a [reopened part](#reopen-a-part). Its request says why, and quotes the walk's words for the failing steps. The check of accepted parts protects what the part built until its revision lands.
+
+The run judges the part again only once what it needs is there. When a part it needs is not accepted yet, the run's note says so. On the Basic Store sample:
+
+<!-- described, not captured -->
+```output
+Note: clients.details:screen is accepted before, its steps changed since (ev-<ID>): the run judges it again by itself, with no model call, before anything that needs it, once what it needs is there (it waits on clients.edit-get:screen (landed, not accepted)); if its own steps fail, it is planned again, to be revised in place.
+```
+
+- When nothing planned is ready, the run judges again by itself the landed part it waits on, to learn what keeps it.
+- When the run stops before it could judge the part, its last line says so: `<PART_ID> is still to be judged again by the run itself: it waits on …`.
+
+A part's own step can fail because of another part. For example, the step "Save" lands on the client's details page, so it is the details screen's own step. It failed because the edit's endpoint answered a `redirectTo` without the id. When that endpoint is planned again for its redirect ([where an old redirect lands](#where-an-old-redirect-lands)), the details screen waits on it. The endpoint is revised first. Then the run judges the screen again. The screen is not revised for a defect that is not its own.
 
 ### What a revised part is shown
 
@@ -424,6 +455,13 @@ Note: The day reset scripts/reset-sample-seed.mjs deleted the sample database un
 ```
 
 A reset that a person changed is kept as it is. CodeLead's check of the data before every walk then judges it, as [walk and parity](walk-and-parity.md#the-checks-before-a-walk) says.
+
+The manifest of such a rebuild still says the earlier rule in `decisions.database`: `the day reset (run.reset) deletes it before every journey`. CodeLead does not rewrite your manifest. The data access's request reads only the decision's key, `sample-seed`, and its file, and says today's rule:
+
+<!-- described, not captured -->
+```output
+(the decision: sample-seed: the new API starts on a sample database seeded at start-up (api/Api/sample-seed.db); the day reset (run.reset) puts the seed back in it before every journey, in place while the API runs, so that each journey starts on the seed)
+```
 
 A database that is not a file, such as `--database Store`, gets no reset from CodeLead. The database is yours, and a day reset there is your own script in `run.reset`. The contract is the same: the reset changes rows, and the API keeps running.
 
@@ -694,13 +732,46 @@ No walk judged data-access's landing (ev-<ID>): its acceptance was not walked (t
 
 You can ask the same judgement yourself with `--judge-again <PART_ID> --reason <WHY>`. A reopened part is judged by its next composition instead. When that composition finds nothing to change, the run judges the part as it stands, even when its files changed since. The composition read them as they are now.
 
+### A part refused for what is gone
+
+A part can land and be refused for a cause that was not its own. For example, an index endpoint's walk found `refused-read … 500 … no such table`, because a database file was deleted under the running API. That cause is fixed since. The part stays **landed, not accepted** until something judges it again.
+
+The run judges it again by itself, with no model call and no repair round, when all of these hold:
+
+- A stored walk of the tree as it is now was made after that judgement.
+- In that walk, each own step that failed passes, and each step that regressed passes.
+- No finding it was refused for is at its step in that walk.
+- Every own step the plan gives it now passes in that walk.
+- Its own files stand as it left them: unchanged, or changed only by other parts' landings, with its own lines still there.
+
+The run says why, then judges it:
+
+<!-- described, not captured -->
+```output
+clients.index:endpoint (endpoint: GET /api/clients/index), part 13 of 45: judged again by itself, with no model call (its walk (ev-<ID>) did not accept it for what the walk of <TIME> no longer shows (the finding refused-read at clients.edit-post-3: …): judged again by the run itself as it stands, with no model call or repair round, when its own files stand as it left them).
+```
+
+- One judgement per stored walk. When it refuses the part, its record says what keeps it, and the part stays a person's turn.
+- A part whose reason is still in the walk stays as it is.
+- When a commit that no landing made changed its files, the run does not judge it. It says so, and names `--judge-again` and `--reopen`.
+
 ### Parked parts
 
 A parked part is a card on the rebuild's board, with the reason. It is your turn. Read the card, then fix the part by hand, or plan it again with `/modernize --transform T9 --reopen <PART_ID> --reason <WHY>`, and run again. See [`/modernize --transform T9`](../chat-commands/modernize.md#--transform-t9).
 
 A part is parked after 3 attempts that did not land, by default. It is parked at once when the patch check refused two attempts in a row with the same problems, on the same request. A third attempt would meet the same check. The reason then says `the patch check refused the same change twice: <problem>`. See [Run profile](../reference/run-profile.md#the-keys-of-run).
 
-Sometimes the tree already holds what a part asks for. An earlier part's repair built it, for example. The model then says so, and gives no diff, or a patch that changes nothing. An answer that wraps no file in its file block counts as no diff too. CodeLead records that the attempt found **nothing to change**. The plan then judges the part by the stored walk of the tree as it stands, with no model call:
+Sometimes the tree already holds what a part asks for. An earlier part's repair built it, for example. The model then says so, and gives no diff, or a patch that changes nothing. An answer that wraps no file in its file block counts as no diff too. CodeLead records that the attempt found **nothing to change**. The session's last words say so, and never ask you to change the request:
+
+<!-- described, not captured -->
+```output
+Implementation stopped: nothing to change.
+
+Reason:
+The model found nothing to change ("No content changes are required."): what this part asks already stands in the tree, so no patch was applied. The request is not at fault.
+```
+
+The plan then judges the part by the stored walk of the tree as it stands, with no model call:
 
 - When the part's own steps pass, it is **present by the walk**. The run says `satisfied: present by the walk of <TIME>: …`, and composes it no more.
 - A part with no own step, whose work stands from a landing before, is judged as its acceptance always is. The run judges it again by itself, with no model call: what regresses against the walk before, and its own checks. For example, the user directory signs in through the real directory again.

@@ -118,6 +118,21 @@ The journeys that you record in the Observe stage can also run on the old applic
 
 The drafted journeys get the same proof. Once the rebuild holds its copy, the stage Initialize the rebuild asks you before it walks them on the old application. In the rebuild, `codelead rebuild journeys --prove` does the same at any time. A step that fails there is a defect of the draft. No part is judged on it, and the plan warns with `draft-defect`. For example, a draft that expects the edit form's own address after "Save", where the old application goes on to the client's page, fails there. See [`codelead rebuild journeys`](../cli/codelead-rebuild-journeys.md#with---prove-the-journeys-walked-on-the-old-application).
 
+Such a step is never held against the rebuild. Wherever a failing step is said, it is said apart:
+
+<!-- described, not captured -->
+```output
+Not the rebuild's: orders.cancel-5 fails on the old application as well (the proof of 2026-11-25): a defect of the drafted journey, not of the rebuild. Every other step passes.
+```
+
+- **The walk** says it after its counts, as above.
+- **A part's acceptance** counts no regression and no finding at that step. Its line says `Not this part's: …`.
+- **Parity** reads a walk that fails only on such steps, and on steps blocked behind them, as passing. Its note names them.
+- **The stage** says `the walk passed but for what is not the rebuild's (…)`.
+- **A part whose own steps wait only on such a step** is your turn: correct the draft. The run does not wait to judge it.
+
+Some controls are rendered only under a condition. For example, the old order page writes "Cancel this order" inside `@if (Model.Status == Order.Placed)`. The drafted step then says so, with the condition and its place: `the old view renders it only when`, then `Model.Status == …` and `Views/Orders/Details.cshtml:25`. The draft does not guess which row meets the condition. When the proof finds nothing to click there, its words name the condition the page did not meet.
+
 ## Parity
 
 *Parity* means that the new version does what the old version did. CodeLead has two kinds, for two different changes. Both are jobs of [`codelead parity`](../cli/codelead-parity.md).
