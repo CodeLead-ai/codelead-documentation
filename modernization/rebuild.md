@@ -291,6 +291,27 @@ An endpoint that landed before its request said so is read again, with no model 
 
 The data access keeps the attributes on the ported entities, with their messages. EF Core reads a required member and a string length as the schema. The refusals stay the endpoint's.
 
+### Where a form's refusals are decided
+
+The endpoint decides what a form may not send, as the old action did. So a screen that wires a command sends the form as the old page sent it. A choice the old form left empty stays empty until the user makes it. The screen shows what the endpoint refuses, in the endpoint's own words.
+
+The screen adds no check of its own before it sends. CodeLead reads the old page's source to see what it checked in the browser:
+
+- a validation script it loads, such as `@Scripts.Render("~/bundles/jqueryval")`, in the view or its layout;
+- a rule on an input, such as `required` or `maxlength="50"`;
+- a script of its own on submit.
+
+Each check found is named, with its file and line, and may stay. When it finds none, the request says so:
+
+<!-- described, not captured -->
+```output
+The old page checked nothing in the browser before it sent the form (read in BasicStore.Web/Views/Orders/Create.cshtml, BasicStore.Web/Views/Shared/_Layout.cshtml and BasicStore.Web/Web.config of the old application: no validation script, no rule on an input, no script on submit): the page adds no check of its own either, so every submit the old page sent reaches the endpoint, and …
+```
+
+The screen's tests then send the form as the old page left it, and assert that the refusal's message is shown.
+
+A step can expect a request at an old address, such as `POST ^/Orders/Create$`. The walk reads it as the endpoint of the feature whose old route answers that method. The form's own page is often an action that takes any verb at the same address. It no longer hides the command's endpoint, `POST ^/api/orders/create$`.
+
 ### When a part's steps change
 
 A part stays accepted only while the walk that accepted it judged its own steps as the journeys write them now. A later stored walk of the tree, in which those steps pass, counts too. The steps can change in two ways:
@@ -331,6 +352,35 @@ The rule for what the patch is shown:
 - A file the part built and someone deleted since is not named.
 
 These sentences only describe where the work lives. The gates owe the patch none of these files, so a revision may leave one of them alone. On a revision, the menu's request no longer says it replaces the shell's navigation, and its tests are the part's own.
+
+#### What a revision is held to
+
+A revision changes what differs from its request, and keeps what already matches. So a file that holds what the part built is never a refusal when the revision leaves it alone. The request's other words may name that file. The plan then lists it as recommended, with the words `it holds what this part built, and a revision in place may leave it alone`. The request-coverage gate owes nothing of it, and says so in a warning:
+
+<!-- described, not captured -->
+```output
+request_coverage: the request names api/Api/Api.csproj, which holds what this part built: a revision in place may leave it alone, and this patch does (not owed).
+```
+
+For example, a sign-in screen is reopened to change one address. Its patch changes the page and leaves the API client module alone. Both files hold what the part built, so the patch passes the check. The build, the tests and the walk then judge it.
+
+Two things stay owed:
+
+- A file the revision's own words name. These are your reason, the walk's words, or the contract's words. That file is what the revision is about, and the request's words for it hold.
+- Something new the request asks for. A test file it asks to create is an example.
+
+When nothing differs, the model says so and gives no patch. That is **nothing to change**, and the plan judges the part as it stands. See [Parked parts](#parked-parts).
+
+A revision changes what it built, or a file its request names. A patch can change neither and take lines out of another file. That patch is refused. For example, a model once replaced the rebuild's `.gitignore` by one line:
+
+<!-- described, not captured -->
+```output
+This part is revised in place, and the patch changes none of what it built (api/Api/Api.csproj, api/Api/Program.cs, api/Api/SampleSeed/schema.sql and 8 more) and no file its request names: it removes 40 lines of .gitignore and adds 1. A revision changes what the part built where it differs from the request; when nothing differs, answer that there is nothing to change, with no patch.
+```
+
+A patch outside them that only adds lines is not refused. The build, the tests and the walk judge it.
+
+The retry reads those words. When the model then says there is nothing to change, the attempt found nothing to change.
 
 ### The data access
 
@@ -627,6 +677,22 @@ accepted_parts: allowed: the patch changes what 3 tests the accepted part orders
 ```
 
 Then the run judges the other part again by itself, on the new tree, with no model call. When its walk accepts it, both parts are accepted. When its walk refuses it, it is your turn, and its note says why. Neither part is composed again for it, so the two never loop.
+
+### A part no walk judged
+
+A part can land while no walk can judge it. For example, a file changed under the walk, and its record says `not walked (tree-changed)`. Such a part is **landed, not walked**.
+
+Once a walk of the tree is made after that landing, the run judges the part again by itself, with no model call. It reads the part's own files first, the ones its records' patches name:
+
+- When they are unchanged since its landing, the part is judged as it stands in this tree. It is walked as its landing would have been, and its record says `unwalked`.
+- When one of them changed since, nothing is judged. The run says which files changed, and by which commits or landings. The part waits for you:
+
+<!-- described, not captured -->
+```output
+No walk judged data-access's landing (ev-<ID>): its acceptance was not walked (tree-changed: the code changed while the walk ran, so no single tree was walked), and its own files changed since that landing (api/Api/Program.cs, by ev-<ID> of user-directory at <COMMIT>): the tree now holds something else than what landed, so it is not judged as it stands. A person can reopen it: /modernize --transform T9 --reopen data-access --reason "<why>" composes it again, revising in place what it built; when its composition finds nothing to change, the run judges it as it stands. Nothing was walked or written.
+```
+
+You can ask the same judgement yourself with `--judge-again <PART_ID> --reason <WHY>`. A reopened part is judged by its next composition instead. When that composition finds nothing to change, the run judges the part as it stands, even when its files changed since. The composition read them as they are now.
 
 ### Parked parts
 
