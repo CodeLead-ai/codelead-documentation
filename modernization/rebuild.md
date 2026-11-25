@@ -700,7 +700,7 @@ A parked part is a card on the rebuild's board, with the reason. It is your turn
 
 A part is parked after 3 attempts that did not land, by default. It is parked at once when the patch check refused two attempts in a row with the same problems, on the same request. A third attempt would meet the same check. The reason then says `the patch check refused the same change twice: <problem>`. See [Run profile](../reference/run-profile.md#the-keys-of-run).
 
-Sometimes the tree already holds what a part asks for. An earlier part's repair built it, for example. The model then says so, and gives no diff, or a patch that changes nothing. CodeLead records that the attempt found **nothing to change**. The plan then judges the part by the stored walk of the tree as it stands, with no model call:
+Sometimes the tree already holds what a part asks for. An earlier part's repair built it, for example. The model then says so, and gives no diff, or a patch that changes nothing. An answer that wraps no file in its file block counts as no diff too. CodeLead records that the attempt found **nothing to change**. The plan then judges the part by the stored walk of the tree as it stands, with no model call:
 
 - When the part's own steps pass, it is **present by the walk**. The run says `satisfied: present by the walk of <TIME>: …`, and composes it no more.
 - A part with no own step, whose work stands from a landing before, is judged as its acceptance always is. The run judges it again by itself, with no model call: what regresses against the walk before, and its own checks. For example, the user directory signs in through the real directory again.
@@ -718,6 +718,8 @@ Sometimes you want a part composed again, although it holds work already. For ex
 ```console
 /modernize --transform T9 --reopen sign-in:screen --reason "the model read again: ReturnUrl is a hidden field"
 ```
+
+You can reopen the same part again with another reason. For example, it parked after your first reopen. The plan and the next composition then use your newest reason.
 
 <!-- described, not captured -->
 ```output
