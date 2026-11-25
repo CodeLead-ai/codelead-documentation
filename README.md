@@ -52,7 +52,7 @@ Not sure which one you are? Read [Choose your path](get-started/choose-your-path
 A page says so when it is about a later or an earlier version.
 
 <!-- copied:start -->
-Last copied on **2026-11-25**: 222 pages, 40 pictures.
+Last copied on **2026-11-25**: 226 pages, 40 pictures.
 <!-- copied:end -->
 
 ## How the pages are kept true

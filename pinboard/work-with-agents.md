@@ -1,9 +1,9 @@
 ---
 title: Work with agents
-description: Give a coding agent the board - the generated AGENTS.md, the check on an interval, how an agent proposes, replies and records finished work, cards from a conversation, several agents, and CodeLead's queue.
+description: Give a coding agent the board - the generated AGENTS.md, the check on an interval, how an agent proposes, replies and records finished work, cards from a conversation, several agents, CodeLead's queue, and the cards CodeLead takes from Ready.
 kind: how-to
 area: pinboard
-date: 2026-11-20
+date: 2026-11-25
 ---
 
 # Work with agents
@@ -15,6 +15,7 @@ This page shows how to give the board to a coding agent, such as Claude Code or 
 - The agent runs [`codelead board check`](cli/board-check.md) at the start of each session, when you ask, and on a timer when it has one.
 - The agent proposes cards in Inbox, answers in threads, and moves finished work to **For review** with a `Landed:` comment. You move it to **Done**.
 - `new --batch` turns a conversation into several cards at once. `--dry-run` shows them first.
+- A card in **Ready** may be worked alone. `codelead implement --ready` takes those cards from the board, one branch and worktree for each, and hands each back to you in For review.
 
 ## Before you begin
 
@@ -213,12 +214,81 @@ CodeLead takes part as the agent `codelead`. You hand a card to it with the tag 
 
 Then run CodeLead on the tagged cards:
 
-- [`codelead implement --queue`](../cli/codelead-implement.md) takes the tagged cards that are not archived and not in In progress, For review or Done. It takes Backlog first, then the other columns in the board's order.
+- [`codelead implement --queue`](../cli/codelead-implement.md) takes the tagged cards that are not archived and not in Ready, In progress, For review or Done. It takes Backlog first, then the other columns in the board's order.
 - [`codelead implement --card 1`](../cli/codelead-implement.md) works one card. In a chat session, [`/implement --card 1`](../chat-commands/implement.md) does the same.
 
 CodeLead reads the card as the request: its title, its description, your comments, its related cards and its attachments. It writes `Started:` when it starts, and moves the card to In progress. At the end it writes `Landed:` and moves the card to For review, or writes `Stopped:` with the reason and the options, addressed to you. To run a card again, answer in its thread and move it back to Backlog, still tagged.
 
 The other agents do not add the tag: the commands refuse it, and the agent asks you in the card's thread instead. `AGENTS.md` also asks them not to remove the tag, and not to take the cards that carry it.
+
+## Hand a card to CodeLead through Ready
+
+**Ready** is the second way. You move a card there when CodeLead may work it alone, with nobody in a session. The card must say three things first, in its fields:
+
+| Field | What it says | Example |
+|---|---|---|
+| `definitionOfDone` | How anyone can tell the work is done. | `Five failed sign-ins in a minute lock the form for ten minutes; npm test passes.` |
+| `mayTouch` | The folders or files the work may change. | `src/auth/`, `test/auth.test.ts` |
+| `limitMinutes`, `limitMoney` | A limit in minutes, in money, or both. | `30` |
+
+You set them and move the card. On the page, drag the card to Ready: when something is missing, its panel opens and asks for it. With the commands:
+
+```console
+codelead board set 3 --as sam --field definitionOfDone="Five failed sign-ins in a minute lock the form for ten minutes; npm test passes." --field mayTouch='["src/auth/", "test/auth.test.ts"]' --field limitMinutes=30
+codelead board move 3 --to ready --as sam
+```
+
+```output
+#3: changed its fields.
+Moved #3 from Backlog to Ready.
+```
+
+Then run CodeLead on Ready:
+
+```console
+codelead implement --ready
+```
+
+CodeLead does not choose the card. It asks the board for its card, as every agent does ([`take`](cli/board-take.md)). The board gives it the next card it may work, and holds that card for it in In progress. For each card, CodeLead:
+
+1. Makes a branch `card/3-rate-limit-the-sign-in-form` from your HEAD, and a git worktree for it beside your checkout: `../<repository>-cards/3-rate-limit-the-sign-in-form`. Nothing lands on the branch you have checked out. Your own work, committed or not, is never touched.
+2. Runs one session in that worktree. The card's three things steer it:
+   - Your "done when" words go into the request, marked as yours.
+   - A patch that touches a file outside `mayTouch` is refused, and the refusal names the file.
+   - When the time limit is up, no model call starts and the session ends. A money limit stops the priced calls the same way. A local model costs nothing.
+3. Renews the card's claim while it works. When you move the card away during the work, your move wins, and the session ends.
+4. Hands the card back to you in **For review**, with one comment. It never puts a card back in Ready, so a card is not taken again in a loop.
+
+Then it asks the board for the next card, until the board has nothing for it.
+
+What comes back, when the card landed. This comment comes from CodeLead's tests; the ids and hashes are examples:
+
+```output
+Landed: 8f90a6e on card/1-show-the-count-of-free-berths; evidence record ev-20261125121145-0lg3iy
+
+- files: `src/app.ts` (+1 / -0 lines)
+- patch check: can_apply, 0 warnings
+- apply: applied, 1 file changed
+- validation: passed (`npm test` passed)
+
+Branch: card/1-show-the-count-of-free-berths, 1 commit after 407b725 (nothing is merged).
+- 8f90a6e codelead: /implement — Show the count of free berths …
+
+Done when (the card's words): The bookings page shows the count of free berths; npm test passes.
+What ran to check it:
+- `npm test` passed (exit 0)
+CodeLead does not claim more than what ran: read the change against these words.
+
+Worktree: removed (it held nothing that was not committed); the branch card/1-show-the-count-of-free-berths is kept.
+```
+
+A card that did not land comes back in For review too. Its comment starts with `Stopped:` and gives the reason. Then it says the way out: what to change on the card, and how to carry on by hand. A worktree that still holds work that is not committed stays in place, and the comment names it.
+
+> [!NOTE]
+> **New to this?** Nothing is merged for you. Review the branch, merge it the way your team does, and move the card to Done.
+
+> [!TIP]
+> **For experienced users:** write `mayTouch` as paths. A repository's name or a sentence (`the auth code`) bounds nothing, because the board reads it as the whole repository. CodeLead says so in the card's `Started:` comment.
 
 ## Check that it worked
 

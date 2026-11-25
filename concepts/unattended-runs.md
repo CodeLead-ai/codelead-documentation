@@ -3,7 +3,7 @@ title: Unattended runs and the run lock
 description: Learn how CodeLead works without a person, who answers its questions, how a run is capped and stopped, and why one clone holds one run at a time.
 kind: concept
 area: concepts
-date: 2026-11-20
+date: 2026-11-25
 ---
 
 # Unattended runs and the run lock
@@ -59,6 +59,7 @@ A composed request (a pin or a transform of a modernization) asks no preflight q
 | Command | What it works | Its caps |
 |---|---|---|
 | `codelead implement --card <id>` or `--queue` | The board's cards tagged `for:codelead`, one session for each card, with up to 2 repair rounds each | `--max-cards`, `--max-minutes`, `--until`, `--repair-rounds` |
+| `codelead implement --ready` | The cards the person put in Ready, as the board gives them: each on its own branch and worktree, steered by its "done when", its `mayTouch` and its limit | The card's own `limitMinutes` and `limitMoney`, and `--max-cards`, `--max-minutes`, `--until`, `--repair-rounds` |
 | `codelead rebuild run` | The parts of a rebuild's plan: each composed, validated, walked and judged | `--max-parts`, `--max-cost-usd`, `--max-minutes`, `--until`, or `run.unattended` in the rebuild's manifest |
 | `codelead modernize start --unattended`, then `next` | The stages of a modernization program, with the recommended answer to each question | The caps of each stage, such as the pins' increments |
 
@@ -82,7 +83,7 @@ codelead implement --queue --dry-run
 Dry run of codelead implement --queue: the checks passed; nothing is run or written.
 Board: docs/codelead/board.
 Model: the default role, the preflight role, the fast strategy, the repair role, the clarify strategy, the architect strategy, the deep strategy: lmstudio (the server's loaded model).
-No card is tagged for:codelead outside In progress, For review and Done: a run would end at once.
+No card is tagged for:codelead outside Ready, In progress, For review and Done: a run would end at once.
 Each card: one session driven with /implement --card <id>, then up to 2 repair rounds, then /exit; the session writes the card's trail as codelead.
 Caps: no caps; up to 2 repair rounds per card; the stop file .codelead/STOP and Ctrl+C stop the run after the card in flight.
 Lock: free: a run started now takes it.

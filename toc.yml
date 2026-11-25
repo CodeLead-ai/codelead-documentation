@@ -200,12 +200,20 @@
       href: pinboard/cli/board-move.md
     - name: "codelead board set"
       href: pinboard/cli/board-set.md
+    - name: "codelead board take"
+      href: pinboard/cli/board-take.md
+    - name: "codelead board renew"
+      href: pinboard/cli/board-renew.md
+    - name: "codelead board release"
+      href: pinboard/cli/board-release.md
     - name: "codelead board archive"
       href: pinboard/cli/board-archive.md
     - name: "codelead board unarchive"
       href: pinboard/cli/board-unarchive.md
     - name: "codelead board validate"
       href: pinboard/cli/board-validate.md
+    - name: "codelead board add-ready"
+      href: pinboard/cli/board-add-ready.md
     - name: "codelead board import"
       href: pinboard/cli/board-import.md
     - name: "codelead board tidy"

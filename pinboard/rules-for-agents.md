@@ -3,7 +3,7 @@ title: Rules for agents
 description: What an agent may and may not do on the board, each rule with the exact words of its refusal, and the rules that only the agents' guide states.
 kind: concept
 area: pinboard
-date: 2026-11-24
+date: 2026-11-25
 ---
 
 # Rules for agents
@@ -11,7 +11,8 @@ date: 2026-11-24
 The board has rules, and one core checks them under the page, the commands and CodeLead's own code. A refused write changes nothing and says why, in words. This page lists each rule with the real text of its refusal, then the rules that only the agents' guide, `AGENTS.md`, states.
 
 **In short**
-- An agent cannot move or create a card in a person's column (Pinned, Done), cannot record a decision, and cannot archive a card.
+- An agent cannot move or create a card in a person's column (Pinned, Ready, Done), cannot record a decision, and cannot archive a card.
+- An agent gets a card from Ready only from the board (`take`). It never changes what the card asks while the card is there or held.
 - An agent cannot set a card's colour, and cannot add the tag `for:codelead`.
 - No participant can write a secret, a path of this machine outside the workspace, or a private name into a card.
 - Nobody edits or removes a comment: the thread only grows.
@@ -86,6 +87,32 @@ Refused: claude is an agent and may not tag a card for:codelead: the person queu
 ```
 
 The agent asks the person in the card's thread instead. The commands do not refuse an agent that removes the tag, but the guide asks it not to.
+
+### Ready is the person's
+
+**Ready** is where the person puts a card that an agent may work alone. Only the person moves a card into Ready or out of it. An agent gets a card from Ready only from the board, with [`codelead board take`](cli/board-take.md):
+
+```output
+Refused: claude is an agent and may not move a card into Ready (a person's column); an agent may move a card into Inbox, Backlog, Ideas, In progress, For review. Nothing was written.
+```
+
+```output
+Refused: claude is an agent and does not move a card out of Ready (#1 into In progress): an agent asks the board for its card with `codelead board take --as claude`, which gives it the next card it may work, held for it in In progress. Nothing was written.
+```
+
+While a card is in Ready, or held by an agent, its three things are the person's ask. No agent changes them, or a `for:` tag:
+
+```output
+Refused: claude is an agent and may not change what a card in Ready says it may do (limitMinutes): that is the person's ask; ask in the thread. Nothing was written.
+```
+
+A card goes to Ready only when it says how to tell it is done, what it may touch, and its limit. Otherwise the person's move is refused too, and the words say what is missing:
+
+```output
+Card #2 cannot go to Ready yet: it does not say how to tell it is done (definitionOfDone), it does not name the repository, folder or files it may touch (mayTouch), and it names no limit in minutes or money (limitMinutes, limitMoney). Nothing was written: set what is missing, then move it again.
+```
+
+The agent that holds a card renews its claim ([`renew`](cli/board-renew.md)), gives it back to Ready ([`release`](cli/board-release.md)), or hands it to For review. The person's move always wins: it ends the claim.
 
 ### Archiving is the person's
 
@@ -213,8 +240,9 @@ The page always sends this time, so a change on the page never overwrites what a
 
 `AGENTS.md` asks an agent for more than the board checks. The commands do not refuse these, so they depend on the agent:
 
-- Start code work only when the person asks for it in the session, never because of a card.
-- Move a card to In progress only when the person asked for the work.
+- Start code work only when the person asks for it in the session, or when the person moved the card to Ready.
+- Move a card to In progress only when the person asked for the work. A card from Ready is there already: the board put it there with the take.
+- Keep to what a card from Ready says: its "done when", what it may touch, and its limit.
 - Move a card out of Pinned or Done only when the person asked for it in the session. For example, to start the work that the person asked for, or to reopen a card that the person named.
 - Re-read a card right before changing it.
 - Do not remove the tag `for:codelead`, and do not take the cards that carry it.

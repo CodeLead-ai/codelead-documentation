@@ -3,7 +3,7 @@ title: Cards, columns and participants
 description: The ideas of the board - cards and their types, columns and whose they are, threads, tags, relations, decisions, mentions, the cursor and the check, and the event log.
 kind: concept
 area: pinboard
-date: 2026-11-20
+date: 2026-11-25
 ---
 
 # Cards, columns and participants
@@ -12,7 +12,7 @@ The board is made of a few simple ideas. A **card** is one piece of work. A **co
 
 **In short**
 - A card has a type, a title, a description, tags, relations and a thread of comments. It lives in one column.
-- Two columns, **Pinned** and **Done**, belong to the person. No agent moves a card into them.
+- Three columns, **Pinned**, **Ready** and **Done**, belong to the person. No agent moves a card into them.
 - A decision card asks you a question in its **ask**. Only a person records the answer, in its `decided` field.
 - A **check** lists what changed since your cursor: what is addressed to you first, then the decisions, then the rest.
 
@@ -62,7 +62,7 @@ A card also has these optional parts:
 
 ## Columns and whose they are
 
-A new board has seven columns. Each column says where the work stands:
+A new board has eight columns. Each column says where the work stands:
 
 | Column | Meaning | Who moves cards into it |
 |---|---|---|
@@ -70,11 +70,14 @@ A new board has seven columns. Each column says where the work stands:
 | Backlog | Planned, not started. | Anyone |
 | Ideas | Parked for later. | Anyone |
 | Pinned | Waits on you. | The person only |
+| Ready | An agent may work it alone: it says how to tell it is done, what it may touch, and its limit. | The person only |
 | In progress | Someone works on it. | Anyone |
 | For review | Done by an agent, waiting for your look. | Anyone |
 | Done | Accepted by you. | The person only |
 
 A column with `"owner": "person"` in `board.json` belongs to the person. An agent that tries to move a card there gets a refusal, and nothing changes. An agent moves a card out of it only when the person asked for that in the session. This is a rule of the agents' guide, and no command checks it. The columns that an agent may use are `agents.mayMoveTo` in `board.json`.
+
+Ready is stricter: the commands refuse an agent that moves a card out of it too. An agent gets a card from Ready only from the board, with [`take`](cli/board-take.md). A board made before Ready gets the column with [`add-ready`](cli/board-add-ready.md). See [Ready is the person's](rules-for-agents.md#ready-is-the-persons).
 
 Archiving takes a card off the board. The card stays in its file, and the archived filter shows it again. Only a person archives a card or brings it back.
 

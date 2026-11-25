@@ -3,7 +3,7 @@ title: codelead board
 description: Pinboard, the board between you and your coding agents, kept as files in the repository, and its subcommands.
 kind: reference
 area: cli
-date: 2026-11-20
+date: 2026-11-25
 ---
 
 # codelead board
@@ -36,6 +36,8 @@ Most people use the board as a page, in [Visual Studio Code](../extension/board-
 
 A board that `codelead board init` makes has CodeLead on it from the start, as the participant `codelead`. Give a card to CodeLead with the tag `for:codelead`. [`codelead implement --queue`](codelead-implement.md) takes those cards, top of Backlog first.
 
+Or move a card to **Ready**, once it says how to tell it is done, what it may touch and its limit. [`codelead implement --ready`](codelead-implement.md) asks the board for those cards with [`take`](../pinboard/cli/board-take.md), and works each on its own branch. A board made before Ready gets the column with [`codelead board add-ready`](../pinboard/cli/board-add-ready.md).
+
 > [!TIP]
 > **For experienced users:** the commands come from the package `@codelead/pinboard`, with their words, exit codes and `--json`. The package's own command, `pinboard`, runs the same tree. CodeLead adds its logger and the audit pack's sanitizer, so that a card follows the same rules as the audit pack.
 
@@ -51,9 +53,13 @@ A board that `codelead board init` makes has CodeLead on it from the start, as t
 | [`reply`](../pinboard/cli/board-reply.md) | Adds a comment to a card's thread. |
 | [`move`](../pinboard/cli/board-move.md) | Moves one card, or several, to a column. An agent moves only into the columns that it may use. |
 | [`set`](../pinboard/cli/board-set.md) | Changes the title, description, type, tags, relations, attachments, status line, colour or fields of one card, or of several. |
+| [`take`](../pinboard/cli/board-take.md) | An agent asks the board for its next card from Ready. The board gives one, held by a claim, or says why there is none. |
+| [`renew`](../pinboard/cli/board-renew.md) | The agent that holds a card extends its claim while it works. |
+| [`release`](../pinboard/cli/board-release.md) | The agent that holds a card gives it back to Ready, with the reason in its thread. |
 | [`archive`](../pinboard/cli/board-archive.md) | Archives one card, or several (a person only). The card leaves the board and stays in its file. |
 | [`unarchive`](../pinboard/cli/board-unarchive.md) | Brings archived cards back, into the column each was archived from (a person only). |
 | [`validate`](../pinboard/cli/board-validate.md) | Checks every file of the board. Exit code 1, with the reasons, when something is wrong. |
+| [`add-ready`](../pinboard/cli/board-add-ready.md) | Gives a board made before Ready its Ready column. No card moves. |
 | [`import`](../pinboard/cli/board-import.md) | Turns `PINNED.md`, `DECISIONS-PENDING.md` and, with `--plan`, a plan's status table into cards, once. |
 | [`tidy`](../pinboard/cli/board-tidy.md) | After an import: removes the title that an imported card's description repeats in bold at its start. |
 | [`serve`](../pinboard/cli/board-serve.md) | Serves the board's page on this machine (`127.0.0.1` only), live as the files change. |

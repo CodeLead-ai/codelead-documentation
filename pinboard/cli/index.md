@@ -42,11 +42,20 @@ The board commands are `codelead board <command>`. Agents use them to take part 
 | [`codelead board archive`](board-archive.md) | Takes cards off the board. A person only. |
 | [`codelead board unarchive`](board-unarchive.md) | Brings archived cards back. A person only. |
 
+## Work a card from Ready
+
+| Command | What it does |
+|---|---|
+| [`codelead board take`](board-take.md) | An agent asks the board for its next card from Ready; the board gives one, held by a claim, or says why not. |
+| [`codelead board renew`](board-renew.md) | The agent that holds a card extends its claim while it works. |
+| [`codelead board release`](board-release.md) | The agent that holds a card gives it back to Ready, with the reason. |
+
 ## Look after the board
 
 | Command | What it does |
 |---|---|
 | [`codelead board validate`](board-validate.md) | Checks every file of the board, and names each problem. |
+| [`codelead board add-ready`](board-add-ready.md) | Gives a board made before Ready its Ready column. No card moves. |
 | [`codelead board import`](board-import.md) | Turns `PINNED.md`, `DECISIONS-PENDING.md` and a plan's status table into cards, once. |
 | [`codelead board tidy`](board-tidy.md) | After an import, removes the title that each imported description repeats in bold. |
 
