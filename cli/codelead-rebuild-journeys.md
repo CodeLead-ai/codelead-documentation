@@ -20,6 +20,7 @@ date: 2026-11-24
 
 ```console
 codelead rebuild journeys [--target <REPO>] [--refresh]
+codelead rebuild journeys --prove [--base <URL>] [--target <REPO>]
 codelead rebuild journeys -h|--help
 ```
 
@@ -104,6 +105,21 @@ A newer draft can give a step an action that an earlier draft could not name. Fo
 
 Without a password for each account, [`codelead rebuild run`](codelead-rebuild-run.md) refuses at its checks, with the line `The walk's passwords: …`.
 
+### With --prove: the journeys walked on the old application
+
+The draft writes each step's expectation from the System Model. A wrong one makes the run repair a screen that is right. So `--prove` walks the copy on the old application, with the same walk, its old addresses as written. A step that fails there is a defect of the draft:
+
+<!-- described, not captured -->
+```output
+A defect of the draft: clients.edit-post-5 fails on the old application (on /Clients/Details/1, expected ^/Clients/Edit$ (clicked "Save")). No part is judged on it: `codelead model` and then `codelead rebuild journeys --refresh` draft it anew, or a person corrects the step in the journeys; `codelead rebuild journeys --prove` walks them on the old application again.
+```
+
+The results go in `docs/codelead/rebuild/journeys-proof.json`, beside the journeys, never in them. Each step's result is kept with the hash of the step. A note you add changes no hash, so the mark stays. A step that `--refresh` drafts anew has a new hash, so the proof no longer speaks for it. Prove the journeys again after a refresh.
+
+The plan reads the proof. It leaves a defect of the draft out of every part's own steps, and warns with `draft-defect`. A step that is only blocked on the old application stays a part's step.
+
+The walk sends the journeys' forms. What they write stays in the old application's data, so run it against a copy you can reset. CodeLead starts nothing here: pass `--base`, or record the old application's run profile with `codelead modernize source`.
+
 ### Where the difference is said
 
 The plan says the same as this command, without `--refresh`. It warns with `journeys-draft-moved` when the copy stands otherwise than the draft. The same words are one of the plan's notes. The start of `codelead rebuild run`, its dry run and `codelead rebuild init` print the plan's notes.
@@ -119,6 +135,14 @@ The command is part of the modernization program, which is in CodeLead's Pro pla
 - **`--refresh`**
 
   Writes the copy anew from the draft, and prints what it kept and what it replaced. Without it, nothing is written.
+
+- **`--prove`**
+
+  Walks the copy on the old application and writes `docs/codelead/rebuild/journeys-proof.json`. Each step that fails there is said as a defect of the draft.
+
+- **`--base <URL>`**
+
+  With `--prove`: the old application's address. The default is the address of its run profile.
 
 ## Examples
 
@@ -223,7 +247,7 @@ A journey that the refresh keeps is listed with its reason, in the form `Kept as
 | Code | Meaning |
 |---|---|
 | `0` | The copy was compared with the draft, whether it stands as the draft or otherwise. With `--refresh`: the copy was written. |
-| `1` | No rebuild manifest, a copy that cannot be read, or a draft that is missing or cannot be read. With `--refresh`: the refresh was refused, and nothing was written. A folder without the Pro plan is refused too. |
+| `1` | No rebuild manifest, a copy that cannot be read, or a draft that is missing or cannot be read. With `--refresh`: the refresh was refused, and nothing was written. With `--prove`: a step fails on the old application, or nothing could be walked. A folder without the Pro plan is refused too. |
 
 ## Files
 
@@ -232,6 +256,7 @@ A journey that the refresh keeps is listed with its reason, in the form `Kept as
 | `docs/codelead/rebuild/rebuild.json` | Reads the manifest: the old application's folder (`source.repository`), and the copy's file when `run.journeys` names another one. |
 | `docs/codelead/rebuild/journeys.json` | Reads the copy. `--refresh` writes it. |
 | `docs/codelead/rebuild/journeys.draft.json` in the old application | Reads the draft. Never writes it. |
+| `docs/codelead/rebuild/journeys-proof.json` | `--prove` writes it: each step's result on the old application, by the step's hash. |
 
 ## See also
 

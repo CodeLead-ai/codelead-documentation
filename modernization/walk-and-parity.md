@@ -61,7 +61,7 @@ The passwords of the journeys' accounts come from `CODELEAD_WALK_PASSWORD_<USER>
 
 CodeLead never walks blind. Once the servers answer, and before the first step, it makes its own checks. A failed check means no walk: the part is "not walked", and it is not blamed.
 
-**The data after the day reset.** A walk on a database that the API cannot read judges every screen wrongly. So CodeLead runs the day reset once against the started servers. Then it asks one endpoint that reads data. It takes that endpoint from the plan. The endpoint's old action only reads, it answers GET with no parameter in its route, and it is never the part being judged. When the walk has an account with a password, CodeLead signs it in first. The check fails on a 500 or no answer, and on an empty answer when the seed's rows are known. For example:
+**The data after the day reset.** A walk on a database that the API cannot read judges every screen wrongly. So CodeLead runs the day reset once against the started servers. Then it asks an endpoint that reads data. It takes that endpoint from the plan. The endpoint's old action only reads, it answers GET with no parameter in its route, and it is never the part being judged. Its old action also needs no value of the request. A list or a dashboard fits. A page that takes a row's id does not, for example `Details(int? id)`, which goes back to the list without one. When the walk has an account with a password, CodeLead signs it in first. The check fails on a 500 or no answer, and on an empty answer when the seed's rows are known. For example:
 
 <!-- described, not captured -->
 ```output
@@ -69,6 +69,15 @@ sailors.create-post:endpoint: landed (walk r0); it was not walked (check-failed:
 ```
 
 The words say why, by what the reset is: CodeLead's reset, its earlier one, or yours. The plan then plans `data-access` again, as [the data access](rebuild.md#the-day-reset-and-the-api-one-contract) says. The part that was not walked waits on that check, and the run judges it again by itself once a walk gets past it. A check that passes is said once in a session: `Acceptance: CodeLead's check of the data: after the day reset GET /api/sailors/index answers 200, with the seed's row …`. Before any endpoint reads data, there is no such check.
+
+Some answers say nothing of the data, such as a 401, a 404 or a 409. Then CodeLead asks the next endpoint, at most three in all. When none of them can tell, the line says so plainly. Nobody should read it as a pass:
+
+<!-- described, not captured -->
+```output
+Acceptance: CodeLead's check of the data: the data was NOT checked after the day reset: GET /api/clients/details answers 409; GET /api/orders/index answers 401, which say nothing of the data (the check asks at most 3 endpoints). The walk goes on, and nothing here shows that the API reads its data.
+```
+
+The walk of the Rebuild stage makes the same check before it walks, with the same words.
 
 In a rebuild whose API holds a fake directory, CodeLead signs the walk's first account in itself before the walk. It sends the fields of the old sign-in form: the account, the password, and each hidden field, empty. When the API refuses it (HTTP 401 or 403), the walk is not run, and the line says `the API refused the walk's own account …`. Any other answer says nothing about the account, so the walk runs and its own sign-in step judges. An account may have no roles, and the fake directory must accept it so. When its code shows that it needs roles, the plan plans the sign-in's endpoint again, to be revised in place.
 
@@ -101,9 +110,13 @@ The judge reads some findings before it counts them:
 
 The rebuild's walk reads the journeys' old addresses as the new ones. Some steps click the first link to an old address, because the link's text is computed. Such a step clicks the first link to the new screen's address. For example, `/Orders/Details` becomes `/orders/details`. See [A link whose text is computed](../reference/journeys-format.md#a-link-whose-text-is-computed).
 
+An old address can carry a value of its row, such as the id in `^/Products/Edit/[^/]+$`. The rebuild carries it in the query, so the walk then asks for it: the step passes at `/products/edit?id=3`, and fails at `/products/edit`. See [Where an old redirect lands](rebuild.md#where-an-old-redirect-lands).
+
 ### The old application's journeys
 
 The journeys that you record in the Observe stage can also run on the old application. [`codelead analyst replay`](../analyst/reference/analyst-replay.md) walks a recording's `journeys.json` against the old application's address. A replay that passes on the old application shows that the journey itself is right, before the rebuild is measured against it.
+
+The drafted journeys get the same proof. Once the rebuild holds its copy, the stage Initialize the rebuild asks you before it walks them on the old application. In the rebuild, `codelead rebuild journeys --prove` does the same at any time. A step that fails there is a defect of the draft. No part is judged on it, and the plan warns with `draft-defect`. For example, a draft that expects the edit form's own address after "Save", where the old application goes on to the client's page, fails there. See [`codelead rebuild journeys`](../cli/codelead-rebuild-journeys.md#with---prove-the-journeys-walked-on-the-old-application).
 
 ## Parity
 

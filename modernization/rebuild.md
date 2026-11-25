@@ -194,6 +194,15 @@ A step of a journey often clicks a control on one page and reaches another page.
 
 Sometimes a screen lands, and the page with its control is not accepted yet. Its own step cannot pass, and nothing else fails. Then the part is **accepted on what regresses**: the walk found no regression and no new finding, and only that step waits. The parts that need it wait too. Once the page's part is accepted, the run judges the waiting part again by itself, with no model call.
 
+Some controls are written once per row, such as an "Edit" link in each row of a list. The old view gives each link its row's values, for example `new { id = product.Id }`. Then the request says the address with its value, and which field of the row gives it:
+
+<!-- described, not captured -->
+```output
+the link "Edit" to /products/edit?id=…, once per row (the old view wrote it once per row with id = product.Id: each row's link carries id the row's Id (id in the rows the page reads), as the screen there reads it from its address)
+```
+
+A screen that landed before its request said so is read again, with no model call. When its page writes the address with no value, the plan plans it again, to be revised in place. When its request asked and it still writes none, it is a person's turn.
+
 A step of a journey also waits on the steps before it. When an earlier step fails, the walk cannot reach the later ones. Then a part whose own steps come later lands, and no walk judges it. For example, the screen at `/clients/index` lands, and its step waits on the sign-in step, which fails. The plan names the part whose step it waits on, and that part's state:
 
 <!-- described, not captured -->
@@ -250,6 +259,37 @@ The rule:
 - A menu that landed before its request said this is read again, with no model call. When its sign-out goes elsewhere, the plan plans the menu again, to be revised in place.
 - A menu that lacks the signed-in name too gets one revision for both.
 - When CodeLead cannot tell from the code where the rebuilt sign-out goes, the menu gets a note for a person.
+
+### Where an old redirect lands
+
+One rule says where an address of the old application lands in the rebuild. The endpoint's `redirectTo`, the sign-in's landing and the sign-out's destination all use it. So do the walk's steps.
+
+- **The root stays the root.** The old route table serves its default action at `/`. So `RedirectToAction("Index", "Home")` goes to `/`, and the rebuild goes to `/` too, never to `/home/index`.
+- **Values travel with the address.** An old redirect can carry a value, such as `RedirectToAction("Details", new { id = stored.Id })`. The rebuild carries it in the query of the same name, because its screens read their values from their address.
+
+On the Basic Store sample, the sign-in's request now says:
+
+<!-- described, not captured -->
+```output
+- every signed-in user: the return address the form sent as ReturnUrl when it is an address of this site (…), or / (the site's root, which the screen of home.index serves as well; the old /).
+```
+
+A command whose old action saves a client and shows it asks for `{ "redirectTo": "/clients/details?id=…" }`. The words name the old value, `stored.Id`.
+
+### What the old model refused
+
+An old action often refuses an invalid form with `if (!ModelState.IsValid) return View(product);`. Its rules are not in the action. They are attributes of the model it binds, often in a data library: `[Required(ErrorMessage = "The SKU is required.")]`.
+
+So an endpoint's request quotes those rules. It reads the bound type in the old repository, and the members the form fills. Each rule comes with its message, its file and its line. The request then asks the endpoint to refuse the same, with the same messages, and its tests to send a form that must be refused:
+
+<!-- described, not captured -->
+```output
+One test calls POST /api/products/create with sku and name empty and asserts 400 Bad Request with "The SKU is required." in its body, and that nothing was saved: the old form refused it.
+```
+
+An endpoint that landed before its request said so is read again, with no model call. When its file holds none of the old messages, the plan plans it again, to be revised in place. When it holds only some of them, it gets a note.
+
+The data access keeps the attributes on the ported entities, with their messages. EF Core reads a required member and a string length as the schema. The refusals stay the endpoint's.
 
 ### When a part's steps change
 
@@ -597,7 +637,8 @@ A part is parked after 3 attempts that did not land, by default. It is parked at
 Sometimes the tree already holds what a part asks for. An earlier part's repair built it, for example. The model then says so, and gives no diff, or a patch that changes nothing. CodeLead records that the attempt found **nothing to change**. The plan then judges the part by the stored walk of the tree as it stands, with no model call:
 
 - When the part's own steps pass, it is **present by the walk**. The run says `satisfied: present by the walk of <TIME>: …`, and composes it no more.
-- When they do not pass, the part is parked after that one attempt. The reason says what the walk says:
+- A part with no own step, whose work stands from a landing before, is judged as its acceptance always is. The run judges it again by itself, with no model call: what regresses against the walk before, and its own checks. For example, the user directory signs in through the real directory again.
+- When its own steps do not pass, the part is parked after that one attempt. The reason says what the walk says:
 
 <!-- described, not captured -->
 ```output

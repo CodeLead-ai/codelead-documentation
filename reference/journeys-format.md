@@ -263,6 +263,16 @@ Sometimes the draft can name nothing that the walk can find, such as a button wh
 
 A rebuild's plan judges no part on a step with no action of its own that the draft marked so. An earlier draft titled such steps `Act on …`, and the plan reads them the same way. `codelead model` and then [`codelead rebuild journeys --refresh`](../cli/codelead-rebuild-journeys.md) draft them anew.
 
+### What a form's submit expects
+
+A drafted step that clicks a form's submit sends the form as its page shows it. So the draft reads the form's page:
+
+- **An empty form**, whose page renders a new model such as `View(new Client())`. The old action answers its form again when the form is not valid, so the step expects the form's own address.
+- **A form filled from a stored row**, whose page reads a row by an id it needs. The step expects where the old action sends a valid form, such as `^/Clients/Details/[^/]+$` after `RedirectToAction("Details", new { id = stored.Id })`.
+- **Anything else.** The draft cannot tell, so the step expects only the request it sends, such as `{ "responses": { "method": "POST", "path": "^/Orders/Create$" } }`.
+
+A rebuild then walks the journeys on the old application to prove each step. A step that fails there is a defect of the draft, and no part is judged on it. See [`codelead rebuild journeys --prove`](../cli/codelead-rebuild-journeys.md#with---prove-the-journeys-walked-on-the-old-application).
+
 ### Outcomes
 
 | Outcome | Shape | What must hold |
